@@ -37,7 +37,7 @@ A commercial game-studio tycoon game for Steam on Windows and macOS. The player 
 
 ### 1.2 Assumptions (confirmed)
 
-1. Small team. Placeholder art first, final pixel art later.
+1. Small team. Art comes from CC0 asset packs (Kenney at kenney.nl first; other sources only when the asset is CC0). Rules: CC0 only (no CC-BY, CC-BY-SA or "free for personal use"); every imported asset is listed in `assets/CREDITS.md` with pack name, source URL and license; one pixel scale across the game (chosen in the office-scene milestone); pixel textures import with filtering off. Custom or commissioned art may replace packs later without code changes, because scenes reference assets by path.
 2. Content is data-driven: new genres, topics, platforms, events and review templates need no code change.
 3. The simulation is separate from the UI and uses seeded RNG, so it is deterministic and unit-testable.
 4. Save/load is in this slice.
@@ -161,7 +161,7 @@ The era is not stored. It is derived from `week` through the era table.
 
 **Market**
 
-- `segments`: Dictionary[StringName, Segment] with size and growth per audience segment
+- `segment_size`: Dictionary[StringName, int] (players per audience segment) and `segment_growth_bp`: Dictionary[StringName, int] (yearly growth in basis points)
 - `taste_bp`: Dictionary[StringName, int] keyed by genre id and topic id, in basis points 5000–15000 (10000 = neutral)
 - `platform_install_base`: Dictionary[StringName, int]
 - `focus_drift`: Dictionary keyed by genre id, holding the current offset (−10 to +10 per stage) from the genre's hidden ideal focus weights
