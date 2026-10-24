@@ -65,15 +65,16 @@ JSON rules (spec §9.1): JSON numbers come back as float and keys as String. Cas
 class_name StaffSystem
 extends RefCounted
 
-static func tick(state: GameState, ctx: TickContext) -> void:
+static func tick(ctx: TickContext) -> void:
+    var state: GameState = ctx.state
     var t: TuningDef = ctx.tuning
-    for staff_id: int in state.sorted_staff_ids():
+    for staff_id: int in state.sorted_ids(state.staff):
         var s: Staff = state.staff[staff_id]
         # ... uses ctx.rng, never global randf()
         ctx.emit(&"staff_resigned", {"staff_id": staff_id})
 ```
 
-- No member variables. Everything comes from `state` and `ctx`.
+- No member variables. Everything comes from `ctx` (`ctx.state`, `ctx.rng`, `ctx.tuning`).
 - Iterate in sorted id order when the order changes state or RNG draws (determinism).
 - Push events through `ctx.emit()`. `GameRunner` flushes them to `EventBus` after the tick.
 
@@ -90,13 +91,13 @@ func _init(p_project_id: int, p_enabled: bool) -> void:
     project_id = p_project_id
     enabled = p_enabled
 
-func validate(state: GameState) -> CommandResult:
+func validate(state: GameState, tuning: TuningDef) -> CommandResult:
     if not state.projects.has(project_id):
         return CommandResult.fail(&"error.project_not_found")
-    return CommandResult.ok()
+    return CommandResult.success()
 
-func apply(state: GameState, ctx: TickContext) -> void:
-    state.projects[project_id].crunch = enabled
+func apply(ctx: TickContext) -> void:
+    ctx.state.projects[project_id].crunch = enabled
     ctx.emit(&"project_changed", {"project_id": project_id})
 ```
 

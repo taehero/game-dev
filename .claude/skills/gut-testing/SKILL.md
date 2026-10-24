@@ -40,7 +40,8 @@ The exit code is non-zero when any test fails. Quote the GUT totals line in ever
 - `tests/unit/test_<unit>.gd` for one system, command, entity or service.
 - `tests/scenario/test_<scenario>.gd` for multi-week runs.
 - Every test file: `extends GutTest`. Test functions: `func test_<behaviour>() -> void:`.
-- Build state with the shared helper `tests/helpers/fixtures.gd` (`Fixtures.new_state(seed)`), not by hand in each test.
+- Build state with the shared helper `tests/helpers/fixtures.gd` (`Fixtures.new_state(seed)`, `Fixtures.tuning()`, `Fixtures.add_staff()`, `Fixtures.add_project()`), not by hand in each test.
+- `.gutconfig.json` must not scan `tests/helpers/` (helpers are not test files).
 
 ## Unit test pattern
 
@@ -49,11 +50,10 @@ extends GutTest
 
 func test_crunch_raises_burnout_each_week() -> void:
     var state: GameState = Fixtures.new_state(42)
-    var staff_id: int = Fixtures.add_staff(state, {"burnout": 10})
     var project_id: int = Fixtures.add_project(state, {"crunch": true})
-    Fixtures.assign(state, staff_id, project_id)
+    var staff_id: int = Fixtures.add_staff(state, {"burnout": 10, "assigned_project_id": project_id})
 
-    StaffSystem.tick(state, Fixtures.ctx(state))
+    StaffSystem.tick(TickContext.new(state, Fixtures.tuning()))
 
     assert_eq(state.staff[staff_id].burnout, 16, "crunch adds TuningDef.crunch_burnout_per_week")
 ```
@@ -77,7 +77,7 @@ func test_save_load_continue_matches_uninterrupted() -> void:
     Scenario.advance(state, Scenario.SCRIPT_BASIC, 260)
     var json: String = SaveService.serialize(state)
     var loaded: GameState = SaveService.deserialize(json)
-    Scenario.advance(loaded, Scenario.SCRIPT_BASIC, 260, 260)
+    Scenario.advance(loaded, Scenario.SCRIPT_BASIC, 260)
     assert_eq(StateHash.of(loaded), full)
 ```
 
