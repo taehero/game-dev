@@ -29,7 +29,7 @@
 2. **Font: the Google Fonts build of Noto Sans Thai** (`github.com/google/fonts/ofl/notosansthai`, variable `NotoSansThai[wdth,wght].ttf`). Its subsets include Latin (U+0000–00FF) as well as Thai, so one font is the theme's default font and needs no fallback chain. The file is renamed `NotoSansThai-Variable.ttf`, because brackets in `res://` paths are fragile. The OFL restricts reusing the Reserved Font Name for modified fonts, not file names. System font fallback is off, so a missing glyph shows in tests instead of being hidden by the OS. *Cost if wrong:* if the Latin subset is missing, Task 2's `has_char(65)` test fails, and a Latin OFL font has to be added as primary (a second licence row).
 3. **`OfficeDef.desk_positions` are tile coordinates** in the room's `Floor` layer, converted with `map_to_local()`. Seat *i* is `desk_positions[i]`. The staff sprite sits one tile south (`cell + Vector2i(0, 1)`), facing the desk. This plan owns the room layouts and publishes the desk cells for the office content: Garage `[(3,3), (7,3)]`, Small Office `[(3,3), (7,3), (11,3), (3,6), (7,6)]`. Task 11's consistency test checks the real `data/offices/*.tres` against the rooms. *Cost if wrong:* desks float over walls. Task 11's test catches this.
 4. **Rooms are painted at runtime** from `size_tiles`, and the TileSet is built in code from `OfficeArt`. No hand-edited tile data. If a designer later paints a room in the editor, painting is skipped when `Floor` already has cells. *Cost if wrong:* low. Hand-painted rooms remain possible.
-5. **Content lookup is isolated.** `OfficeScene.configure(offices, equipment_defs)` takes plain typed dictionaries. Only `Main._office_content()` (Task 11) calls M2a's content database. Tests pass fixture-built defs. *Cost if wrong:* M2a's ContentDB API differs, which means one function to edit.
+5. **Content lookup is isolated.** `OfficeScene.configure(offices, equipment_defs)` takes plain typed dictionaries. Only `Main._office_content()` (Task 11) calls M2a's `ContentDB.active()`. Tests pass fixture-built defs. *Cost if wrong:* M2a's ContentDB API differs, which means one function to edit.
 6. **Staff pose rule** (`StateQueries.staff_pose`), in order: `BURNED_OUT` if `burnout >= tuning.resign_burnout_threshold`. Otherwise `CRUNCHING` if assigned to a project in `PRODUCTION` or `POLISH` with `crunch == true`. Otherwise `WORKING` if assigned to such a project. Otherwise `IDLE`. In the office view, a seated staff member whose seat has no computer is shown `IDLE`, because spec §7.3 gives them 0 points. *Cost if wrong:* a visual mismatch only.
 7. **Active project** = the player company's lowest-id project in phase `PRODUCTION` or `POLISH`. Returns -1 if there is none. *Cost if wrong:* the status bar shows the wrong project until the panels plan adds selection.
 8. **Date, money and speed buttons live on the right side of the status bar.** Spec §11.3 lists only project fields, but with the debug HUD hidden the player needs the foundation §8.1 HUD items somewhere. *Cost if wrong:* moving three controls later.
@@ -38,23 +38,25 @@
 11. **Scene test helpers go in `tests/helpers/office_fixtures.gd`** (`class_name OfficeFixtures`), never in `fixtures.gd`, which M2a edits heavily.
 12. **All new locale keys are added in Task 2**, so later tasks never edit `locale/strings.csv` in parallel, and the Thai glyph test covers every new string.
 
-## M2a interfaces this plan consumes (assumed names)
+## M2a interfaces this plan consumes
 
-These are the exact names from spec §4 and §10. Two names have no snake_case form in the spec and are **assumed**, as marked. Before starting Task 10 or 11, read M2a's code. If a name differs, M2a wins: update only the files listed in Tasks 10–11, and say so in the report.
+The names come from spec §4 and §10. They are checked against the M2a plan draft `docs/superpowers/plans/2026-10-24-m2a-game-loop.md` (still uncommitted when this plan was written). Before starting Task 10 or 11, re-read M2a's code. If a name differs, M2a wins: update only the files in Tasks 10–11, and say so in the report.
 
-| Interface | Used in | Spec |
+| Interface | M2a task | Used in |
 |---|---|---|
-| `Company.office_id: StringName` | Task 10 | §4.2 |
-| `Staff.seat_index: int` (-1 = none) | Task 10 | §4.3 |
-| `Equipment` entity: `id`, `company_id`, `def_id: StringName`, `seat_index: int` (-1 = storage); `GameState.equipment: Dictionary[int, Equipment]` | Task 10 | §4.1, §4.4 |
-| `OfficeDef` (`extends Resource`): `id: StringName`, `seats: int`, `desk_positions: Array[Vector2i]`, **`tilemap_scene: String`** (assumed name for "tilemap scene path") | Tasks 10, 11 | §4.7 |
-| `EquipmentDef`: `id: StringName`, **`tier: int`** (assumed name for "era tier"; 1 = oldest) | Task 10 | §4.7 |
-| `EventBus` signals `points_gained {staff_id: int, type: StringName, amount: int}`, `bug_found {staff_id: int}`, `staff_fired`, `equipment_changed`, `game_loaded` | Task 11 | §6.3, §10 |
-| The content database's lookup of all `OfficeDef` and `EquipmentDef` by id | Task 11 (`Main._office_content()` only) | §2 (ContentDB) |
-| `data/offices/*.tres` for the garage and the small office | Task 11 consistency test | §7.3 |
-| `StartProjectCommand` (spec §6.1 arguments) | Task 11 debug button | §6.1 |
+| `OfficeDef`: `id`, `seats: int`, `desk_positions: Array[Vector2i]`, `scene_path: String`; `EquipmentDef`: `id`, `tier: int` | Task 1 | Tasks 10, 11 |
+| `ContentDB.active()` with `offices: Dictionary[StringName, OfficeDef]` and `equipment: Dictionary[StringName, EquipmentDef]`; `Fixtures.content()` (`equipment_micro_1980` tier 1, `equipment_fx_fast` tier 2); `Fixtures.new_state()` installs it | Task 2 | Tasks 10, 11 |
+| `Equipment` entity: `id`, `company_id`, `def_id: StringName`, `seat_index: int` (-1 = storage) | Task 3 | Task 10 |
+| `Company.office_id: StringName`, `Staff.seat_index: int` (-1 = none) | Task 4 | Task 10 |
+| `GameState.equipment: Dictionary[int, Equipment]`; `new_game` seats the owner (`state.owner.staff_id`) at seat 0 with starter equipment `equipment_micro_1980` in `office_garage` (M2a Ruling A2); `Fixtures.add_equipment(state, overrides)`, `Fixtures.add_worker(state, overrides)` | Task 6 | Tasks 10, 12 |
+| `Removal.remove_staff(state, id)` | Task 7 | Task 10 test |
+| `EventBus` signals `points_gained {staff_id, project_id, type: StringName, amount}`, `bug_found {staff_id, project_id}`, `staff_fired`, `equipment_changed`, `game_loaded {}` | Task 8 | Task 11 |
+| `Project.stage_progress` in bp 0–10000 (M2a Ruling A13) | Task 5 | Task 7 (already written for bp) |
+| `data/offices/office_garage.tres`, `office_small.tres` (`desk_positions`, `scene_path`) | Task 10 (content) | Task 11 |
+| `StartProjectCommand.game(...)` | Task 15 | Task 11 debug button |
+| Production emits `points_gained` / `bug_found` | Task 16 | Task 12 |
 
-M2a task numbers: the M2a plan had not landed when this plan was written. The manager maps each row to its M2a task before dispatching Tasks 10–11.
+**Hand-off to M2a Task 10 (content):** set `office_garage.desk_positions = [(3,3), (7,3)]`, `scene_path = "res://src/ui/office/rooms/garage_room.tscn"`, `office_small.desk_positions = [(3,3), (7,3), (11,3), (3,6), (7,6)]`, `scene_path = "res://src/ui/office/rooms/small_office_room.tscn"` (Ruling 3). M2a's in-memory fixture garage cells `[(2,2), (5,2)]` also lie on the garage floor, so they need no change.
 
 ## Review Focus
 
@@ -552,14 +554,14 @@ func test_bubble_rises_and_frees_itself() -> void:
 - Produces:
   - `static func active_project_id(state: GameState) -> int` (Ruling 7)
   - `const STAGE_COUNT: int = 3` (spec §6.3)
-  - `static func project_status(state: GameState, project_id: int) -> Dictionary` with keys `title: String`, `stage: int` (`stage_index + 1`), `progress: int`, `design`, `tech`, `art`, `audio`, `bugs`, `hype` (ints; a missing point key gives 0). An unknown id returns `{}`.
+  - `static func project_status(state: GameState, project_id: int) -> Dictionary` with keys `title: String`, `stage: int` (`stage_index + 1`), `progress: int` (percent = `stage_progress / 100`, because `stage_progress` is bp per M2a Ruling A13), `design`, `tech`, `art`, `audio`, `bugs`, `hype` (ints; a missing point key gives 0). An unknown id returns `{}`.
   - `class_name StatusBar extends PanelContainer`, 22 px tall. Left side: unique-name labels `%Title`, `%Stage`, `%Points`, `%Bugs`, `%Hype` (`LabelSmall`). Right side: `%Date`, `%Money`, `ButtonSmall` buttons `%Pause`, `%Speed1x`, `%Speed2x`, `%Speed4x` (text as in the M1 debug HUD keys `ui.hud.*`). `func refresh(state: GameState, t: TuningDef) -> void`. With no active project, `%Title` = `tr("ui.status.no_project")` and the other project labels are hidden. Every label has `clip_text = true` and `text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS`; `%Title` has `custom_minimum_size.x = 120` and `size_flags_horizontal = SIZE_EXPAND_FILL`. Connects `week_ticked`, `money_changed`, `project_changed` and `project_phase_changed` to `_on_event`, which calls `refresh(GameRunner.session.state, GameRunner.session.tuning)` when the session is not null. Disconnects in `_exit_tree`, as in `debug_hud.gd`.
 
 - [ ] **Step 1: Write the failing tests** (`before_each` sets `GameRunner.session = GameSession.new(Fixtures.new_state(1), Fixtures.tuning())`; `after_each` sets it to null and the locale to `en`):
   - `test_no_project_shows_placeholder`: after refresh, `%Title.text == tr("ui.status.no_project")` and `%Stage.visible == false`.
   - `test_active_project_is_lowest_id_in_production_or_polish`: add a CONCEPT project, then a PRODUCTION project (A), then a POLISH project (B). `active_project_id == A`. Set A to `RELEASED`: the result is B.
   - `test_other_company_project_is_not_active`: a PRODUCTION project with `company_id = 999` gives `-1`.
-  - `test_shows_title_stage_points_bugs_hype`: PRODUCTION project titled "Moon Rally" with `stage_index = 1`, `stage_progress = 40`, `points = {design: 12, tech: 7, art: 3, audio: 1}` (set entries directly), `bugs = 5`, `hype = 30`. After refresh, `%Title.text == "Moon Rally"`, `%Stage.text == tr("ui.status.stage").format({"stage": 2, "count": 3, "progress": 40})`, `%Points.text == tr("ui.status.points").format({"design": 12, "tech": 7, "art": 3, "audio": 1})`, `%Bugs.text == tr("ui.status.bugs").format({"bugs": 5})`, `%Hype.text == tr("ui.status.hype").format({"hype": 30})`.
+  - `test_shows_title_stage_points_bugs_hype`: PRODUCTION project titled "Moon Rally" with `stage_index = 1`, `stage_progress = 4000` (bp, M2a Ruling A13), `points = {design: 12, tech: 7, art: 3, audio: 1}` (set entries directly), `bugs = 5`, `hype = 30`. After refresh, `%Title.text == "Moon Rally"`, `%Stage.text == tr("ui.status.stage").format({"stage": 2, "count": 3, "progress": 40})`, `%Points.text == tr("ui.status.points").format({"design": 12, "tech": 7, "art": 3, "audio": 1})`, `%Bugs.text == tr("ui.status.bugs").format({"bugs": 5})`, `%Hype.text == tr("ui.status.hype").format({"hype": 30})`.
   - `test_refreshes_on_project_changed`: instantiate the bar, add a project to `GameRunner.session.state`, `EventBus.dispatch(&"project_changed", {})`, and assert the title changed.
   - `test_refresh_reads_replaced_session`: replace `GameRunner.session` with a new session whose state has a different project, dispatch `week_ticked`, and assert the new title is shown.
   - `test_long_title_is_clipped`: a 200-character title leaves `%Title.clip_text == true`, `%Title.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS`, and `bar.size.y <= 22` after one frame.
@@ -670,7 +672,7 @@ func test_status_bar_filled_at_launch() -> void:
 
 ### Task 10: Office scene from OfficeDef, seats and equipment
 
-**Blocked by M2a:** `Company.office_id`, `Staff.seat_index`, `Equipment` + `GameState.equipment`, `OfficeDef` (`seats`, `desk_positions`, `tilemap_scene`), `EquipmentDef.tier` (see the interface table above).
+**Blocked by M2a Tasks 1–4, 6 and 7:** `OfficeDef` (`seats`, `desk_positions`, `scene_path`) and `EquipmentDef.tier` (Task 1), `Fixtures.content()` (Task 2), `Equipment` (Task 3), `Company.office_id` and `Staff.seat_index` (Task 4), `GameState.equipment`, the seated owner and `Fixtures.add_equipment` (Task 6), and `Removal.remove_staff` (Task 7).
 
 **Files:**
 - Create: `src/core/seat_view.gd`, `src/ui/office/office_scene.gd/.tscn`, `tests/helpers/office_fixtures.gd`
@@ -685,7 +687,7 @@ func test_status_bar_filled_at_launch() -> void:
   - `static func seat_views(state: GameState, office: OfficeDef, equipment_defs: Dictionary[StringName, EquipmentDef], t: TuningDef) -> Array[SeatView]`. It returns one view per seat `0 .. office.seats - 1` (and never more than `desk_positions.size()`), considering only player-company staff and equipment. A `seat_index` outside the range is ignored. On a shared seat, the lowest id wins. The tier comes from `equipment_defs[def_id].tier`, and an unknown `def_id` gives tier 0. The pose is `staff_pose(...)`, forced to `IDLE` when `computer_tier == 0` (Ruling 6).
   - `class_name OfficeScene extends Node2D`, with children `RoomSlot: Node2D`, `Desks: Node2D`, `Staff: Node2D`, `Bubbles: BubbleLayer`:
     - `func configure(offices: Dictionary[StringName, OfficeDef], equipment_defs: Dictionary[StringName, EquipmentDef]) -> void`
-    - `func refresh(state: GameState, t: TuningDef) -> void`: rebuilds the room only when the office id changed (instantiating `office.tilemap_scene` into `RoomSlot`). It reconciles desks with the seat views and keeps staff sprites keyed by `staff_id`: it frees sprites for staff no longer seated and moves or creates the rest at `room.cell_to_local(desk_cell + Vector2i(0, 1))`.
+    - `func refresh(state: GameState, t: TuningDef) -> void`: rebuilds the room only when the office id changed (instantiating `office.scene_path` into `RoomSlot`). It reconciles desks with the seat views and keeps staff sprites keyed by `staff_id`: it frees sprites for staff no longer seated and moves or creates the rest at `room.cell_to_local(desk_cell + Vector2i(0, 1))`.
     - `func room() -> OfficeRoom`, `func desk_count() -> int`, `func desk_at(seat_index: int) -> DeskSprite`, `func staff_sprite(staff_id: int) -> StaffSprite` (null if not shown)
     - `func spawn_bubble(staff_id: int, kind: StringName) -> bool`: spawns at the sprite position + `Vector2(0, -12)`, or returns false when the sprite is not shown.
     - An unknown office id leaves the scene empty, with a `push_warning`.
@@ -693,24 +695,25 @@ func test_status_bar_filled_at_launch() -> void:
     - `static func garage() -> OfficeDef` (id `&"office_garage"`, seats 2, `OfficeRoom.GARAGE_DESKS`, garage room path)
     - `static func small_office() -> OfficeDef` (`&"office_small"`, 5, `SMALL_OFFICE_DESKS`, small room path)
     - `static func offices() -> Dictionary[StringName, OfficeDef]`
-    - `static func equipment_defs() -> Dictionary[StringName, EquipmentDef]` (`&"pc_t1"` tier 1, `&"pc_t2"` tier 2)
+    - `static func equipment_defs() -> Dictionary[StringName, EquipmentDef]` returns `Fixtures.content().equipment` (`equipment_micro_1980` tier 1, `equipment_fx_fast` tier 2)
     - `static func set_office(state: GameState, office_id: StringName) -> void`
-    - `static func add_equipment(state: GameState, def_id: StringName, seat_index: int, company_id: int = -2) -> int` (`-2` means the player company)
+    - Equipment and workers come from M2a's `Fixtures.add_equipment(state, {"seat_index": n, "def_id": id})` and `Fixtures.add_worker(state, overrides)`.
 
-- [ ] **Step 1: Write the failing tests** `tests/unit/test_state_queries_office.gd`. Each test starts from `Fixtures.new_state(1)` plus `OfficeFixtures.set_office(s, &"office_garage")`.
+- [ ] **Step 1: Write the failing tests** `tests/unit/test_state_queries_office.gd`. Each test starts from `Fixtures.new_state(1)` plus `OfficeFixtures.set_office(s, &"office_garage")`. Seat 0 already holds the owner with `equipment_micro_1980` (M2a Ruling A2), so the tests use seat 1 unless they say otherwise.
   - `test_one_view_per_seat_with_desk_cells`: `seat_views(...)` has size 2, and `desk_cell`s equal `OfficeRoom.GARAGE_DESKS`.
-  - `test_seated_staff_and_computer_tier`: staff with `seat_index = 1`, equipment `&"pc_t2"` on seat 1 gives `views[1].staff_id == id`, `views[1].computer_tier == 2`, and `views[0].staff_id == -1`.
-  - `test_seat_without_computer_forces_idle`: staff seated on a PRODUCTION project with no equipment gives `pose == IDLE`. Adding `pc_t1` on that seat gives `WORKING`.
+  - `test_owner_on_seat_zero`: `views[0].staff_id == s.owner.staff_id` and `views[0].computer_tier == 1`. `views[1].staff_id == -1` and `views[1].computer_tier == 0`.
+  - `test_seated_staff_and_computer_tier`: staff with `seat_index = 1` and `equipment_fx_fast` on seat 1 gives `views[1].staff_id == id` and `views[1].computer_tier == 2`.
+  - `test_seat_without_computer_forces_idle`: staff on seat 1, assigned to a PRODUCTION project, with no equipment, gives `pose == IDLE`. Adding `equipment_micro_1980` on seat 1 gives `WORKING`.
   - `test_out_of_range_seat_ignored`: `seat_index = 7` appears in no view, and nothing errors.
-  - `test_shared_seat_lowest_id_wins`: two staff on seat 0 give the lower id.
-  - `test_storage_and_other_company_equipment_ignored`: equipment with `seat_index = -1`, or on seat 0 for `company_id = 999`, gives `computer_tier == 0`.
+  - `test_shared_seat_lowest_id_wins`: two extra staff on seat 1 give the lower id. This state is invalid per M2a's validator; it is built directly to prove the scene does not crash.
+  - `test_storage_and_other_company_equipment_ignored`: equipment with `seat_index = -1`, or on seat 1 for `company_id = 999`, gives `views[1].computer_tier == 0`.
   - `test_unknown_def_id_gives_tier_zero`.
 
   `tests/unit/test_office_scene.gd` (scene from `office_scene.tscn`, `configure(OfficeFixtures.offices(), OfficeFixtures.equipment_defs())`, then `refresh(state, Fixtures.tuning())`):
   - `test_builds_room_from_office_def`: `room().size_tiles == Vector2i(12, 8)`.
   - `test_desks_match_office_seats_and_positions`: `desk_count() == 2`, and for each i, `desk_at(i).position == room().cell_to_local(GARAGE_DESKS[i])`.
-  - `test_computer_sprite_per_equipment_tier`: `pc_t2` on seat 0 gives `desk_at(0).computer_tier == 2`, and `desk_at(1).computer_tier == 0`.
-  - `test_seated_staff_sprite_has_pose`: seated + computer + crunch project gives `staff_sprite(id).pose == CRUNCHING` at `room().cell_to_local(GARAGE_DESKS[0] + Vector2i(0, 1))`.
+  - `test_computer_sprite_per_equipment_tier`: `desk_at(0).computer_tier == 1` (starter) and `desk_at(1).computer_tier == 0`. After adding `equipment_fx_fast` on seat 1 and refreshing, `desk_at(1).computer_tier == 2`.
+  - `test_seated_staff_sprite_has_pose`: a worker on seat 1 (`Fixtures.add_worker`) assigned to a crunching PRODUCTION project gives `staff_sprite(id).pose == CRUNCHING` at `room().cell_to_local(GARAGE_DESKS[1] + Vector2i(0, 1))`.
   - `test_unseated_staff_has_no_sprite`.
   - `test_removed_staff_sprite_freed_on_refresh`: remove the staff with M2a's `Removal.remove_staff(state, id)` (spec §4.8; never `.erase`), refresh, and `staff_sprite(id) == null`.
   - `test_office_change_rebuilds_room`: `set_office(s, &"office_small")`, refresh, and `room().size_tiles == Vector2i(18, 9)` and `desk_count() == 5`.
@@ -725,7 +728,7 @@ func test_status_bar_filled_at_launch() -> void:
 
 ### Task 11: Wire the office into main: events, content, load
 
-**Blocked by M2a:** EventBus `points_gained`, `bug_found`, `staff_fired`, `equipment_changed`, `game_loaded`; the content database lookup of `OfficeDef` / `EquipmentDef`; `data/offices/*.tres`; `StartProjectCommand`.
+**Blocked by M2a Tasks 2, 8, 10 and 15:** `ContentDB.active()` (Task 2); the EventBus signals `points_gained`, `bug_found`, `staff_fired`, `equipment_changed` and `game_loaded` (Task 8); `data/offices/*.tres` (Task 10); and `StartProjectCommand.game(...)` (Task 15).
 
 **Files:**
 - Modify: `src/ui/office/office_scene.gd`, `src/ui/main.gd`, `src/ui/main.tscn`, `src/ui/hud/status_bar.gd` (add `game_loaded`), `src/ui/debug_hud.gd/.tscn`
@@ -739,9 +742,9 @@ func test_status_bar_filled_at_launch() -> void:
     - `week_ticked`, `staff_hired`, `staff_resigned`, `staff_fired`, `equipment_changed`, `project_changed`, `project_phase_changed`, `game_loaded` → `refresh(GameRunner.session.state, GameRunner.session.tuning)` when the session is not null
     
     The payload is read with `.get()` and defaults; a missing `staff_id` spawns nothing.
-  - `Main._office_content() -> Array` returns `[offices, equipment_defs]` built from M2a's content database (Ruling 5, the only call site). `Main` instances `office_scene.tscn` into `OfficeSlot` with `scale = Vector2(OFFICE_SCALE, OFFICE_SCALE)` and `position = office_origin(scene.room().pixel_size())`. It re-centres after each refresh that changes the room.
+  - `Main._office_content() -> Array` returns `[ContentDB.active().offices, ContentDB.active().equipment]` (Ruling 5, the only call site). `Main` instances `office_scene.tscn` into `OfficeSlot` with `scale = Vector2(OFFICE_SCALE, OFFICE_SCALE)` and `position = office_origin(scene.room().pixel_size())`. It re-centres after each refresh that changes the room.
   - `StatusBar` also refreshes on `game_loaded`.
-  - Debug HUD button `%TestProject` (text `tr("ui.debug.test_project")`) submits `StartProjectCommand` with the arguments of the first game in M2a's acceptance scenario script. Debug only, for the manual bubble check.
+  - Debug HUD button `%TestProject` (text `tr("ui.debug.test_project")`) submits `StartProjectCommand.game(...)` with the arguments of the first game in M2a's acceptance scenario (M2a Task 19). Debug only, for the manual bubble check.
 
 - [ ] **Step 1: Write the failing tests**, added to `test_office_scene.gd`:
   - `test_points_gained_spawns_bubble_at_staff`: seated staff, `EventBus.dispatch(&"points_gained", {"staff_id": id, "type": &"design", "amount": 3})` gives `Bubbles.live_count() == 1`, and the bubble's `kind == &"design"`.
@@ -751,7 +754,7 @@ func test_status_bar_filled_at_launch() -> void:
   
   Added to `test_main_scene.gd`:
   - `test_office_mounted_and_centred`: `OfficeSlot` has an `OfficeScene` child with `scale == Vector2(2, 2)` and `position == Vector2(load("res://src/ui/main.gd").office_origin(room_px))` (`main.gd` has no `class_name`).
-  - `test_office_data_desks_lie_on_room_floor`: for every `.tres` in `res://data/offices/`, load the `OfficeDef` and instantiate its `tilemap_scene` as an `OfficeRoom`. Assert `desk_positions.size() == seats`, and that every desk cell and its `+ (0, 1)` chair cell satisfy `is_floor`. Also assert at least one office file exists. If the desk cells in the data disagree with Ruling 3's published cells, set them to those cells in this task (`Modify: data/offices/*.tres`, fields `desk_positions` and `tilemap_scene` only).
+  - `test_office_data_desks_lie_on_room_floor`: for every `.tres` in `res://data/offices/`, load the `OfficeDef` and instantiate its `scene_path` as an `OfficeRoom`. Assert `desk_positions.size() == seats`, and that every desk cell and its `+ (0, 1)` chair cell satisfy `is_floor`. Also assert at least one office file exists. If the desk cells in the data disagree with Ruling 3's published cells, set them to those cells in this task (`Modify: data/offices/*.tres`, fields `desk_positions` and `scene_path` only; normally M2a Task 10 already set them from the hand-off above).
 - [ ] **Step 2: Run, expect FAIL.**
 - [ ] **Step 3: Implement** the wiring, `_office_content()` and the debug button.
 - [ ] **Step 4: Run** the import, then the suite. Expected: all pass.
@@ -761,7 +764,7 @@ func test_status_bar_filled_at_launch() -> void:
 
 ### Task 12: Manual Mac checklist
 
-**Prerequisite:** Tasks 1–11 are done. M2a production emits `points_gained` and `bug_found`. Bubbles need a seated owner with a computer at new game (M2b) or a debug hire placed in a seat. If that part has not landed, run items 1, 2, 4, 5 and 6 now, report `DONE_WITH_CONCERNS` naming item 3, and rerun item 3 once it lands.
+**Prerequisite:** Tasks 1–11 are done, and so are M2a Tasks 15–16 (StartProject, and production emitting `points_gained`/`bug_found`). M2a Ruling A2 already seats the owner with a starter computer at new game. If M2a production has not landed, run items 1, 2, 4, 5 and 6 now, report `DONE_WITH_CONCERNS` naming item 3, and rerun item 3 once it lands.
 
 - [ ] **Step 1:** Run `godot --path "/Users/chanapols/Projects/ game-dev"`. Check each item and report what you saw for each:
   1. **Crisp 4× pixels.** The window opens at 1280×720. The office tiles show hard pixel edges with no blur, and every art pixel is square and the same size. Zoom a screenshot: each art pixel is 4×4 points, which is 8×8 physical pixels on a Retina display. Resize the window to about 1600×900: it stays at 2× with black bars. Resize to 1920×1080 or go fullscreen at 1080p: it fills exactly at 3× with no bars. Nothing is blurry at either size.
@@ -784,7 +787,7 @@ Tasks in the same group touch disjoint files and can run at the same time. Group
 | G2 | **4**, **5**, **8** | 4: `office_room.gd`, `rooms/`, `test_office_room.gd` · 5: `state_queries.gd`, `staff_sprite.*`, `desk_sprite.*`, two tests · 8: `tab_bar_shell.*`, `panel_host.*`, `test_tab_bar.gd` | 4, 5 need Task 1; 8 needs Task 2 |
 | G3 | **7** | `state_queries.gd`, `status_bar.*`, `test_status_bar.gd` | Task 5 (`state_queries.gd`) and Task 2 |
 | G4 | **9** | `main.*`, `project.godot`, `test_main_scene.gd`, `test_debug_hud.gd` | Tasks 3, 7, 8 |
-| G5 | **10** | `seat_view.gd`, `state_queries.gd`, `office_scene.*`, `office_fixtures.gd`, two tests | Tasks 4, 5, 6 **and M2a data model** |
-| G6 | **11** → **12** | `office_scene.gd`, `main.*`, `status_bar.gd`, `debug_hud.*`, `data/offices/*.tres` (desk fields only) | Tasks 9, 10 **and M2a events, content, StartProject** |
+| G5 | **10** | `seat_view.gd`, `state_queries.gd`, `office_scene.*`, `office_fixtures.gd`, two tests | Tasks 4, 5, 6 **and M2a Tasks 1–4, 6, 7** |
+| G6 | **11** → **12** | `office_scene.gd`, `main.*`, `status_bar.gd`, `debug_hud.*`, `data/offices/*.tres` (desk fields only) | Tasks 9, 10 **and M2a Tasks 2, 8, 10, 15** (Task 12 also needs M2a Task 16) |
 
 **Shared with M2a** (do not edit in parallel with an M2a task that touches the same file; commit, then let the other side rebase): `locale/strings.csv` (Task 2), `project.godot` (Tasks 3, 9), `src/core/state_queries.gd` (Tasks 5, 7, 10), `data/offices/*.tres` (Task 11). This plan never edits `tests/helpers/fixtures.gd`, `src/core/event_bus.gd` or any entity or content class.
