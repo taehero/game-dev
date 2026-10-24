@@ -76,7 +76,7 @@ func test_save_load_continue_matches_uninterrupted() -> void:
     var state: GameState = Fixtures.new_state(7)
     Scenario.advance(state, Scenario.SCRIPT_BASIC, 260)
     var json: String = SaveService.serialize(state)
-    var loaded: GameState = SaveService.deserialize(json)
+    var loaded: GameState = SaveService.deserialize(json).state
     Scenario.advance(loaded, Scenario.SCRIPT_BASIC, 260)
     assert_eq(StateHash.of(loaded), full)
 ```
