@@ -6,7 +6,7 @@
 
 ## 1. Purpose and context
 
-A commercial game-studio tycoon game for PC (Steam). The player runs a game studio from a 1980s garage to a modern platform holder. The full vision has five systems that later specs will cover:
+A commercial game-studio tycoon game for Steam on Windows and macOS. The player runs a game studio from a 1980s garage to a modern platform holder. The full vision has five systems that later specs will cover:
 
 1. Core loop in five phases: Pre-Production, Production, Marketing, Release, Post-Launch
 2. Staff system: personalities, team chemistry, crunch and burnout
@@ -24,7 +24,9 @@ A commercial game-studio tycoon game for PC (Steam). The player runs a game stud
 | Topic | Decision |
 |---|---|
 | Goal | Commercial release |
-| Launch platform | PC (Steam) first |
+| Launch platform | Steam on Windows and macOS. Linux and Steam Deck come later |
+| Dev and test machine | macOS. The editor, GUT tests and local `.app` exports run on the Mac from day one |
+| macOS distribution | Release builds are signed and notarized with an Apple Developer account. Local test builds use ad-hoc signing |
 | Engine | Godot 4.4 or later (typed `Dictionary[K, V]` needs 4.4; `TileMapLayer` replaces the deprecated `TileMap`). The exact version is pinned in `project.godot` and `README.md` at plan time |
 | Language | GDScript with static typing everywhere |
 | Test framework | GUT, run headless |
