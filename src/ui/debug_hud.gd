@@ -16,9 +16,9 @@ var _hire_index: int = 0
 
 func _ready() -> void:
 	%Pause.text = tr("ui.hud.pause")
-	%Speed1x.text = "1x"
-	%Speed2x.text = "2x"
-	%Speed4x.text = "4x"
+	%Speed1x.text = tr("ui.hud.speed").format({"speed": 1})
+	%Speed2x.text = tr("ui.hud.speed").format({"speed": 2})
+	%Speed4x.text = tr("ui.hud.speed").format({"speed": 4})
 	%Hire.text = tr("ui.hud.hire")
 	%Save.text = tr("ui.hud.save")
 	%Load.text = tr("ui.hud.load")

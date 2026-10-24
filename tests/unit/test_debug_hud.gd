@@ -1,14 +1,18 @@
 extends GutTest
 
 var _saved_dir: String
+var _saved_locale: String
 
 func before_each() -> void:
 	_saved_dir = GameRunner.save_dir
 	GameRunner.save_dir = "user://test_hud_saves"
+	_saved_locale = TranslationServer.get_locale()
+	TranslationServer.set_locale("en")
 
 func after_each() -> void:
 	GameRunner.save_dir = _saved_dir
 	GameRunner.session = null
+	TranslationServer.set_locale(_saved_locale)
 
 func _make_hud() -> Control:
 	return add_child_autofree(load("res://src/ui/debug_hud.tscn").instantiate())
@@ -48,3 +52,15 @@ func test_load_missing_slot_shows_error() -> void:
 	var hud: Control = _make_hud()
 	hud.get_node("%Load").pressed.emit()
 	assert_ne(hud.get_node("%MessageLabel").text, "")
+
+func test_speed_button_text_is_translated() -> void:
+	GameRunner.start_new_game(1, "T")
+	var hud: Control = _make_hud()
+	assert_eq(hud.get_node("%Speed2x").text, tr("ui.hud.speed").format({"speed": 2}))
+
+func test_main_scene_fills_labels_at_launch() -> void:
+	var main: Control = add_child_autofree(load("res://src/ui/main.tscn").instantiate())
+	var label: Label = main.get_node("DebugHud/Box/DateLabel")
+	var st: GameState = GameRunner.session.state
+	assert_ne(label.text, "")
+	assert_eq(label.text, StateQueries.date_text(st, GameRunner.session.tuning))

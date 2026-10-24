@@ -2,6 +2,7 @@ keys,en,th
 ui.hud.date,"Year {year}, Week {week}","ปี {year} สัปดาห์ที่ {week}"
 ui.hud.money,"Money: {money}","เงิน: {money}"
 ui.hud.staff,"Staff: {count}","พนักงาน: {count}"
+ui.hud.speed,{speed}x,{speed}x
 ui.hud.pause,Pause,หยุด
 ui.hud.hire,Hire,จ้างคน
 ui.hud.save,Save,บันทึก
