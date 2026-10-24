@@ -110,17 +110,17 @@ static func from_dict(d: Dictionary) -> GameState:
 	s.next_id = int(d["next_id"])
 	s.player_company_id = int(d["player_company_id"])
 	var companies_in: Dictionary = d["companies"]
-	for k: Variant in companies_in:
-		s.companies[int(String(k))] = Company.from_dict(companies_in[k])
+	for id: int in _sorted_keys(companies_in):
+		s.companies[id] = Company.from_dict(companies_in[str(id)])
 	var staff_in: Dictionary = d["staff"]
-	for k: Variant in staff_in:
-		s.staff[int(String(k))] = Staff.from_dict(staff_in[k])
+	for id: int in _sorted_keys(staff_in):
+		s.staff[id] = Staff.from_dict(staff_in[str(id)])
 	var projects_in: Dictionary = d["projects"]
-	for k: Variant in projects_in:
-		s.projects[int(String(k))] = Project.from_dict(projects_in[k])
+	for id: int in _sorted_keys(projects_in):
+		s.projects[id] = Project.from_dict(projects_in[str(id)])
 	var contracts_in: Dictionary = d["contracts"]
-	for k: Variant in contracts_in:
-		s.contracts[int(String(k))] = Contract.from_dict(contracts_in[k])
+	for id: int in _sorted_keys(contracts_in):
+		s.contracts[id] = Contract.from_dict(contracts_in[str(id)])
 	s.market = Market.from_dict(d["market"])
 	for e: Variant in d["active_events"]:
 		s.active_events.append(ActiveWorldEvent.from_dict(e))
@@ -129,3 +129,12 @@ static func from_dict(d: Dictionary) -> GameState:
 	for dec: Variant in d["pending_decisions"]:
 		s.pending_decisions.append(Decision.from_dict(dec))
 	return s
+
+
+## JSON keys in ascending int order, so load inserts in allocation order like a live game.
+static func _sorted_keys(d: Dictionary) -> Array[int]:
+	var out: Array[int] = []
+	for k: Variant in d:
+		out.append(int(String(k)))
+	out.sort()
+	return out

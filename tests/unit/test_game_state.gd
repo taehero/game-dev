@@ -152,3 +152,19 @@ func test_validate_rejects_id_key_mismatch() -> void:
 	var d := _rt(s)
 	d["staff"][str(sid)]["id"] = sid + 1
 	assert_false(GameState.validate_dict(d))
+
+
+func test_validate_rejects_out_of_range_rng_seed() -> void:
+	var d := _rt(Fixtures.new_state(5))
+	d["rng_seed"] = "99999999999999999999999"
+	assert_false(GameState.validate_dict(d))
+	d["rng_seed"] = "+5"
+	assert_false(GameState.validate_dict(d))
+
+
+func test_from_dict_keeps_allocation_order() -> void:
+	var s := Fixtures.new_state(5)
+	for i in 11:
+		Fixtures.add_staff(s)
+	var back := GameState.from_dict(_rt(s))
+	assert_eq(back.staff.keys(), s.staff.keys())

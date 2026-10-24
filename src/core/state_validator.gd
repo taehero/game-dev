@@ -26,7 +26,7 @@ static func validate(d: Variant) -> bool:
 	if not SaveSchema.check(d, STATE_SCHEMA):
 		return false
 	var s: Dictionary = d
-	if not (String(s["rng_seed"]).is_valid_int() and String(s["rng_state"]).is_valid_int()):
+	if not (_canonical_int(String(s["rng_seed"])) and _canonical_int(String(s["rng_state"]))):
 		return false
 	var company_ids: Dictionary = {}
 	var used: Array[int] = []
@@ -73,6 +73,26 @@ static func validate(d: Variant) -> bool:
 	for id: int in used:
 		if next_id <= id:
 			return false
+	return true
+
+
+## True when x is exactly what str(int) would produce: digits only, optional "-", no "+",
+## no leading zeros, within 64-bit range. Checked on the text, because to_int() itself errors
+## on overflow.
+static func _canonical_int(x: String) -> bool:
+	var neg: bool = x.begins_with("-")
+	var digits: String = x.substr(1) if neg else x
+	if digits.is_empty() or not digits.is_valid_int() or digits.begins_with("+"):
+		return false
+	if digits.begins_with("-") or (digits.length() > 1 and digits.begins_with("0")):
+		return false
+	if neg and digits == "0":
+		return false
+	if digits.length() > 19:
+		return false
+	if digits.length() == 19:
+		var limit: String = "9223372036854775808" if neg else "9223372036854775807"
+		return digits <= limit
 	return true
 
 
