@@ -119,6 +119,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 | `LicensedEngineDef` | id, available years, fee, royalty_bp, tech_cap, features |
 | `ResearchDef` | id, cost_rp, prerequisites, unlocks (topic, genre, feature, size, channel ids) |
 | `ProjectSizeDef` | id, base_weeks, min_staff, cost_multiplier_bp, audience_bp |
+| `LevelDef` | level, min best skill, min total exp, salary_bp, output_bp |
 | `PerkDef` | id, path (DEV/BUSINESS), max_rank, effects per rank (Dictionary of effect id → bp) |
 | `MarketingChannelDef` | id, era years, cost, hype_gain, audience segment |
 | `AwardDef` | id, fictional name key, week_in_year, entry_fee, prize, fans |
@@ -217,6 +218,14 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 - The M1 `max_staff_default` limit is replaced by free seats: `HireStaffCommand` (and `HireCandidate`) require a free seat in the current office.
 - Hiring pool: on each month start, `CANDIDATES_PER_MONTH` candidates appear with skills drawn by era, asking salary = market ± `randi_range(-10, 15)`%; each expires after 8 weeks. Hiring needs a free seat.
 - Firing pays `SEVERANCE_MONTHS` of salary and lowers everyone's morale by 5.
+
+### 7.2a Career levels
+
+- `Staff.level: {JUNIOR, MID, SENIOR, LEAD}` (new field). Level sets the salary multiplier (`LEVEL_SALARY_BP`), output multiplier (`LEVEL_OUTPUT_BP`) and the chemistry effect of leading others.
+- A staff member becomes eligible for promotion when their best skill and total exp pass the next level's thresholds (`LevelDef` content). Eligible staff ask for a promotion; the player accepts (salary rises to the new level's market rate) or refuses (morale −10, raise-demand rules apply).
+- `LEAD` replaces the M1 `Role.LEAD_*` meaning: only a `LEAD` can take a lead role on a project; a project without a lead in a discipline gets that discipline's bug penalty.
+- Candidates in the hiring pool come with a level; seniors ask more.
+- **Managers and C-level (CTO, Creative Director, CFO, CMO, COO) are M3**, because they need offices bigger than the 1980s allow. M2 only reserves the enum values `MANAGER` and `EXECUTIVE` and the `Staff.title: StringName` field so M3 adds them without a schema change.
 
 ### 7.3 Seats and equipment
 
@@ -322,7 +331,7 @@ assets/ (art, fonts, CREDITS.md)
 
 | Milestone | Items |
 |---|---|
-| **M3** Economy and rivals | AI competitor studios releasing games; poaching staff; offers to buy our games/IP; investors buying shares; a rival buying our company, then starting a new studio with the money and the owner's skills; economy cycles and era crises with fictional names (1980s market crash, dot-com bust, financial crisis, pandemic); genre trends such as a horror boom and the Thai ghost topic; dynamic market taste; selling our engine licence |
+| **M3** Economy and rivals | Manager and C-level positions (CTO, Creative Director, CFO, CMO, COO): each takes over part of the owner's Business work, so the owner can keep a high dev focus in a big studio, and each has its own salary demands and poaching risk; AI competitor studios releasing games; poaching staff; offers to buy our games/IP; investors buying shares; a rival buying our company, then starting a new studio with the money and the owner's skills; economy cycles and era crises with fictional names (1980s market crash, dot-com bust, financial crisis, pandemic); genre trends such as a horror boom and the Thai ghost topic; dynamic market taste; selling our engine licence |
 | **M4** AI track | AI per era with era-based cost (expert systems, middleware licences, in-house tools, cloud ML, generative AI); cloud subscription tiers with token overage vs local AI on GPU servers (electricity, ML engineer); vendor price hikes, outages, data leaks; AI art backlash and staff resistance; later selling our own AI subscription |
 | **M5** Platform features | Steam Workshop mods for Studio Tycoon itself (data-only JSON, never `.tres` or scripts); Steamworks achievements and cloud saves |
 | Era milestones | Content for the 1990s–2020s, including later marketing channels (websites, video, social media, streamers, short video) |
