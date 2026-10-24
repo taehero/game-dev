@@ -10,6 +10,8 @@ func before_each() -> void:
 func after_each() -> void:
 	var abs_dir: String = ProjectSettings.globalize_path(dir)
 	if DirAccess.dir_exists_absolute(abs_dir):
+		for sub: String in DirAccess.get_directories_at(abs_dir):
+			DirAccess.remove_absolute(abs_dir.path_join(sub))
 		for f: String in DirAccess.get_files_at(abs_dir):
 			DirAccess.remove_absolute(abs_dir.path_join(f))
 		DirAccess.remove_absolute(abs_dir)
@@ -51,6 +53,7 @@ func test_wrong_type_is_invalid() -> void:
 func test_migration_runs_for_older_version() -> void:
 	var d := _parsed()
 	d["schema_version"] = 0
+	d["state"]["schema_version"] = 0
 	SaveService.migrations[0] = func(st: Dictionary) -> Dictionary:
 		st["week"] = 7
 		return st
@@ -58,6 +61,13 @@ func test_migration_runs_for_older_version() -> void:
 	SaveService.migrations.erase(0)
 	assert_true(r.ok)
 	assert_eq(r.state.week, 7)
+	assert_eq(r.state.schema_version, SaveService.SCHEMA_VERSION)
+
+
+func test_inner_root_version_mismatch_is_invalid() -> void:
+	var d := _parsed()
+	d["state"]["schema_version"] = 99
+	assert_eq(SaveService.deserialize(JSON.stringify(d)).error_key, &"error.save_invalid")
 
 
 func test_slot_names_reject_path_traversal() -> void:
@@ -65,6 +75,8 @@ func test_slot_names_reject_path_traversal() -> void:
 	assert_false(SaveService.is_valid_slot("slot_10"))
 	assert_true(SaveService.is_valid_slot("slot_3"))
 	assert_true(SaveService.is_valid_slot("autosave"))
+	assert_false(SaveService.is_valid_slot("slot_1\n"))
+	assert_false(SaveService.is_valid_slot("autosave\n"))
 	assert_eq(SaveService.save_to_slot(Fixtures.new_state(1), "../x", dir), ERR_INVALID_PARAMETER)
 
 
@@ -96,3 +108,12 @@ func test_failed_write_keeps_previous_save() -> void:
 
 func test_missing_slot_is_unreadable() -> void:
 	assert_eq(SaveService.load_from_slot("slot_9", dir).error_key, &"error.save_unreadable")
+
+
+func test_failed_tmp_open_keeps_previous_save() -> void:
+	var a := Fixtures.new_state(11)
+	var b := Fixtures.new_state(12)
+	assert_eq(SaveService.save_to_slot(a, "slot_1", dir), OK)
+	DirAccess.make_dir_absolute(ProjectSettings.globalize_path(dir + "/slot_1.json.tmp"))
+	assert_ne(SaveService.save_to_slot(b, "slot_1", dir), OK)
+	assert_eq(StateHash.of(SaveService.load_from_slot("slot_1", dir).state), StateHash.of(a))

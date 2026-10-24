@@ -4,6 +4,9 @@ extends RefCounted
 
 const SCHEMA_VERSION: int = 1
 const DEFAULT_DIR: String = "user://saves"
+const VALID_SLOTS: Array[String] = [
+	"slot_1", "slot_2", "slot_3", "slot_4", "slot_5", "slot_6", "slot_7", "slot_8", "slot_9", "autosave",
+]
 
 ## Key n migrates a version-n state dict to version n + 1.
 static var migrations: Dictionary[int, Callable] = {}
@@ -29,6 +32,10 @@ static func deserialize(text: String) -> LoadResult:
 	if version > SCHEMA_VERSION:
 		return LoadResult.failure(&"error.save_newer_version")
 	var state_dict: Dictionary = root["state"]
+	# The root wrapper version is authoritative; the inner copy must agree.
+	if not state_dict.has("schema_version") or not SaveSchema.is_whole(state_dict["schema_version"]) \
+			or int(state_dict["schema_version"]) != version:
+		return LoadResult.failure(&"error.save_invalid")
 	while version < SCHEMA_VERSION:
 		if not migrations.has(version):
 			return LoadResult.failure(&"error.save_invalid")
@@ -37,15 +44,14 @@ static func deserialize(text: String) -> LoadResult:
 			return LoadResult.failure(&"error.save_invalid")
 		state_dict = migrated
 		version += 1
+	state_dict["schema_version"] = SCHEMA_VERSION
 	if not GameState.validate_dict(state_dict):
 		return LoadResult.failure(&"error.save_invalid")
 	return LoadResult.success(GameState.from_dict(state_dict))
 
 
 static func is_valid_slot(slot: String) -> bool:
-	var re := RegEx.new()
-	re.compile("^(slot_[1-9]|autosave)$")
-	return re.search(slot) != null
+	return VALID_SLOTS.has(slot)
 
 
 static func save_to_slot(state: GameState, slot: String, dir: String = DEFAULT_DIR) -> Error:
