@@ -16,6 +16,11 @@ static func check(d: Variant, schema: Dictionary) -> bool:
 	return true
 
 
+## True for an int, or a float with no fraction (how JSON delivers whole numbers).
+static func is_whole(v: Variant) -> bool:
+	return _matches(v, "int")
+
+
 static func _matches(v: Variant, tag: String) -> bool:
 	var t: int = typeof(v)
 	match tag:
