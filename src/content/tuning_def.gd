@@ -10,12 +10,12 @@ extends Resource
 @export var max_staff_default: int = 4
 @export var hire_skill_min: int = 10
 @export var hire_skill_max: int = 40
-@export var crunch_speed_mult: float = 1.5
-@export var crunch_bug_mult: float = 1.8
+@export var crunch_speed_bp: int = 15000
+@export var crunch_bug_bp: int = 18000
 @export var crunch_burnout_per_week: int = 6
 @export var crunch_morale_per_week: int = -4
 @export var resign_burnout_threshold: int = 80
-@export var resign_base_chance: float = 0.05
+@export var resign_base_chance_bp: int = 500
 @export var delay_hype_per_week: int = -3
 
 
