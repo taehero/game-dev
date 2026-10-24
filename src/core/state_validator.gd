@@ -102,7 +102,7 @@ static func _entities(
 ) -> bool:
 	for k: Variant in d:
 		var key: String = String(k)
-		if not key.is_valid_int():
+		if not _canonical_int(key):
 			return false
 		var e: Variant = d[k]
 		if not SaveSchema.check(e, schema):

@@ -168,3 +168,22 @@ func test_from_dict_keeps_allocation_order() -> void:
 		Fixtures.add_staff(s)
 	var back := GameState.from_dict(_rt(s))
 	assert_eq(back.staff.keys(), s.staff.keys())
+
+
+func test_validate_rejects_non_canonical_entity_keys() -> void:
+	for bad_key: String in ["02", "+2", "99999999999999999999999"]:
+		var s := Fixtures.new_state(5)
+		var sid := Fixtures.add_staff(s)
+		var d := _rt(s)
+		var e: Dictionary = d["staff"][str(sid)]
+		d["staff"].erase(str(sid))
+		d["staff"][bad_key] = e
+		assert_false(GameState.validate_dict(d), "key %s" % bad_key)
+
+
+func test_validate_rejects_non_canonical_rng_strings() -> void:
+	for field: String in ["rng_seed", "rng_state"]:
+		for bad: String in ["-0", "007", "+5", "99999999999999999999999", ""]:
+			var d := _rt(Fixtures.new_state(5))
+			d[field] = bad
+			assert_false(GameState.validate_dict(d), "%s=%s" % [field, bad])
