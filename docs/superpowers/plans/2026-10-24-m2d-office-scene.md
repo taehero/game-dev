@@ -712,7 +712,7 @@ func test_status_bar_filled_at_launch() -> void:
   - `test_computer_sprite_per_equipment_tier`: `pc_t2` on seat 0 gives `desk_at(0).computer_tier == 2`, and `desk_at(1).computer_tier == 0`.
   - `test_seated_staff_sprite_has_pose`: seated + computer + crunch project gives `staff_sprite(id).pose == CRUNCHING` at `room().cell_to_local(GARAGE_DESKS[0] + Vector2i(0, 1))`.
   - `test_unseated_staff_has_no_sprite`.
-  - `test_removed_staff_sprite_freed_on_refresh`: erase the staff from `state.staff` in the test, refresh, and `staff_sprite(id) == null`.
+  - `test_removed_staff_sprite_freed_on_refresh`: remove the staff with M2a's `Removal.remove_staff(state, id)` (spec §4.8; never `.erase`), refresh, and `staff_sprite(id) == null`.
   - `test_office_change_rebuilds_room`: `set_office(s, &"office_small")`, refresh, and `room().size_tiles == Vector2i(18, 9)` and `desk_count() == 5`.
   - `test_unknown_office_leaves_scene_empty`: `desk_count() == 0` and no crash.
   - `test_spawn_bubble_for_seated_staff_only`: true for a seated id; false for an unseated id and for `-1`.
@@ -764,7 +764,7 @@ func test_status_bar_filled_at_launch() -> void:
 **Prerequisite:** Tasks 1–11 are done. M2a production emits `points_gained` and `bug_found`. Bubbles need a seated owner with a computer at new game (M2b) or a debug hire placed in a seat. If that part has not landed, run items 1, 2, 4, 5 and 6 now, report `DONE_WITH_CONCERNS` naming item 3, and rerun item 3 once it lands.
 
 - [ ] **Step 1:** Run `godot --path "/Users/chanapols/Projects/ game-dev"`. Check each item and report what you saw for each:
-  1. **Crisp 4× pixels.** The window opens at 1280×720. The office tiles show hard pixel edges with no blur, and every art pixel is the same size (zoom a screenshot: each art pixel is 4×4 screen pixels). Resize the window to about 1920×1080: the scale jumps to 3× with black bars, and nothing is blurry.
+  1. **Crisp 4× pixels.** The window opens at 1280×720. The office tiles show hard pixel edges with no blur, and every art pixel is square and the same size. Zoom a screenshot: each art pixel is 4×4 points, which is 8×8 physical pixels on a Retina display. Resize the window to about 1600×900: it stays at 2× with black bars. Resize to 1920×1080 or go fullscreen at 1080p: it fills exactly at 3× with no bars. Nothing is blurry at either size.
   2. **Thai renders.** Switch the locale to Thai (temporarily set `internationalization/locale/test="th"` in Project Settings, and do not commit the change). Tabs and the status bar show Thai with tone marks above and vowels below, not boxes, and the text is clipped with "…" when too long. Revert the setting.
   3. **Bubbles while developing.** Press F3, then Test project, then 1x. Coloured bubbles rise from the seated staff each week, and a red bubble appears when a bug is found. At 4× the screen does not fill with bubbles.
   4. **Tabs visible.** All five tabs show. Clicking one slides an empty panel up with its title, and clicking it again closes the panel.
@@ -776,7 +776,7 @@ func test_status_bar_filled_at_launch() -> void:
 
 ## Parallel groups
 
-Tasks in the same group touch disjoint files and can run at the same time. Groups run in order.
+Tasks in the same group touch disjoint files and can run at the same time. Groups run in order. Disjoint files are not enough on their own: every task runs `godot --headless --import` and the full suite. Run parallel tasks in separate worktrees (`isolation: "worktree"`), so they do not race on `.godot/` or `.git/index.lock` or see a sibling's red TDD step. Otherwise, each task runs only its own tests with `-gselect`, and the full suite runs once at the end of the group.
 
 | Group | Tasks | Files (exclusive within the group) | Waits for |
 |---|---|---|---|
