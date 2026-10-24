@@ -4,3 +4,4 @@
 export_presets.cfg
 .DS_Store
 .env
+.superpowers/
