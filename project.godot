@@ -9,6 +9,7 @@ config/features=PackedStringArray("4.7")
 [autoload]
 
 EventBus="*res://src/core/event_bus.gd"
+GameRunner="*res://src/core/game_runner.gd"
 
 [editor_plugins]
 
