@@ -7,7 +7,7 @@ const SCRIPT_BASIC: Dictionary = {
 	0: [["hire", "Ada", 800]],
 	10: [["hire", "Bo", 700]],
 	30: [["hire", "Cy", 900]],
-	200: [["hire", "Di", 600]],
+	300: [["hire", "Di", 600]],
 }
 
 

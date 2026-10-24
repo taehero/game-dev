@@ -33,6 +33,8 @@ godot --headless -s addons/gut/gut_cmdln.gd -gexit         # all tests (uses .gu
 godot --headless -s addons/gut/gut_cmdln.gd -gexit -gtest=res://tests/unit/test_calendar_system.gd   # one file
 ```
 
+Judge a run by the exit code: the post-run hook fails the run if any test script failed to load, even though the summary may still say All tests passed.
+
 The exit code is non-zero when any test fails. Quote the GUT totals line in every report. If GUT reports "Could not find class" or a parse error for a `class_name`, run the import command and retry once before debugging.
 
 ## File conventions
