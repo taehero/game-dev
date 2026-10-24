@@ -50,7 +50,7 @@ func _refresh() -> void:
 	var st: GameState = GameRunner.session.state
 	_date.text = StateQueries.date_text(st, GameRunner.session.tuning)
 	_money.text = tr("ui.hud.money").format({"money": StateQueries.player_money(st)})
-	_staff.text = tr("ui.hud.staff").format({"count": StateQueries.staff_count(st, st.player_company_id)})
+	_staff.text = tr("ui.hud.staff").format({"count": StateQueries.staff_count(st, StateQueries.player_company_id(st))})
 
 
 func _on_refresh_event(_payload: Dictionary) -> void:
@@ -69,7 +69,7 @@ func _on_hire() -> void:
 	var st: GameState = GameRunner.session.state
 	var hire_name: String = DEBUG_NAMES[_hire_index % DEBUG_NAMES.size()]
 	_hire_index += 1
-	GameRunner.submit(HireStaffCommand.new(st.player_company_id, hire_name, DEBUG_HIRE_SALARY))
+	GameRunner.submit(HireStaffCommand.new(StateQueries.player_company_id(st), hire_name, DEBUG_HIRE_SALARY))
 	_refresh()
 
 

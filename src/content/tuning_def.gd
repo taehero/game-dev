@@ -20,4 +20,4 @@ extends Resource
 
 
 static func load_default() -> TuningDef:
-	return load("res://data/tuning.tres")
+	return load("res://data/tuning.tres") as TuningDef

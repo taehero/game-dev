@@ -55,8 +55,8 @@ static func from_dict(d: Dictionary) -> Staff:
 	s.company_id = int(d["company_id"])
 	s.name = String(d["name"])
 	var sk: Dictionary = d["skills"]
-	for k: Variant in sk:
-		s.skills[StringName(String(k))] = int(sk[k])
+	for k: StringName in GameState.sorted_names(sk):
+		s.skills[k] = int(sk[String(k)])
 	for t: Variant in d["traits"]:
 		s.traits.append(StringName(String(t)))
 	s.morale = int(d["morale"])

@@ -4,6 +4,8 @@ extends RefCounted
 ## enum names, and reference integrity. GameState.from_dict crashes on bad input,
 ## so this must reject anything from_dict cannot read.
 
+const SKILL_KEYS: Array[String] = ["art", "audio", "design", "tech"]
+
 const STATE_SCHEMA: Dictionary = {
 	"schema_version": "int",
 	"week": "int",
@@ -28,17 +30,17 @@ static func validate(d: Variant) -> bool:
 	var s: Dictionary = d
 	if not (_canonical_int(String(s["rng_seed"])) and _canonical_int(String(s["rng_state"]))):
 		return false
-	var company_ids: Dictionary = {}
+	var company_ids: Dictionary[int, bool] = {}
 	var used: Array[int] = []
 	if not _entities(s["companies"], Company.SCHEMA, used, company_ids, _company_ok):
 		return false
-	var staff_ids: Dictionary = {}
+	var staff_ids: Dictionary[int, bool] = {}
 	if not _entities(s["staff"], Staff.SCHEMA, used, staff_ids, _staff_ok):
 		return false
-	var project_ids: Dictionary = {}
+	var project_ids: Dictionary[int, bool] = {}
 	if not _entities(s["projects"], Project.SCHEMA, used, project_ids, _project_ok):
 		return false
-	var contract_ids: Dictionary = {}
+	var contract_ids: Dictionary[int, bool] = {}
 	if not _entities(s["contracts"], Contract.SCHEMA, used, contract_ids, _contract_ok):
 		return false
 	if not _market_ok(s["market"]):
@@ -62,17 +64,30 @@ static func validate(d: Variant) -> bool:
 			return false
 	var projects_d: Dictionary = s["projects"]
 	for k: Variant in projects_d:
-		if not company_ids.has(int(projects_d[k]["company_id"])):
+		var pe: Dictionary = projects_d[k]
+		if not company_ids.has(int(pe["company_id"])):
+			return false
+		var cid: int = int(pe["contract_id"])
+		if cid != -1 and not contract_ids.has(cid):
 			return false
 	var contracts_d: Dictionary = s["contracts"]
 	for k: Variant in contracts_d:
 		var e: Dictionary = contracts_d[k]
 		if not company_ids.has(int(e["party_a"])) or not company_ids.has(int(e["party_b"])):
 			return false
-	var next_id: int = int(s["next_id"])
-	for id: int in used:
-		if next_id <= id:
+	for post: Variant in s["forum_posts"]:
+		if not project_ids.has(int(post["project_id"])):
 			return false
+	var next_id: int = int(s["next_id"])
+	var seen: Dictionary[int, bool] = {}
+	for id: int in used:
+		if id <= 0 or next_id <= id or seen.has(id):
+			return false
+		seen[id] = true
+	for dec: Variant in s["pending_decisions"]:
+		for r: Variant in dec["related_ids"]:
+			if not seen.has(int(r)):
+				return false
 	return true
 
 
@@ -98,7 +113,7 @@ static func _canonical_int(x: String) -> bool:
 
 ## Validates a dictionary keyed by str(id). Records ids.
 static func _entities(
-	d: Dictionary, schema: Dictionary, used: Array[int], ids: Dictionary, extra: Callable
+	d: Dictionary, schema: Dictionary, used: Array[int], ids: Dictionary[int, bool], extra: Callable
 ) -> bool:
 	for k: Variant in d:
 		var key: String = String(k)
@@ -157,8 +172,12 @@ static func _contract_ok(e: Dictionary) -> bool:
 static func _staff_ok(e: Dictionary) -> bool:
 	if not _enum_ok(Staff.Role.keys(), e["role"]):
 		return false
-	if not _whole_values(e["skills"]):
+	var skills: Dictionary = e["skills"]
+	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
 		return false
+	for sk: String in SKILL_KEYS:
+		if not skills.has(sk):
+			return false
 	for t: Variant in e["traits"]:
 		if typeof(t) != TYPE_STRING:
 			return false

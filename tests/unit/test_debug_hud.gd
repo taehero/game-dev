@@ -2,10 +2,12 @@ extends GutTest
 
 var _saved_dir: String
 var _saved_locale: String
+var _dir: String = ""
 
 func before_each() -> void:
 	_saved_dir = GameRunner.save_dir
-	GameRunner.save_dir = "user://test_hud_saves"
+	_dir = "user://test_hud_saves_%d" % Time.get_ticks_usec()
+	GameRunner.save_dir = _dir
 	_saved_locale = TranslationServer.get_locale()
 	TranslationServer.set_locale("en")
 
@@ -13,6 +15,11 @@ func after_each() -> void:
 	GameRunner.save_dir = _saved_dir
 	GameRunner.session = null
 	TranslationServer.set_locale(_saved_locale)
+	var abs_dir: String = ProjectSettings.globalize_path(_dir)
+	if DirAccess.dir_exists_absolute(abs_dir):
+		for f: String in DirAccess.get_files_at(abs_dir):
+			DirAccess.remove_absolute(abs_dir.path_join(f))
+		DirAccess.remove_absolute(abs_dir)
 
 func _make_hud() -> Control:
 	return add_child_autofree(load("res://src/ui/debug_hud.tscn").instantiate())
@@ -64,3 +71,9 @@ func test_main_scene_fills_labels_at_launch() -> void:
 	var st: GameState = GameRunner.session.state
 	assert_ne(label.text, "")
 	assert_eq(label.text, StateQueries.date_text(st, GameRunner.session.tuning))
+
+func test_state_queries_player_company_id() -> void:
+	GameRunner.start_new_game(1, "T")
+	var st: GameState = GameRunner.session.state
+	assert_eq(StateQueries.player_company_id(st), st.player_company_id)
+	assert_gt(StateQueries.player_company_id(st), 0)

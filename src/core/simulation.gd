@@ -2,7 +2,7 @@ class_name Simulation
 extends RefCounted
 ## Weekly tick order (spec 4.2). Preloads because class_name refs are not constant expressions.
 
-const SYSTEMS: Array = [
+const SYSTEMS: Array[GDScript] = [
 	preload("res://src/systems/calendar_system.gd"),
 	preload("res://src/systems/world_event_system.gd"),
 	preload("res://src/systems/market_system.gd"),

@@ -7,7 +7,7 @@ var save_dir: String = SaveService.DEFAULT_DIR
 
 
 func start_new_game(p_seed: int, studio_name: String) -> void:
-	var tuning: TuningDef = load("res://data/tuning.tres") as TuningDef
+	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(GameState.new_game(p_seed, studio_name, tuning), tuning)
 
 
@@ -29,7 +29,7 @@ func load_game(slot: String) -> LoadResult:
 	var r: LoadResult = SaveService.load_from_slot(slot, save_dir)
 	if not r.ok:
 		return r
-	var tuning: TuningDef = load("res://data/tuning.tres") as TuningDef
+	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(r.state, tuning)
 	session.set_speed(0)
 	return r

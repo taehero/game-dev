@@ -49,8 +49,24 @@ func test_comment_stripping() -> void:
 	assert_eq(RuleScan.strip_comment("var s := \"a # b\" # c"), "var s := \"a # b\" ")
 
 func _assert_clean(paths: Array[String], pattern: String, rule: String) -> void:
-	var hits := RuleScan.scan(paths, pattern)
+	var report := RuleScan.scan(paths, pattern)
+	var hits: Array[String] = report["hits"]
 	assert_eq(hits.size(), 0, "%s violated:\n%s" % [rule, "\n".join(hits)])
+	# A scan that read nothing proves nothing: every root that exists must yield files.
+	for root: String in paths:
+		if RuleScan.root_exists(root):
+			var one := RuleScan.scan([root] as Array[String], pattern)
+			assert_gt(int(one["files"]), 0, "%s: no .gd files read under %s" % [rule, root])
+
+func test_scan_roots_contain_gd_files() -> void:
+	for root: String in ["res://src/core", "res://src/core/entities", "res://src/systems", "res://src/ui"]:
+		var report := RuleScan.scan([root] as Array[String], "zzz_never_matches_zzz")
+		assert_gt(int(report["files"]), 0, "no .gd files read under %s" % root)
+
+func test_missing_scan_root_reads_zero_files_without_failing() -> void:
+	var report := RuleScan.scan(["res://src/does_not_exist_yet"] as Array[String], RuleScan.GLOBAL_RNG)
+	assert_eq(int(report["files"]), 0)
+	assert_eq((report["hits"] as Array).size(), 0)
 
 func test_no_global_rng_in_core_and_systems() -> void:
 	_assert_clean(["res://src/core", "res://src/systems"], RuleScan.GLOBAL_RNG, "global RNG")
@@ -123,18 +139,24 @@ class RuleScan:
 			out.append_array(gd_files(path.path_join(d)))
 		return out
 
-	## Returns "path:line: text" for every code line (comments stripped) matching pattern.
-	static func scan(paths: Array[String], pattern: String) -> Array[String]:
+	static func root_exists(path: String) -> bool:
+		return FileAccess.file_exists(path) or DirAccess.dir_exists_absolute(path)
+
+	## Returns {"hits": Array[String] of "path:line: text" for every code line (comments
+	## stripped) matching pattern, "files": number of .gd files actually read}.
+	static func scan(paths: Array[String], pattern: String) -> Dictionary:
 		var hits: Array[String] = []
+		var files_read: int = 0
 		var re := RegEx.create_from_string(pattern)
 		for root: String in paths:
 			for f: String in gd_files(root):
 				var fa := FileAccess.open(f, FileAccess.READ)
 				if fa == null:
 					continue
+				files_read += 1
 				var lines := fa.get_as_text().split("\n")
 				for i: int in lines.size():
 					var code := strip_comment(lines[i])
 					if re.search(code) != null:
 						hits.append("%s:%d: %s" % [f, i + 1, code.strip_edges()])
-		return hits
+		return {"hits": hits, "files": files_read}

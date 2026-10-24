@@ -30,7 +30,7 @@ func test_hire_is_deterministic_for_same_seed() -> void:
 func test_hire_rejected_at_staff_limit() -> void:
 	var s := Fixtures.new_state(3)
 	var t := Fixtures.tuning()
-	for i in t.max_staff_default:
+	for i: int in t.max_staff_default:
 		Fixtures.add_staff(s)
 	var r := HireStaffCommand.new(s.player_company_id, "X", 800).validate(s, t)
 	assert_false(r.ok)

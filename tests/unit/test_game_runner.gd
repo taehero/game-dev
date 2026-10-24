@@ -56,6 +56,21 @@ func test_failed_load_leaves_session_untouched() -> void:
 	assert_eq(StateHash.of(GameRunner.session.state), before_hash)
 
 
+func test_corrupt_slot_load_leaves_session_untouched() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	var before: GameSession = GameRunner.session
+	var before_hash: String = StateHash.of(before.state)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_dir))
+	var f: FileAccess = FileAccess.open(_dir.path_join("slot_2.json"), FileAccess.WRITE)
+	f.store_string("{\"schema_version\": 1, \"sta")
+	f.close()
+	var r: LoadResult = GameRunner.load_game("slot_2")
+	assert_false(r.ok)
+	assert_eq(r.error_key, &"error.save_unreadable")
+	assert_same(GameRunner.session, before)
+	assert_eq(StateHash.of(GameRunner.session.state), before_hash)
+
+
 func test_autosave_written_on_quarter_start() -> void:
 	GameRunner.start_new_game(5, "Acme")
 	GameRunner.session.state.week = 12

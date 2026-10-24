@@ -88,8 +88,8 @@ static func from_dict(d: Dictionary) -> Project:
 	p.company_id = int(d["company_id"])
 	p.title = String(d["title"])
 	var cfg: Dictionary = d["config"]
-	for k: Variant in cfg:
-		p.config[StringName(String(k))] = StringName(String(cfg[k]))
+	for k: StringName in GameState.sorted_names(cfg):
+		p.config[k] = StringName(String(cfg[String(k)]))
 	p.phase = Phase[String(d["phase"])]
 	p.stage_index = int(d["stage_index"])
 	p.stage_progress = int(d["stage_progress"])
@@ -97,8 +97,8 @@ static func from_dict(d: Dictionary) -> Project:
 	for f: Variant in d["focus"]:
 		p.focus.append(int(f))
 	var pts: Dictionary = d["points"]
-	for k: Variant in pts:
-		p.points[StringName(String(k))] = int(pts[k])
+	for k: StringName in GameState.sorted_names(pts):
+		p.points[k] = int(pts[String(k)])
 	p.bugs = int(d["bugs"])
 	p.hype = int(d["hype"])
 	p.deadline_week = int(d["deadline_week"])

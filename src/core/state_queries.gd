@@ -18,3 +18,7 @@ static func player_money(state: GameState) -> int:
 
 static func staff_count(state: GameState, company_id: int) -> int:
 	return state.staff_of(company_id).size()
+
+
+static func player_company_id(state: GameState) -> int:
+	return state.player_company_id

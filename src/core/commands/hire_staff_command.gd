@@ -28,7 +28,12 @@ func apply(ctx: TickContext) -> void:
 	s.company_id = company_id
 	s.name = staff_name
 	s.salary = salary
+	# Draw order is fixed (design, tech, art, audio); insert sorted so live order
+	# matches the order a loaded save produces (Ruling 14).
+	var drawn: Dictionary[StringName, int] = {}
 	for skill: StringName in [&"design", &"tech", &"art", &"audio"]:
-		s.skills[skill] = ctx.rng.randi_range(ctx.tuning.hire_skill_min, ctx.tuning.hire_skill_max)
+		drawn[skill] = ctx.rng.randi_range(ctx.tuning.hire_skill_min, ctx.tuning.hire_skill_max)
+	for skill: StringName in GameState.sorted_names(drawn):
+		s.skills[skill] = drawn[skill]
 	ctx.state.staff[s.id] = s
 	ctx.emit(&"staff_hired", {"staff_id": s.id})

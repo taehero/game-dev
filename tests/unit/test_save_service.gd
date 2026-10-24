@@ -117,3 +117,33 @@ func test_failed_tmp_open_keeps_previous_save() -> void:
 	DirAccess.make_dir_absolute(ProjectSettings.globalize_path(dir + "/slot_1.json.tmp"))
 	assert_ne(SaveService.save_to_slot(b, "slot_1", dir), OK)
 	assert_eq(StateHash.of(SaveService.load_from_slot("slot_1", dir).state), StateHash.of(a))
+
+
+func test_older_version_without_migration_is_invalid() -> void:
+	SaveService.migrations.erase(0)
+	var d := _parsed()
+	d["schema_version"] = 0
+	d["state"]["schema_version"] = 0
+	assert_eq(SaveService.deserialize(JSON.stringify(d)).error_key, &"error.save_invalid")
+
+
+func test_missing_state_is_unreadable() -> void:
+	assert_eq(SaveService.deserialize("{\"schema_version\": 1}").error_key, &"error.save_unreadable")
+
+
+func test_dangling_company_id_is_invalid() -> void:
+	var d := _parsed()
+	d["state"]["player_company_id"] = 999
+	assert_eq(SaveService.deserialize(JSON.stringify(d)).error_key, &"error.save_invalid")
+
+
+func test_missing_inner_version_is_invalid() -> void:
+	var d := _parsed()
+	d["state"].erase("schema_version")
+	assert_eq(SaveService.deserialize(JSON.stringify(d)).error_key, &"error.save_invalid")
+
+
+func test_fractional_inner_version_is_invalid() -> void:
+	var d := _parsed()
+	d["state"]["schema_version"] = 1.5
+	assert_eq(SaveService.deserialize(JSON.stringify(d)).error_key, &"error.save_invalid")

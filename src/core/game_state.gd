@@ -47,6 +47,19 @@ func sorted_ids(d: Dictionary) -> Array[int]:
 	return out
 
 
+## Name keys in ascending String order. Use for any iteration that changes state,
+## draws RNG or breaks a tie (Ruling 14); static so from_dict can use it too.
+static func sorted_names(d: Dictionary) -> Array[StringName]:
+	var strs: Array[String] = []
+	for k: Variant in d:
+		strs.append(String(k))
+	strs.sort()
+	var out: Array[StringName] = []
+	for k: String in strs:
+		out.append(StringName(k))
+	return out
+
+
 func staff_of(company_id: int) -> Array[int]:
 	var out: Array[int] = []
 	for id: int in sorted_ids(staff):

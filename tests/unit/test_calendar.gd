@@ -12,7 +12,7 @@ func test_year_from_week() -> void:
 
 func test_twelve_month_starts_per_year() -> void:
 	var n := 0
-	for w in 52:
+	for w: int in 52:
 		if Calendar.is_month_start(w, t):
 			n += 1
 	assert_eq(n, 12)

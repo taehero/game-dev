@@ -47,21 +47,21 @@ func to_dict() -> Dictionary:
 static func from_dict(d: Dictionary) -> Market:
 	var m := Market.new()
 	var size_in: Dictionary = d["segment_size"]
-	for k: Variant in size_in:
-		m.segment_size[StringName(String(k))] = int(size_in[k])
+	for k: StringName in GameState.sorted_names(size_in):
+		m.segment_size[k] = int(size_in[String(k)])
 	var growth_in: Dictionary = d["segment_growth_bp"]
-	for k: Variant in growth_in:
-		m.segment_growth_bp[StringName(String(k))] = int(growth_in[k])
+	for k: StringName in GameState.sorted_names(growth_in):
+		m.segment_growth_bp[k] = int(growth_in[String(k)])
 	var taste_in: Dictionary = d["taste_bp"]
-	for k: Variant in taste_in:
-		m.taste_bp[StringName(String(k))] = int(taste_in[k])
+	for k: StringName in GameState.sorted_names(taste_in):
+		m.taste_bp[k] = int(taste_in[String(k)])
 	var base_in: Dictionary = d["platform_install_base"]
-	for k: Variant in base_in:
-		m.platform_install_base[StringName(String(k))] = int(base_in[k])
+	for k: StringName in GameState.sorted_names(base_in):
+		m.platform_install_base[k] = int(base_in[String(k)])
 	var drift_in: Dictionary = d["focus_drift"]
-	for k: Variant in drift_in:
+	for k: StringName in GameState.sorted_names(drift_in):
 		var arr: Array = []
-		for v: Variant in drift_in[k]:
+		for v: Variant in drift_in[String(k)]:
 			arr.append(int(v))
-		m.focus_drift[StringName(String(k))] = arr
+		m.focus_drift[k] = arr
 	return m

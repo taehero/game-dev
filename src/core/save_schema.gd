@@ -3,6 +3,9 @@ extends RefCounted
 ## Validates dictionaries parsed from JSON (all numbers are float, keys are String).
 ## schema maps field name -> type tag: "int", "float", "string", "bool", "dict", "array".
 
+## 2^53: largest magnitude where a double still holds every integer exactly.
+const MAX_SAFE_WHOLE: float = 9007199254740992.0
+
 
 static func check(d: Variant, schema: Dictionary) -> bool:
 	if typeof(d) != TYPE_DICTIONARY:
@@ -29,7 +32,7 @@ static func _matches(v: Variant, tag: String) -> bool:
 				return true
 			if t == TYPE_FLOAT:
 				var f: float = v
-				return is_finite(f) and f == floorf(f)
+				return is_finite(f) and f == floorf(f) and absf(f) <= MAX_SAFE_WHOLE
 			return false
 		"float":
 			return t == TYPE_INT or t == TYPE_FLOAT
