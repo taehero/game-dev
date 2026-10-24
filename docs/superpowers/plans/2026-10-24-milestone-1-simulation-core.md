@@ -19,7 +19,7 @@
 - Money is `int`.
 - Every player-facing string goes through `tr()` with a key in `locale/strings.csv` (`keys,en,th`).
 - Tuning numbers live in `data/tuning.tres` (`TuningDef`), never as literals in systems or commands.
-- Saves: JSON only. `JSON.stringify(data, "", true, true)` (sorted keys, full precision). `rng_seed` and `rng_state` stored as decimal strings. Every int cast back with `int()`. Int dictionary keys converted back with `int()`; StringName keys/values with `StringName()`.
+- Saves: JSON only. `JSON.stringify(data, "", true, true)` (sorted keys). No `float` anywhere in `GameState` or entities: ratios, multipliers and chances are `int` basis points with a `_bp` suffix (`Fixed.ONE_BP` = 10000 = 1.0); simulation math uses `Fixed.mul_bp()` / `Fixed.roll_bp()` (Ruling 3: Godot 4.7 JSON parsing is not correctly rounded). `rng_seed` and `rng_state` stored as decimal strings. Every int cast back with `int()`. Int dictionary keys converted back with `int()`; StringName keys/values with `StringName()`.
 - Enums serialize as their name string (e.g. `"PLAYER"`), not as ints.
 - Scripts registered as autoloads (`EventBus`, `GameRunner`) must NOT declare `class_name` (Godot errors when a class_name hides an autoload).
 - Until the first public build, `schema_version` stays `1` and fields may be added without a migration.
@@ -122,7 +122,7 @@ func test_engine_version_is_4_7() -> void:
 - Produces:
   - `class_name SaveSchema` with `static func check(d: Variant, schema: Dictionary) -> bool`. `schema` maps field name → type tag: `"int"`, `"float"`, `"string"`, `"bool"`, `"dict"`, `"array"`. Returns false if `d` is not a Dictionary, a key is missing, or a type does not match. `"int"` accepts a JSON float only when it has no fractional part. `"float"` accepts int or float. `"string"` accepts String or StringName.
   - `class_name TuningDef extends Resource` with `@export` fields and these default values (spec §4.1, §6.2):
-    `seconds_per_week: float = 8.0`, `max_ticks_per_frame: int = 4`, `start_money: int = 20000`, `start_year: int = 1980`, `weeks_per_year: int = 52`, `max_staff_default: int = 4`, `hire_skill_min: int = 10`, `hire_skill_max: int = 40`, `crunch_speed_mult: float = 1.5`, `crunch_bug_mult: float = 1.8`, `crunch_burnout_per_week: int = 6`, `crunch_morale_per_week: int = -4`, `resign_burnout_threshold: int = 80`, `resign_base_chance: float = 0.05`, `delay_hype_per_week: int = -3`.
+    `seconds_per_week: float = 8.0`, `max_ticks_per_frame: int = 4`, `start_money: int = 20000`, `start_year: int = 1980`, `weeks_per_year: int = 52`, `max_staff_default: int = 4`, `hire_skill_min: int = 10`, `hire_skill_max: int = 40`, `crunch_speed_bp: int = 15000`, `crunch_bug_bp: int = 18000`, `crunch_burnout_per_week: int = 6`, `crunch_morale_per_week: int = -4`, `resign_burnout_threshold: int = 80`, `resign_base_chance_bp: int = 500`, `delay_hype_per_week: int = -3`.
   - `static func load_default() -> TuningDef` returns `load("res://data/tuning.tres")`.
 
 - [ ] **Step 1: Write failing tests**
@@ -162,12 +162,12 @@ func test_default_tuning_matches_spec() -> void:
     var t: TuningDef = TuningDef.load_default()
     assert_eq(t.seconds_per_week, 8.0)
     assert_eq(t.max_ticks_per_frame, 4)
-    assert_eq(t.crunch_speed_mult, 1.5)
-    assert_eq(t.crunch_bug_mult, 1.8)
+    assert_eq(t.crunch_speed_bp, 15000)
+    assert_eq(t.crunch_bug_bp, 18000)
     assert_eq(t.crunch_burnout_per_week, 6)
     assert_eq(t.crunch_morale_per_week, -4)
     assert_eq(t.resign_burnout_threshold, 80)
-    assert_eq(t.resign_base_chance, 0.05)
+    assert_eq(t.resign_base_chance_bp, 500)
     assert_eq(t.delay_hype_per_week, -3)
 ```
 
@@ -231,7 +231,7 @@ Same three tests for `Company` (kind `AI_PUBLISHER`) and `Contract` (`locked_gen
 - Consumes: `SaveSchema`, `Fixtures.json_round_trip`.
 - Produces (same `to_dict` / `from_dict` / `SCHEMA` contract as Task 3):
   - `Project`: `enum Phase { CONCEPT, PRODUCTION, POLISH, RELEASED, LIVE, RETIRED }`; `id: int`, `company_id: int`, `title: String`, `config: Dictionary[StringName, StringName]` (keys `&"platform"`, `&"engine"`, `&"genre"`, `&"topic"`, `&"art_style"`, `&"business_model"`), `phase: Phase = Phase.CONCEPT`, `stage_index: int = 0`, `stage_progress: int = 0` (0–100), `focus: Array[int] = [50, 50, 50]` (tech share per stage), `points: Dictionary[StringName, int]` (design/tech/art/audio), `bugs: int = 0`, `hype: int = 0`, `deadline_week: int`, `crunch: bool = false`, `delay_weeks_total: int = 0`, `contract_id: int = -1`, `release_week: int = -1`, `units_sold: int = 0`, `revenue: int = 0`, `user_score: int = 0`, `sentiment: int = 0`.
-  - `Market`: `segment_size: Dictionary[StringName, int]`, `segment_growth_bp: Dictionary[StringName, int]` (basis points per year), `taste: Dictionary[StringName, float]`, `platform_install_base: Dictionary[StringName, int]`, `focus_drift: Dictionary[StringName, Array]` (each value 3 ints, −10..10).
+  - `Market`: `segment_size: Dictionary[StringName, int]`, `segment_growth_bp: Dictionary[StringName, int]` (basis points per year), `taste_bp: Dictionary[StringName, int]` (5000–15000, 10000 = neutral), `platform_install_base: Dictionary[StringName, int]`, `focus_drift: Dictionary[StringName, Array]` (each value 3 ints, −10..10).
   - `ActiveWorldEvent`: `event_id: StringName`, `start_week: int`, `end_week: int`.
   - `ForumPost`: `id: int`, `project_id: int`, `week: int`, `topic_key: StringName`, `sentiment: int`, `replied: bool = false`.
   - `Decision`: `id: int`, `kind: StringName`, `related_ids: Array[int]`, `deadline_week: int`, `option_keys: Array[StringName]`.
@@ -241,11 +241,12 @@ Ruling recorded here: Project `review_results` (spec §3.3) is deferred to the r
 - [ ] **Step 1: Write failing tests:** the same round-trip, schema and enum-name tests as Task 3 for all five classes. Add for `Market`:
 
 ```gdscript
-func test_market_float_taste_survives_exactly() -> void:
+func test_market_taste_bp_survives_exactly_as_int() -> void:
     var m := Market.new()
-    m.taste[&"genre_rpg"] = 1.1 + 0.0000001
+    m.taste_bp[&"genre_rpg"] = 11001
     var back: Market = Market.from_dict(Fixtures.json_round_trip(m.to_dict()))
-    assert_eq(back.taste[&"genre_rpg"], m.taste[&"genre_rpg"])
+    assert_eq(typeof(back.taste_bp[&"genre_rpg"]), TYPE_INT)
+    assert_eq(back.taste_bp[&"genre_rpg"], 11001)
 
 func test_market_focus_drift_values_are_ints() -> void:
     var m := Market.new()
@@ -334,14 +335,14 @@ func test_64bit_seed_and_state_survive_round_trip() -> void:
 func test_full_state_round_trip_preserves_hash() -> void:
     var s := Fixtures.new_state(5)
     Fixtures.add_staff(s); Fixtures.add_project(s)
-    s.market.taste[&"genre_rpg"] = 1.23456789
+    s.market.taste_bp[&"genre_rpg"] = 12346
     var back := GameState.from_dict(Fixtures.json_round_trip(s.to_dict()))
     assert_eq(StateHash.of(back), StateHash.of(s))
 
 func test_hash_ignores_dictionary_insertion_order() -> void:
     var a := Fixtures.new_state(5); var b := Fixtures.new_state(5)
-    a.market.taste[&"x"] = 1.0; a.market.taste[&"y"] = 1.1
-    b.market.taste[&"y"] = 1.1; b.market.taste[&"x"] = 1.0
+    a.market.taste_bp[&"x"] = 10000; a.market.taste_bp[&"y"] = 11000
+    b.market.taste_bp[&"y"] = 11000; b.market.taste_bp[&"x"] = 10000
     assert_eq(StateHash.of(a), StateHash.of(b))
 
 func test_validate_rejects_dangling_company_id() -> void:
@@ -740,6 +741,8 @@ func test_values_stay_in_range() -> void:
 - [ ] **Step 2: Write `tests/unit/test_rules.gd`.** It reads every `.gd` file under the given folders with `DirAccess`/`FileAccess` and fails with the file path and line number on:
   - in `res://src/core/` and `res://src/systems/`: regex `(?<![\w.])(randi|randf|randomize|randi_range|randf_range)\s*\(` (global RNG; `rng.randi()` is allowed);
   - in `res://src/core/save_service.gd`: `ResourceSaver` or `ResourceLoader`;
+  - in `res://src/core/entities/` and `res://src/core/game_state.gd`: the word `float` (no floats in state, Ruling 3);
+  - in `res://src/systems/`: `pow(`, `exp(`, `log(`, `sin(`, `cos(`;
   - in `res://src/ui/`: regex `\bstate\.[\w.\[\]"&]+\s*[-+*/]?=[^=]` (direct state writes).
   Add one test that runs each regex against a known-bad string, so a broken regex cannot pass silently.
 

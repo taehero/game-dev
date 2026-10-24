@@ -20,8 +20,9 @@ Game-studio tycoon game. Godot 4.7.2, GDScript (static typing everywhere), GUT f
 4. No global `randi()`, `randf()`, `randomize()` or `randf_range()` in `src/core/` or `src/systems/`. Use the `RandomNumberGenerator` passed in.
 5. Entities reference each other by id (int for runtime entities, `StringName` for content). Never by object reference.
 6. Every player-facing string goes through `tr()` with a key in `locale/strings.csv` (columns `keys,en,th`). No literal display text.
-7. Saves are JSON only via `to_dict()` / `from_dict()`. Never `ResourceSaver`/`ResourceLoader` for saves. Follow the JSON type rules in spec §9.1 (64-bit RNG values as strings, cast ints back, convert dictionary keys back, sorted keys + full precision).
+7. Saves are JSON only via `to_dict()` / `from_dict()`. Never `ResourceSaver`/`ResourceLoader` for saves. Follow the JSON type rules in spec §9.1 (64-bit RNG values as strings, cast ints back, convert dictionary keys back, sorted keys).
 8. Tuning numbers live in `data/tuning.tres` (`TuningDef`), not in code.
+9. No `float` in `GameState` or entities. Ratios, multipliers and chances are `int` basis points with a `_bp` suffix (`Fixed.ONE_BP` = 10000 = 1.0). Simulation math uses `Fixed.mul_bp()` and `Fixed.roll_bp()`; no `pow`/`exp`/`log`/trig on simulation values in `src/core/` or `src/systems/`. Floats are allowed only in UI and real-time pacing (`seconds_per_week`).
 
 ## Layout
 

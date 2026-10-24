@@ -13,7 +13,7 @@ The binding rules are in `CLAUDE.md` and the spec. This skill shows how to follo
 - File names snake_case; `class_name` PascalCase; one class per file.
 - Constants and enums UPPER_SNAKE. Signals past tense (`review_published`).
 - No `@onready` or Node APIs in `src/core/` and `src/systems/`. Those folders must run headless without a scene tree.
-- Integer money. Never float for currency.
+- Integer money. No floats in state or simulation math: ratios are `_bp` ints (`Fixed.ONE_BP` = 10000), scaled with `Fixed.mul_bp()`, chances rolled with `Fixed.roll_bp()`.
 
 ## Entity template (`src/core/entities/`)
 
@@ -57,7 +57,7 @@ static func from_dict(d: Dictionary) -> Staff:
     return s
 ```
 
-JSON rules (spec §9.1): JSON numbers come back as float and keys as String. Cast every int with `int()`. Convert `Dictionary[int, …]` keys with `int(key)`. Convert StringName with `StringName()`. Store 64-bit RNG seed/state as decimal strings.
+JSON rules (spec §9.1): JSON numbers come back as float and keys as String. Cast every int with `int()`. Convert `Dictionary[int, …]` keys with `int(key)`. Convert StringName with `StringName()`. Store 64-bit RNG seed/state as decimal strings. Never store floats: Godot's JSON parser does not round-trip doubles exactly.
 
 ## System template (`src/systems/`)
 

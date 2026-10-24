@@ -162,7 +162,7 @@ The era is not stored. It is derived from `week` through the era table.
 **Market**
 
 - `segments`: Dictionary[StringName, Segment] with size and growth per audience segment
-- `taste`: Dictionary keyed by genre id and topic id, values 0.5–1.5 (1.0 = neutral)
+- `taste_bp`: Dictionary[StringName, int] keyed by genre id and topic id, in basis points 5000–15000 (10000 = neutral)
 - `platform_install_base`: Dictionary[StringName, int]
 - `focus_drift`: Dictionary keyed by genre id, holding the current offset (−10 to +10 per stage) from the genre's hidden ideal focus weights
 
@@ -354,7 +354,7 @@ Example result: "Gameplay is excellent, but performance is poor on handheld." Th
 - `rng_seed` and `rng_state` are 64-bit and lose precision above 2^53. Store them as decimal strings.
 - Every `int` field is cast back with `int()` in `from_dict()`.
 - `Dictionary[int, …]` keys are converted back to `int`. `StringName` keys and values are converted back with `StringName()`.
-- Float fields (taste, morale factors) are written with `JSON.stringify(data, "", true, true)` (sorted keys, full precision).
+- No float fields. Godot 4.7's JSON parser is not correctly rounded (about 12% of doubles in 0.5–1.5 parse back 1 ulp off), so floats cannot round-trip exactly. Every number in `GameState` and its entities is an `int`; ratios and multipliers are basis-point ints with a `_bp` suffix (`Fixed.ONE_BP` = 10000 = 1.0). Saves and the state hash use `JSON.stringify(data, "", true, true)` (sorted keys).
 - **State hash** (used by the tests): `JSON.stringify(state.to_dict(), "", true, true).sha256_text()`. Sorted keys make the hash independent of dictionary insertion order, which can differ after a load.
 - **Security rule:** never save or load `GameState` with `ResourceSaver` / `ResourceLoader`. A `.tres`/`.res` file can contain embedded scripts, so a shared save or a future mod file would allow code execution. Saves are JSON only.
 
