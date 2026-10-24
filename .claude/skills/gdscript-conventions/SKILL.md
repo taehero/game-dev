@@ -75,7 +75,7 @@ static func tick(ctx: TickContext) -> void:
 ```
 
 - No member variables. Everything comes from `ctx` (`ctx.state`, `ctx.rng`, `ctx.tuning`).
-- Iterate in sorted id order when the order changes state or RNG draws (determinism).
+- Any iteration that changes state, draws RNG or breaks a tie iterates `state.sorted_ids(dict)` (int keys) or `GameState.sorted_names(dict)` (StringName keys), never raw Dictionary order (Ruling 14). `from_dict` also inserts StringName-keyed entries via `sorted_names`, so live and loaded dictionaries share one order.
 - Push events through `ctx.emit()`. `GameRunner` flushes them to `EventBus` after the tick.
 
 ## Command template (`src/core/commands/`)

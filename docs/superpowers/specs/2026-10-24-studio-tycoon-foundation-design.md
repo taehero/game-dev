@@ -138,7 +138,7 @@ The era is not stored. It is derived from `week` through the era table.
 - `skills`: design, tech, art, audio (0–100 each)
 - `traits`: Array[StringName] that refer to `TraitDef` content
 - `morale` (0–100), `burnout` (0–100), `salary` (per month)
-- `assignment`: project id and role (`LEAD_DESIGN`, `LEAD_TECH`, `LEAD_ART`, `MEMBER`), or none
+- `assigned_project_id` (project id, or -1 for none) and `role` (`NONE`, `LEAD_DESIGN`, `LEAD_TECH`, `LEAD_ART`, `MEMBER`)
 
 **Project**
 
@@ -156,7 +156,7 @@ The era is not stored. It is derived from `week` through the era table.
 
 - `id`, `kind` (this slice: `PUBLISHING`), `party_a`, `party_b`
 - `advance`, `revenue_share_pct`, `deadline_week`, `late_penalty_per_week`
-- `constraints`: Dictionary (for example `locked_genre`, `locked_platform`, `min_score`)
+- Typed constraint fields: `locked_genre` (StringName, empty for none), `locked_platform` (StringName, empty for none), `min_score` (int, 0 for none). New constraint kinds add new typed fields.
 - Hook for later: store revenue cut, console exclusives and outsourcing reuse this type with new `kind` values.
 
 **Market**
@@ -235,19 +235,20 @@ Systems push events into a queue during the tick. `GameRunner` flushes the queue
 class_name Command
 extends RefCounted
 
-func validate(state: GameState) -> CommandResult:
-    return CommandResult.ok()
+func validate(state: GameState, tuning: TuningDef) -> CommandResult:
+    return CommandResult.success()
 
-func apply(state: GameState, ctx: TickContext) -> void:
+func apply(ctx: TickContext) -> void:
     pass
 ```
 
+- `CommandResult.success()` and `CommandResult.fail(reason_key)` build results. `apply` reads and writes state through `ctx.state`, draws RNG from `ctx.rng` and reads tuning from `ctx.tuning`.
 - `GameRunner.submit(cmd)` calls `validate`. On failure it emits `command_rejected(reason_key)`. The reason is a `tr()` key.
 - Commands in this slice: `StartProject`, `AssignStaff`, `SetFocus`, `SetCrunch`, `DelayRelease`, `AcceptContract`, `DeclineContract`, `RunMarketing`, `ReleaseGame`, `StartPatch`, `StartDLC`, `ReplyForum`, `HireStaff`, `FireStaff`, `ResolveDecision`.
 
 ### 5.2 EventBus signals
 
-`week_ticked`, `era_changed`, `money_changed`, `project_phase_changed`, `decision_required`, `review_published`, `sales_updated`, `staff_hired`, `staff_resigned`, `forum_post_created`, `command_rejected`.
+`week_ticked`, `era_changed`, `money_changed`, `project_phase_changed`, `project_changed`, `decision_required`, `review_published`, `sales_updated`, `staff_hired`, `staff_resigned`, `forum_post_created`, `command_rejected`.
 
 ## 6. Project lifecycle
 
@@ -344,7 +345,7 @@ Example result: "Gameplay is excellent, but performance is poor on handheld." Th
 ### 9.1 Save/load
 
 - `SaveService` writes `user://saves/slot_<n>.json` through `to_dict()` / `from_dict()` on `GameState` and each entity.
-- Each save has `schema_version`. On load, a migration chain upgrades older versions step by step.
+- Each save has `schema_version`. On load, a migration chain upgrades older versions step by step. The root `schema_version` is authoritative; the `schema_version` inside the state must match it, otherwise the save is invalid.
 - On load, the service checks every key and type before it builds the state. An invalid file gives an error message and does not change the current game.
 - Autosave at the start of each quarter, in a separate autosave slot.
 - Saves happen only at a tick boundary with the command queue empty, so no queued command is lost.
@@ -360,7 +361,7 @@ Example result: "Gameplay is excellent, but performance is poor on handheld." Th
 
 ### 9.2 Tests (GUT, headless)
 
-Command: `godot --headless -s addons/gut/gut_cmdln.gd`
+Command: `godot --headless -s addons/gut/gut_cmdln.gd -gexit`. Judge a run by its exit code, not only the summary text: a post-run hook fails the run when a test script cannot be loaded.
 
 - **Unit tests:** one test file per system and per command.
 - **Scenario tests:** a fixed seed plus a scripted list of commands, run for 520 weeks (the full 1980s). Assert:

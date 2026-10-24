@@ -23,6 +23,7 @@ Game-studio tycoon game. Godot 4.7.2, GDScript (static typing everywhere), GUT f
 7. Saves are JSON only via `to_dict()` / `from_dict()`. Never `ResourceSaver`/`ResourceLoader` for saves. Follow the JSON type rules in spec §9.1 (64-bit RNG values as strings, cast ints back, convert dictionary keys back, sorted keys).
 8. Tuning numbers live in `data/tuning.tres` (`TuningDef`), not in code.
 9. No `float` in `GameState` or entities. Ratios, multipliers and chances are `int` basis points with a `_bp` suffix (`Fixed.ONE_BP` = 10000 = 1.0). Simulation math uses `Fixed.mul_bp()` and `Fixed.roll_bp()`; no `pow`/`exp`/`log`/trig on simulation values in `src/core/` or `src/systems/`. Floats are allowed only in UI and real-time pacing (`seconds_per_week`).
+10. Any iteration that changes state, draws RNG or breaks a tie iterates `GameState.sorted_ids()` / `sorted_names()`, never raw Dictionary order.
 
 ## Layout
 

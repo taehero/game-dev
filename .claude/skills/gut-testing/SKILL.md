@@ -30,10 +30,12 @@ Project path has a leading space. Always quote it.
 cd "/Users/chanapols/Projects/ game-dev"
 godot --headless --import                                  # needed after a fresh checkout or a new class_name
 godot --headless -s addons/gut/gut_cmdln.gd -gexit         # all tests (uses .gutconfig.json)
-godot --headless -s addons/gut/gut_cmdln.gd -gexit -gtest=res://tests/unit/test_calendar_system.gd   # one file
+godot --headless -s addons/gut/gut_cmdln.gd -gexit -gselect=test_calendar_system   # only scripts whose name matches
 ```
 
-Judge a run by the exit code: the post-run hook fails the run if any test script failed to load, even though the summary may still say All tests passed.
+`-gselect` runs only matching scripts. `-gtest=...` merges with the `.gutconfig.json` dirs and still runs everything.
+
+Judge a run by the exit code: the post-run hook fails the run if any test script failed to load, even though the summary may still say All tests passed. The hook detects load failures from GUT's warning log, so `-glog=0` disables that detection.
 
 The exit code is non-zero when any test fails. Quote the GUT totals line in every report. If GUT reports "Could not find class" or a parse error for a `class_name`, run the import command and retry once before debugging.
 
