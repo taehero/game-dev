@@ -136,3 +136,32 @@ func test_refreshes_on_game_loaded() -> void:
 	GameRunner.session = GameSession.new(fresh, Fixtures.tuning())
 	EventBus.dispatch(&"game_loaded", {})
 	assert_eq(bar.get_node("%Title").text, "Loaded")
+
+
+func _assert_fits_640(locale: String) -> void:
+	TranslationServer.set_locale(locale)
+	var st: GameState = _st()
+	st.week = 520
+	st.companies[st.player_company_id].money = 1234567
+	var pid: int = Fixtures.add_project(st, {"title": "Moon Rally", "phase": Project.Phase.PRODUCTION, "stage_index": 2, "stage_progress": 9900, "bugs": 9999, "hype": 9999})
+	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
+		st.projects[pid].points[k] = 9999
+	var bar: StatusBar = _bar()
+	_refresh(bar)
+	assert_lte(bar.get_combined_minimum_size().x, 640.0, locale)
+
+
+func test_fits_640_px_in_thai() -> void:
+	_assert_fits_640("th")
+
+
+func test_fits_640_px_in_english() -> void:
+	_assert_fits_640("en")
+
+
+func test_speed_labels_refresh_on_translation_change() -> void:
+	var bar: StatusBar = _bar()
+	TranslationServer.set_locale("th")
+	bar.notification(NOTIFICATION_TRANSLATION_CHANGED)
+	assert_eq(bar.get_node("%Pause").text, tr("ui.hud.pause"))
+	assert_ne(bar.get_node("%Pause").text, "Pause")

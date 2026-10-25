@@ -15,19 +15,17 @@ const EVENT_SIGNALS: Array[StringName] = [
 
 func _ready() -> void:
 	custom_minimum_size.y = BAR_HEIGHT
-	for node_name: String in ["Title", "Date", "Money"]:
+	for node_name: String in ["Title", "Points", "Date", "Money"]:
 		var label: Label = get_node("%" + node_name)
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var title: Label = %Title
 	title.custom_minimum_size.x = TITLE_MIN_WIDTH
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	%Points.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	%Date.custom_minimum_size.x = DATE_MIN_WIDTH
 	%Money.custom_minimum_size.x = MONEY_MIN_WIDTH
-	%Pause.text = tr("ui.hud.pause")
-	%Speed1x.text = tr("ui.hud.speed").format({"speed": 1})
-	%Speed2x.text = tr("ui.hud.speed").format({"speed": 2})
-	%Speed4x.text = tr("ui.hud.speed").format({"speed": 4})
+	_translate_buttons()
 	%Pause.pressed.connect(_on_speed.bind(0))
 	%Speed1x.pressed.connect(_on_speed.bind(1))
 	%Speed2x.pressed.connect(_on_speed.bind(2))
@@ -36,6 +34,20 @@ func _ready() -> void:
 		var sig: Signal = Signal(EventBus, sig_name)
 		sig.connect(_on_event)
 	_on_event({})
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_translate_buttons()
+		if GameRunner.session != null:
+			refresh(GameRunner.session.state, GameRunner.session.tuning)
+
+
+func _translate_buttons() -> void:
+	%Pause.text = tr("ui.hud.pause")
+	%Speed1x.text = tr("ui.hud.speed").format({"speed": 1})
+	%Speed2x.text = tr("ui.hud.speed").format({"speed": 2})
+	%Speed4x.text = tr("ui.hud.speed").format({"speed": 4})
 
 
 func _exit_tree() -> void:
