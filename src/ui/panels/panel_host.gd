@@ -1,10 +1,12 @@
 class_name PanelHost
 extends Control
 
-const SLIDE_FROM: float = 316.0
+signal close_requested
+
+const SLIDE_FROM: float = 326.0
 const SLIDE_S: float = 0.15
-const REST_POS: Vector2 = Vector2(8, 40)
-const REST_SIZE: Vector2 = Vector2(624, 274)
+const REST_POS: Vector2 = Vector2(70, 34)
+const REST_SIZE: Vector2 = Vector2(500, 286)
 
 var _panels: Dictionary[StringName, Control] = {}
 var _current: StringName = &""
@@ -15,6 +17,10 @@ func _ready() -> void:
 	position = REST_POS
 	size = REST_SIZE
 	visible = false
+	var close_btn: Button = get_node("%Close") as Button
+	close_btn.icon = UiIcons.texture(&"close")
+	close_btn.tooltip_text = tr("ui.popup.close")
+	close_btn.pressed.connect(func() -> void: close_requested.emit())
 
 
 func _notification(what: int) -> void:
