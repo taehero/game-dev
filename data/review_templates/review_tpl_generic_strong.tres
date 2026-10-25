@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ReviewTemplateDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/review_template_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"review_tpl_generic_strong"
+dimension = &"generic"
+is_strength = true
+threshold_x10 = 0
+text_key = &"review.strong.generic"

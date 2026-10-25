@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ReviewOutletDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/review_outlet_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"outlet_byte_review"
+name_key = &"content.outlet.byte_review.name"
+weights_bp = Dictionary[StringName, int]({&"gameplay": 1500, &"tech": 2500, &"graphics": 500, &"audio": 500, &"story": 500, &"innovation": 1500, &"bugs": 1500, &"platform_fit": 1000, &"market_fit": 300, &"value": 200})
+bias_x10 = 0

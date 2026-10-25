@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ReviewOutletDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/review_outlet_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"outlet_arcade_ace"
+name_key = &"content.outlet.arcade_ace.name"
+weights_bp = Dictionary[StringName, int]({&"gameplay": 3000, &"tech": 500, &"graphics": 1500, &"audio": 1500, &"story": 300, &"innovation": 700, &"bugs": 500, &"platform_fit": 500, &"market_fit": 1000, &"value": 500})
+bias_x10 = 4

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ReviewOutletDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/review_outlet_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"outlet_joystick_weekly"
+name_key = &"content.outlet.joystick_weekly.name"
+weights_bp = Dictionary[StringName, int]({&"gameplay": 3500, &"tech": 500, &"graphics": 1000, &"audio": 1000, &"story": 500, &"innovation": 500, &"bugs": 1000, &"platform_fit": 1000, &"market_fit": 500, &"value": 500})
+bias_x10 = -3

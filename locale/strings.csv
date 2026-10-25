@@ -120,3 +120,49 @@ content.research.topics_scifi.name,Research: Sci-Fi Topics,วิจัย: ธ�
 content.research.topics_action.name,Research: Action Hero Topics,วิจัย: ธีมสงครามและซูเปอร์ฮีโร่
 content.engine.vector_kit.name,Vector Kit,เวกเตอร์คิต (Vector Kit)
 content.engine.sprite_works.name,Sprite Works,สไปรต์เวิร์กส์ (Sprite Works)
+content.outlet.pixel_press.name,Pixel Press,พิกเซลเพรส (Pixel Press)
+content.outlet.joystick_weekly.name,Joystick Weekly,จอยสติ๊กวีคลี่ (Joystick Weekly)
+content.outlet.byte_review.name,Byte Review,ไบต์รีวิว (Byte Review)
+content.outlet.arcade_ace.name,Arcade Ace,อาร์เคดเอซ (Arcade Ace)
+review.strong.gameplay.1,Hooked from the first minute. Hard to put down.,ติดมือตั้งแต่นาทีแรก วางไม่ลงเลย
+review.strong.gameplay.2,A true classic of play. Every second is fun.,เกมเพลย์ระดับตำนาน สนุกทุกวินาที
+review.weak.gameplay.1,The {genre} gameplay is a bit dull and repetitive.,เกมเพลย์แนว {genre} ค่อนข้างจืดและซ้ำซาก
+review.weak.gameplay.2,Not much fun to play. The core loop falls flat.,เล่นแล้วไม่สนุกเท่าไร ระบบหลักแป้กสนิท
+review.strong.tech.1,Smooth and solid. The engine is impressive.,ลื่นไหลและแน่นปึ้ก เอนจินน่าทึ่งมาก
+review.strong.tech.2,A technical showpiece that pushes {platform} to its limits.,โชว์พลังเทคนิคชั้นยอด รีดสเปก {platform} จนสุดขีด
+review.weak.tech.1,Sluggish on {platform}: the code cannot keep up.,อืดบน {platform} โค้ดตามไม่ทัน
+review.weak.tech.2,Technically a mess. It stutters and chokes constantly.,เทคนิคพังยับ กระตุกและค้างแทบตลอด
+review.strong.graphics.1,Lovely visuals with plenty of charm.,ภาพสวยน่ารัก เสน่ห์เต็มเปี่ยม
+review.strong.graphics.2,Stunning graphics. You will not believe it is {platform}.,กราฟิกสุดอลังการ ไม่อยากเชื่อว่าเป็น {platform}
+review.weak.graphics.1,The graphics look dated and plain.,กราฟิกดูเชยและธรรมดามาก
+review.weak.graphics.2,"Ugly, muddy and hard to read on screen.",ภาพขี้เหร่ มัว ดูไม่รู้เรื่อง
+review.strong.audio.1,A catchy tune that sticks in your head.,เพลงติดหู ฮัมตามได้ทั้งวัน
+review.strong.audio.2,"A soundtrack worth owning, with superb effects.",ซาวด์แทร็กระดับเก็บสะสม เสียงเอฟเฟกต์เยี่ยม
+review.weak.audio.1,The sound is thin and forgettable.,เสียงบางและไม่มีอะไรให้จำ
+review.weak.audio.2,Painful bleeps that make you mute the speaker.,เสียงบี๊บแสบหู ต้องปิดลำโพงกันเลย
+review.strong.story.1,A story with real heart and a few good twists.,เนื้อเรื่องมีหัวใจและหักมุมน่าสนใจ
+review.strong.story.2,A gripping tale that stays with you after the credits.,เรื่องราวชวนติดตาม ฝังใจแม้เกมจบแล้ว
+review.weak.story.1,The story is thin and goes nowhere.,เนื้อเรื่องบางเบาและไม่ไปไหน
+review.weak.story.2,"No plot to speak of, and the writing is dreadful.",แทบไม่มีพล็อต บทก็แย่สุด ๆ
+review.strong.innovation.1,A fresh idea in a crowded field.,ไอเดียสดใหม่ในตลาดที่แน่นไปด้วยเกมเดิม ๆ
+review.strong.innovation.2,Truly groundbreaking. Nothing else plays like it.,ล้ำหน้าจริง ไม่มีเกมไหนเล่นแบบนี้มาก่อน
+review.weak.innovation.1,Another {genre} game we have seen before.,เกม {genre} แบบที่เคยเห็นมาแล้ว
+review.weak.innovation.2,A shameless copy with no ideas of its own.,ลอกชัด ๆ ไม่มีไอเดียเป็นของตัวเองเลย
+review.strong.bugs.1,Polished and stable. We hit no real bugs.,เนี้ยบและเสถียร ไม่เจอ Bug จริงจังเลย
+review.strong.bugs.2,Rock solid. Flawless from start to finish.,แน่นเปรี๊ยะ ไร้ที่ติตั้งแต่ต้นจนจบ
+review.weak.bugs.1,A few annoying bugs spoil the fun.,มี Bug กวนใจหลายจุด ทำเสียอรรถรส
+review.weak.bugs.2,Riddled with bugs. It crashed on us again and again.,Bug เพียบ เกมแครชใส่เราซ้ำแล้วซ้ำเล่า
+review.strong.platform_fit.1,Makes good use of what {platform} can do.,ใช้ความสามารถของ {platform} ได้ดี
+review.strong.platform_fit.2,Born for {platform}. It feels made for the machine.,เกิดมาเพื่อ {platform} เข้ากับเครื่องเหมือนทำมาเฉพาะ
+review.weak.platform_fit.1,Feels awkward on {platform}.,เล่นบน {platform} แล้วรู้สึกขัด ๆ
+review.weak.platform_fit.2,A poor fit for {platform}. It fights the hardware.,ไม่เข้ากับ {platform} เลย ฝืนฮาร์ดแวร์สุด ๆ
+review.strong.market_fit.1,Just what {genre} fans were waiting for.,ตรงใจแฟนเกม {genre} ที่รออยู่พอดี
+review.strong.market_fit.2,Perfect timing. The whole market wants this.,จังหวะเป๊ะ ตลาดทั้งตลาดต้องการเกมนี้
+review.weak.market_fit.1,Hard to see who this is for.,มองไม่ออกว่าทำมาเพื่อใคร
+review.weak.market_fit.2,Nobody is asking for this. Terrible timing.,ไม่มีใครอยากได้เกมแบบนี้ จังหวะแย่มาก
+review.strong.value.1,Good value for the price.,คุ้มค่าเกินราคา
+review.strong.value.2,A bargain. Hours and hours of play.,คุ้มสุด ๆ เล่นได้เป็นชั่วโมง ๆ
+review.weak.value.1,Over before you know it. Hard to justify the price.,จบเร็วจนตั้งตัวไม่ทัน ราคานี้ไม่คุ้ม
+review.weak.value.2,A rip-off. Save your money.,โดนหลอกชัด ๆ เก็บเงินไว้ดีกว่า
+review.strong.generic,A solid effort overall.,โดยรวมทำออกมาได้ดีทีเดียว
+review.weak.generic,Nothing here really stands out.,โดยรวมไม่มีอะไรโดดเด่น

@@ -41,3 +41,23 @@ func test_m2a_genres_topics_research() -> void:
 	assert_eq(open_topics.size(), 14)
 	for id: StringName in GameState.sorted_names(db.genres):
 		assert_ne(tr(db.genres[id].name_key), String(db.genres[id].name_key))
+
+
+func test_m2a_outlets_and_templates() -> void:
+	var db := ContentDB.load_dir()
+	assert_eq(db.outlets.size(), 4)
+	for dim: StringName in ReviewOutletDef.DIMENSIONS:
+		var strong := 0
+		var weak := 0
+		for id: StringName in GameState.sorted_names(db.review_templates):
+			var t: ReviewTemplateDef = db.review_templates[id]
+			if t.dimension == dim:
+				if t.is_strength:
+					strong += 1
+				else:
+					weak += 1
+		assert_gte(strong, 2, String(dim))
+		assert_gte(weak, 2, String(dim))
+	for id: StringName in GameState.sorted_names(db.review_templates):
+		var key: StringName = db.review_templates[id].text_key
+		assert_ne(tr(key), String(key), String(key))

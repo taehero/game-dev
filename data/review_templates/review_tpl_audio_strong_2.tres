@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ReviewTemplateDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/review_template_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"review_tpl_audio_strong_2"
+dimension = &"audio"
+is_strength = true
+threshold_x10 = 85
+text_key = &"review.strong.audio.2"
