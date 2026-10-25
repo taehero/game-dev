@@ -19,6 +19,16 @@ run/main_scene="res://src/ui/main.tscn"
 EventBus="*res://src/core/event_bus.gd"
 GameRunner="*res://src/core/game_runner.gd"
 
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/stretch/scale_mode="integer"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
@@ -29,5 +39,7 @@ locale/translations=PackedStringArray("res://locale/strings.en.translation", "re
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
+2d/snap/snap_2d_transforms_to_pixel=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
