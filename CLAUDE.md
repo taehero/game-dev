@@ -44,7 +44,21 @@ Main session is the manager. Dispatch:
 
 - `gd-implementer` (sonnet): one plan task, TDD, one commit.
 - `gd-content-author` (sonnet): `.tres` content and EN/TH strings.
-- `gd-reviewer` (opus): read-only review of a task or branch against spec and plan.
+- `gd-reviewer` (opus by default; pass `model: sonnet` except where Token budget says opus): read-only review of a task or branch against spec and plan.
 - `gd-architect` (opus): design questions, BLOCKED/NEEDS_DESIGN tasks, hard debugging, fix rounds 4+.
 
 Subagents cannot spawn subagents. A sonnet agent that needs deeper design reports `NEEDS_DESIGN` and stops; the manager dispatches `gd-architect`.
+
+## Token budget
+
+- Manager does not write game code itself. Dispatch `gd-implementer` / `gd-content-author` (sonnet) for implementation.
+- In a dispatch prompt, give the task text and only the spec sections it needs (by § number). Do not tell the agent to read the whole spec.
+- Use `Explore` for searches across many files. Read files in the main session only when the target is known, and read only the needed line range.
+- Run independent plan tasks in parallel, but **at most 2–3 agents at once** so a burst does not hit the 5-hour session limit.
+- Keep tool output short: filter test output to failures, use `tail`/`grep`, no full logs.
+- **Opus only where it pays:** plans, the final whole-branch review, and task reviews of money, owner, save/load and determinism code. Every other task review uses `gd-reviewer` with `model: sonnet`.
+- **Haiku for mechanical work:** content `.tres`, EN/TH strings and simple test-only tasks may use `model: haiku`.
+- **Batch small same-shape tasks** (content, strings, one-line fixes across files) into one agent instead of one agent each.
+- **One fresh agent per task**; do not keep one agent running across many tasks (its context grows and every turn re-sends it).
+- **Skip the scoped re-review** when a fix round changes only a few lines; the manager checks that diff itself.
+- Agents write full reports to files and return only status, commit, test totals and concerns.
