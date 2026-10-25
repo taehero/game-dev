@@ -43,19 +43,23 @@ func test_regexes_allow_known_good_strings() -> void:
 	assert_false(RuleScan.matches(RuleScan.FLOAT_LITERAL, "var v := a1.5x"))
 	assert_false(RuleScan.matches(RuleScan.FLOAT_LITERAL, "var n := 15"))
 
+func test_entity_erase_regex() -> void:
+	assert_true(RuleScan.matches(RuleScan.ENTITY_ERASE, "state.staff.erase(id)"))
+	assert_false(RuleScan.matches(RuleScan.ENTITY_ERASE, "d.erase(\"name\")"))
+
 func test_comment_stripping() -> void:
 	assert_eq(RuleScan.strip_comment("var a := 1  # float here"), "var a := 1  ")
 	assert_eq(RuleScan.strip_comment("## float docs"), "")
 	assert_eq(RuleScan.strip_comment("var s := \"a # b\" # c"), "var s := \"a # b\" ")
 
-func _assert_clean(paths: Array[String], pattern: String, rule: String) -> void:
-	var report := RuleScan.scan(paths, pattern)
+func _assert_clean(paths: Array[String], pattern: String, rule: String, exclude: Array[String] = []) -> void:
+	var report := RuleScan.scan(paths, pattern, exclude)
 	var hits: Array[String] = report["hits"]
 	assert_eq(hits.size(), 0, "%s violated:\n%s" % [rule, "\n".join(hits)])
 	# A scan that read nothing proves nothing: every root that exists must yield files.
 	for root: String in paths:
 		if RuleScan.root_exists(root):
-			var one := RuleScan.scan([root] as Array[String], pattern)
+			var one := RuleScan.scan([root] as Array[String], pattern, exclude)
 			assert_gt(int(one["files"]), 0, "%s: no .gd files read under %s" % [rule, root])
 
 func test_scan_roots_contain_gd_files() -> void:
@@ -88,9 +92,13 @@ func test_no_float_math_in_core_and_systems() -> void:
 func test_no_direct_state_writes_in_ui() -> void:
 	_assert_clean(["res://src/ui"], RuleScan.STATE_WRITE, "direct state write in UI")
 
+func test_entity_removal_only_in_removal_gd() -> void:
+	_assert_clean(["res://src"], RuleScan.ENTITY_ERASE, "entity erase outside removal.gd", ["res://src/core/removal.gd"])
+
 class RuleScan:
 	const GLOBAL_RNG := "(?<![\\w.])(randi|randf|randomize|randi_range|randf_range)\\s*\\("
 	const RESOURCE_IO := "ResourceSaver|ResourceLoader"
+	const ENTITY_ERASE := "\\bstate\\.(staff|equipment|contracts|loans|projects)\\.erase\\s*\\("
 	const FLOAT_WORD := "\\bfloat\\b"
 	const GLOBAL_RNG_EXTRA := "(?<![\\w.])(randfn|seed)\\s*\\(|\\.(shuffle|pick_random)\\s*\\("
 	const FLOAT_LITERAL := "(?<![\\w.])\\d+\\.\\d"
@@ -144,12 +152,14 @@ class RuleScan:
 
 	## Returns {"hits": Array[String] of "path:line: text" for every code line (comments
 	## stripped) matching pattern, "files": number of .gd files actually read}.
-	static func scan(paths: Array[String], pattern: String) -> Dictionary:
+	static func scan(paths: Array[String], pattern: String, exclude: Array[String] = []) -> Dictionary:
 		var hits: Array[String] = []
 		var files_read: int = 0
 		var re := RegEx.create_from_string(pattern)
 		for root: String in paths:
 			for f: String in gd_files(root):
+				if exclude.has(f):
+					continue
 				var fa := FileAccess.open(f, FileAccess.READ)
 				if fa == null:
 					continue
