@@ -45,8 +45,6 @@ custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 flat = true
 expand_icon = true
-theme_override_colors/icon_normal_color = Color(0.42, 0.45, 0.5, 1)
-theme_override_colors/icon_hover_color = Color(0.12, 0.16, 0.22, 1)
 
 [node name="Body" type="VBoxContainer" parent="Card/Layout"]
 unique_name_in_owner = true

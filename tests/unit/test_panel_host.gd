@@ -59,3 +59,13 @@ func test_close_button_requests_close() -> void:
 	watch_signals(host)
 	(host.get_node("%Close") as Button).pressed.emit()
 	assert_signal_emitted(host, "close_requested")
+
+
+func test_repeated_open_close_keeps_exact_size() -> void:
+	var host: PanelHost = _host()
+	for i: int in 30:
+		host.show_tab(&"team")
+		await wait_seconds(PanelHost.SLIDE_S + 0.05)
+		assert_eq(host.size, PanelHost.REST_SIZE)
+		host.hide_panel()
+		assert_eq(host.size, PanelHost.REST_SIZE)

@@ -18,14 +18,16 @@ func _ready() -> void:
 	size = REST_SIZE
 	visible = false
 	var close_btn: Button = get_node("%Close") as Button
-	close_btn.icon = UiIcons.texture(&"close")
+	UiIcons.style_close_button(close_btn)
 	close_btn.tooltip_text = tr("ui.popup.close")
 	close_btn.pressed.connect(func() -> void: close_requested.emit())
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSLATION_CHANGED and _current != &"" and is_node_ready():
-		(get_node("%PanelTitle") as Label).text = tr("ui.tab.%s" % _current)
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		(get_node("%Close") as Button).tooltip_text = tr("ui.popup.close")
+		if _current != &"":
+			(get_node("%PanelTitle") as Label).text = tr("ui.tab.%s" % _current)
 
 
 func set_panel(tab: StringName, panel: Control) -> void:
@@ -46,8 +48,10 @@ func show_tab(tab: StringName) -> void:
 	if _tween != null:
 		_tween.kill()
 	position = Vector2(REST_POS.x, SLIDE_FROM)
+	size = REST_SIZE
 	_tween = create_tween()
 	_tween.tween_property(self, "position:y", REST_POS.y, SLIDE_S)
+	_tween.tween_callback(_snap_to_rest)
 
 
 func hide_panel() -> void:
@@ -55,10 +59,15 @@ func hide_panel() -> void:
 		_tween.kill()
 	_current = &""
 	visible = false
-	position = REST_POS
+	_snap_to_rest()
 	for key: StringName in _panels:
 		_panels[key].visible = false
 
 
 func current_tab() -> StringName:
 	return _current
+
+
+func _snap_to_rest() -> void:
+	position = REST_POS
+	size = REST_SIZE

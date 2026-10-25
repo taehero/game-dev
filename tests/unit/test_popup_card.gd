@@ -29,6 +29,7 @@ func test_backdrop_blocks_input() -> void:
 	var popup: PopupCard = _popup()[1]
 	await wait_frames(1)
 	var backdrop: ColorRect = popup.get_node("Backdrop")
+	assert_eq(backdrop.color, UiPalette.BACKDROP)
 	assert_eq(backdrop.mouse_filter, Control.MOUSE_FILTER_STOP)
 	assert_eq(backdrop.get_global_rect(), Rect2(0, 0, 640, 360))
 
@@ -55,3 +56,23 @@ func test_not_closable_hides_close() -> void:
 func test_body_is_vbox() -> void:
 	var popup: PopupCard = _popup()[1]
 	assert_true(popup.body() is VBoxContainer)
+
+
+func test_open_before_add_child_is_centred() -> void:
+	var screen: Control = Control.new()
+	screen.size = Vector2(640, 360)
+	add_child_autofree(screen)
+	var popup: PopupCard = POPUP_SCENE.instantiate()
+	popup.open("T")
+	screen.add_child(popup)
+	popup.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	await wait_frames(2)
+	var c: Vector2 = (popup.get_node("%Card") as Control).get_global_rect().get_center()
+	assert_almost_eq(c.x, 320.0, 1.5)
+	assert_almost_eq(c.y, 180.0, 1.5)
+
+
+func test_closable_setter_updates_visibility() -> void:
+	var popup: PopupCard = _popup()[1]
+	popup.closable = false
+	assert_false((popup.get_node("%Close") as Button).visible)

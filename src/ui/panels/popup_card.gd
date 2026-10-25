@@ -5,7 +5,11 @@ extends Control
 signal closed
 
 @export var card_size: Vector2 = Vector2(400, 200)
-@export var closable: bool = true
+@export var closable: bool = true:
+	set(value):
+		closable = value
+		if is_node_ready():
+			(get_node("%Close") as Button).visible = value
 
 
 func _ready() -> void:
@@ -13,11 +17,17 @@ func _ready() -> void:
 	backdrop.color = UiPalette.BACKDROP
 	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
 	var close_btn: Button = get_node("%Close") as Button
-	close_btn.icon = UiIcons.texture(&"close")
+	UiIcons.style_close_button(close_btn)
 	close_btn.tooltip_text = tr("ui.popup.close")
 	close_btn.visible = closable
 	close_btn.pressed.connect(close)
 	resized.connect(_centre)
+	_centre()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		(get_node("%Close") as Button).tooltip_text = tr("ui.popup.close")
 
 
 func open(title: String) -> void:
