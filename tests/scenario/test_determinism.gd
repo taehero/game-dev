@@ -11,7 +11,7 @@ func test_different_seed_different_hash() -> void:
 			Scenario.run(Fixtures.new_state(8), Scenario.SCRIPT_BASIC, 520))
 
 
-## 0, 10 and 300 are command weeks, 13 is a quarter start, 260 is mid-run.
+## SCRIPT_BASIC has one hire at week 0. Save points: 0 (hire week), 10 and 300 (arbitrary), 13 (quarter start), 260 (mid-run).
 func test_save_load_continue_matches_uninterrupted_at_many_points() -> void:
 	var full: String = Scenario.run(Fixtures.new_state(7), Scenario.SCRIPT_BASIC, 520)
 	for save_week: int in [0, 10, 13, 260, 300]:
@@ -33,9 +33,8 @@ func test_values_stay_in_range() -> void:
 	assert_true(s.staff_of(s.player_company_id).size() <= tuning.max_staff_default)
 	for id: int in s.sorted_ids(s.staff):
 		var st: Staff = s.staff[id]
-		if st.is_owner:
-			continue
-		for skill: StringName in st.skills:
-			assert_between(st.skills[skill], tuning.hire_skill_min, tuning.hire_skill_max)
+		if not st.is_owner:
+			for skill: StringName in st.skills:
+				assert_between(st.skills[skill], tuning.hire_skill_min, tuning.hire_skill_max)
 		assert_between(st.morale, 0, 100)
 		assert_between(st.burnout, 0, 100)

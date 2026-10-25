@@ -421,3 +421,16 @@ func test_m2_state_round_trip_preserves_hash() -> void:
 	var d := Fixtures.json_round_trip(s.to_dict())
 	assert_true(GameState.validate_dict(d))
 	assert_eq(StateHash.of(GameState.from_dict(d)), StateHash.of(s))
+
+
+func test_add_worker_seat_override_shares_seat_with_equipment() -> void:
+	var s := Fixtures.new_state(1)
+	var id := Fixtures.add_worker(s, {"seat_index": 3})
+	assert_eq(s.staff[id].seat_index, 3)
+	var found: bool = false
+	for eid: int in s.equipment:
+		if s.equipment[eid].seat_index == 3:
+			found = true
+	assert_true(found)
+	var next := Fixtures.add_worker(s)
+	assert_eq(s.staff[next].seat_index, 1)

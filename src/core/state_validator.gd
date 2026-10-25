@@ -51,6 +51,12 @@ static func validate(d: Variant) -> bool:
 		return false
 	if not SaveSchema.check(s["owner"], OwnerProfile.SCHEMA):
 		return false
+	var owner_d: Dictionary = s["owner"]
+	if not _whole_values(owner_d["perks"]):
+		return false
+	var focus_dev: int = int(owner_d["focus_dev_bp"])
+	if focus_dev < 0 or focus_dev > 10000:
+		return false
 	var equipment_ids: Dictionary[int, bool] = {}
 	if not _entities(s["equipment"], Equipment.SCHEMA, used, equipment_ids, _equipment_ok):
 		return false

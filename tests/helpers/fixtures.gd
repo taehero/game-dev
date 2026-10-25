@@ -63,13 +63,18 @@ static func add_worker(state: GameState, overrides: Dictionary = {}) -> int:
 	var used: Dictionary = {}
 	for sid: int in state.staff_of(state.player_company_id):
 		used[state.staff[sid].seat_index] = true
+	for eid: int in state.sorted_ids(state.equipment):
+		if state.equipment[eid].company_id == state.player_company_id:
+			used[state.equipment[eid].seat_index] = true
 	var seat: int = 0
 	while used.has(seat):
 		seat += 1
-	var id: int = add_staff(state, {"seat_index": seat})
+	if overrides.has("seat_index"):
+		seat = int(overrides["seat_index"])
+	var staff_overrides: Dictionary = overrides.duplicate()
+	staff_overrides["seat_index"] = seat
+	var id: int = add_staff(state, staff_overrides)
 	add_equipment(state, {"seat_index": seat})
-	for k: Variant in overrides:
-		_apply(state.staff[id], String(k), overrides[k])
 	return id
 
 

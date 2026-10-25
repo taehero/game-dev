@@ -160,3 +160,15 @@ func test_rejects_equipment_of_unknown_company() -> void:
 	var d := Fixtures.json_round_trip(s.to_dict())
 	d["equipment"][str(eid)]["company_id"] = 999
 	assert_false(GameState.validate_dict(d))
+
+
+func test_rejects_fractional_owner_perk() -> void:
+	var d := Fixtures.json_round_trip(Fixtures.new_state(5).to_dict())
+	d["owner"]["perks"] = {"x": 1.5}
+	assert_false(GameState.validate_dict(d))
+
+
+func test_rejects_owner_focus_dev_out_of_range() -> void:
+	var d := Fixtures.json_round_trip(Fixtures.new_state(5).to_dict())
+	d["owner"]["focus_dev_bp"] = 10001
+	assert_false(GameState.validate_dict(d))
