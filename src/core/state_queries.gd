@@ -108,3 +108,23 @@ static func seat_views(state: GameState, office: OfficeDef, equipment_defs: Dict
 		if view.staff_id != -1 and view.computer_tier > 0:
 			view.pose = staff_pose(state, view.staff_id, t)
 	return views
+
+
+## Spec 6.6: label for a topic and genre pairing from the company's best released result.
+static func combo_label_key(state: GameState, company_id: int, topic_id: StringName, genre_id: StringName, t: TuningDef) -> StringName:
+	var best: int = -1
+	for pid: int in state.sorted_ids(state.projects):
+		var p: Project = state.projects[pid]
+		if p.company_id != company_id or p.kind != Project.Kind.GAME or p.phase < Project.Phase.RELEASED:
+			continue
+		if p.config.get(&"topic", &"") == topic_id and p.config.get(&"genre", &"") == genre_id:
+			best = maxi(best, p.user_score)
+	if best < 0:
+		return &"ui.combo.unknown"
+	if best >= t.combo_great_x10:
+		return &"ui.combo.great"
+	if best >= t.combo_good_x10:
+		return &"ui.combo.good"
+	if best >= t.combo_okay_x10:
+		return &"ui.combo.okay"
+	return &"ui.combo.bad"
