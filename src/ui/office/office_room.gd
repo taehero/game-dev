@@ -15,7 +15,7 @@ const DECOR: Dictionary[StringName, Dictionary] = {
 		Vector2i(4, 5): &"rug", Vector2i(10, 6): &"cone",
 	},
 	&"small_office": {
-		Vector2i(13, 0): &"window", Vector2i(15, 0): &"window", Vector2i(1, 0): &"picture",
+		Vector2i(11, 0): &"window", Vector2i(14, 0): &"window", Vector2i(1, 0): &"picture",
 		Vector2i(1, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(14, 2): &"shelf",
 		Vector2i(11, 5): &"rug",
 	},

@@ -62,7 +62,7 @@ const PROP_SIZES: Dictionary[StringName, Vector2i] = {
 	&"shelf": Vector2i(2, 1),
 	&"rug": Vector2i(3, 2),
 	&"picture": Vector2i(2, 1),
-	&"window": Vector2i(2, 2),
+	&"window": Vector2i(3, 2),
 }
 const EMOTES: Dictionary[StringName, Vector3i] = {
 	&"design": Vector3i(Sheet.EMOTES, 7, 2),

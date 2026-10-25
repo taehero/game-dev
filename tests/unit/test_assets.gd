@@ -55,6 +55,7 @@ func test_tileset_sources_match_sheets() -> void:
 		var src := ts.get_source(sheet) as TileSetAtlasSource
 		assert_not_null(src)
 		assert_eq(src.separation, OfficeArt.SEPARATIONS[sheet])
+		assert_eq(src.texture.resource_path, OfficeArt.SHEET_PATHS[sheet])
 	var refs: Array[Vector3i] = []
 	refs.append_array(OfficeArt.FLOORS.values())
 	refs.append_array(OfficeArt.WALL_UPPER)

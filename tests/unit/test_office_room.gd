@@ -52,6 +52,7 @@ func test_walls_paint_brick_rows_and_wall_tops() -> void:
 	assert_eq(walls.get_cell_atlas_coords(Vector2i(1, 0)), Vector2i(10, 6))
 	assert_eq(walls.get_cell_atlas_coords(Vector2i(0, 1)), Vector2i(9, 8))
 	assert_eq(_atlas(walls, Vector2i(0, 3)), OfficeArt.WALL_TOP)
+	assert_eq(_atlas(walls, Vector2i(11, 3)), OfficeArt.WALL_TOP)
 	assert_eq(_atlas(walls, Vector2i(5, 7)), OfficeArt.WALL_TOP)
 
 func test_ground_rings_the_room() -> void:
