@@ -33,7 +33,9 @@ func submit(cmd: Command) -> CommandResult:
 		return result
 	if speed == 0:
 		var ctx := TickContext.new(state, tuning)
+		var snapshot: int = state.next_id
 		cmd.apply(ctx)
+		_emit_if_new_decision(ctx, snapshot)
 		_events.append_array(ctx.events)
 	else:
 		_queue.append(cmd)
@@ -61,7 +63,7 @@ func advance(delta: float) -> int:
 
 func step_once() -> void:
 	var ctx := TickContext.new(state, tuning)
-	var decisions_before: int = state.pending_decisions.size()
+	var snapshot: int = state.next_id
 	var queued: Array[Command] = _queue
 	_queue = []
 	for cmd: Command in queued:
@@ -71,13 +73,27 @@ func step_once() -> void:
 		else:
 			ctx.emit(&"command_rejected", {"reason_key": result.reason_key})
 	Simulation.step(ctx)
-	if state.pending_decisions.size() > decisions_before:
+	if _emit_if_new_decision(ctx, snapshot):
 		speed = 0
-		var newest: Decision = state.pending_decisions[state.pending_decisions.size() - 1]
-		ctx.emit(&"decision_required", {"decision_id": newest.id})
 	if Calendar.is_quarter_start(state.week, tuning):
 		autosave_due = true
 	_events.append_array(ctx.events)
+
+
+## Spec 4.9: a decision is new when its id was allocated after the snapshot.
+func _emit_if_new_decision(ctx: TickContext, snapshot: int) -> bool:
+	var newest: int = -1
+	for d: Decision in state.pending_decisions:
+		if d.id >= snapshot and d.id > newest:
+			newest = d.id
+	if newest < 0:
+		return false
+	ctx.emit(&"decision_required", {"decision_id": newest})
+	return true
+
+
+func push_event(event_name: StringName, payload: Dictionary) -> void:
+	_events.append({"name": event_name, "payload": payload})
 
 
 func drain_events() -> Array[Dictionary]:

@@ -6,6 +6,7 @@ var _dir: String = ""
 
 func before_each() -> void:
 	_dir = "user://test_runner_saves_%d" % Time.get_ticks_usec()
+	Fixtures.new_state(0)
 	GameRunner.save_dir = _dir
 	GameRunner.session = null
 
@@ -88,3 +89,26 @@ func test_autosave_deferred_while_commands_queued() -> void:
 	GameRunner._process(0.0)
 	assert_true(GameRunner.session.autosave_due)
 	assert_false(FileAccess.file_exists(_dir.path_join("autosave.json")))
+
+
+func test_load_refuses_save_with_unknown_content_id() -> void:
+	Fixtures.new_state(0)
+	GameRunner.start_new_game(3, "T")
+	GameRunner.session.state.companies[GameRunner.session.state.player_company_id].office_id = &"office_gone"
+	GameRunner.save_game("slot_1")
+	GameRunner.start_new_game(4, "T2")
+	var before: String = StateHash.of(GameRunner.session.state)
+	var r: LoadResult = GameRunner.load_game("slot_1")
+	assert_false(r.ok)
+	assert_eq(r.error_key, &"error.save_content_missing")
+	assert_eq(StateHash.of(GameRunner.session.state), before)
+
+
+func test_successful_load_emits_game_loaded() -> void:
+	Fixtures.new_state(0)
+	GameRunner.start_new_game(3, "T")
+	GameRunner.save_game("slot_1")
+	watch_signals(EventBus)
+	GameRunner.load_game("slot_1")
+	GameRunner._process(0.0)
+	assert_signal_emitted(EventBus, "game_loaded")

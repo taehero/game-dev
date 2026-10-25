@@ -148,6 +148,60 @@ func is_unlocked(done: Array[StringName], item_id: StringName) -> bool:
 	return false
 
 
+## One message per content id in the state that this DB does not know.
+func missing_refs(state: GameState) -> Array[String]:
+	var out: Array[String] = []
+	for cid: int in state.sorted_ids(state.companies):
+		var c: Company = state.companies[cid]
+		if c.office_id != &"" and not offices.has(c.office_id):
+			out.append("company %d: unknown office %s" % [cid, c.office_id])
+		for r: StringName in c.unlocked:
+			if not research.has(r):
+				out.append("company %d: unknown research %s" % [cid, r])
+		for p: StringName in c.dev_kits:
+			if not platforms.has(p):
+				out.append("company %d: unknown platform %s" % [cid, p])
+	for eid: int in state.sorted_ids(state.equipment):
+		var e: Equipment = state.equipment[eid]
+		if not equipment.has(e.def_id):
+			out.append("equipment %d: unknown def %s" % [eid, e.def_id])
+		_check_seat(out, state, "equipment", eid, e.company_id, e.seat_index)
+	for sid: int in state.sorted_ids(state.staff):
+		var st: Staff = state.staff[sid]
+		_check_seat(out, state, "staff", sid, st.company_id, st.seat_index)
+	for pid: int in state.sorted_ids(state.projects):
+		var pr: Project = state.projects[pid]
+		if pr.size_id != &"" and not sizes.has(pr.size_id):
+			out.append("project %d: unknown size %s" % [pid, pr.size_id])
+		var lookups: Array = [[&"platform", platforms], [&"genre", genres], [&"topic", topics],
+			[&"engine", licensed_engines]]
+		for pair: Array in lookups:
+			var key: StringName = pair[0]
+			var table: Dictionary = pair[1]
+			var v: StringName = pr.config.get(key, &"")
+			if v != &"" and not table.has(v):
+				out.append("project %d: unknown %s %s" % [pid, key, v])
+		for f: StringName in pr.features:
+			if not engine_features.has(f):
+				out.append("project %d: unknown feature %s" % [pid, f])
+		for rr: ReviewResult in pr.review_results:
+			if not outlets.has(rr.outlet_id):
+				out.append("project %d: unknown outlet %s" % [pid, rr.outlet_id])
+	for gid: int in state.sorted_ids(state.engines):
+		for f: StringName in state.engines[gid].features:
+			if not engine_features.has(f):
+				out.append("engine %d: unknown feature %s" % [gid, f])
+	return out
+
+
+func _check_seat(out: Array[String], state: GameState, what: String, id: int, company_id: int, seat: int) -> void:
+	if seat < 0 or not state.companies.has(company_id):
+		return
+	var office_id: StringName = state.companies[company_id].office_id
+	if office_id != &"" and offices.has(office_id) and seat >= offices[office_id].seats:
+		out.append("%s %d: seat %d beyond office %s" % [what, id, seat, office_id])
+
+
 func validate() -> Array[String]:
 	var errs: Array[String] = []
 	for id: StringName in GameState.sorted_names(research):

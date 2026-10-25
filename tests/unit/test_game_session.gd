@@ -87,3 +87,32 @@ func test_drain_events_clears() -> void:
 	g.submit(HireStaffCommand.new(999, "X", 800))
 	assert_eq(g.drain_events().size(), 1)
 	assert_eq(g.drain_events().size(), 0)
+
+
+class SwapDecisionCommand extends Command:
+	func apply(ctx: TickContext) -> void:
+		ctx.state.pending_decisions.remove_at(0)
+		var d := Decision.new()
+		d.id = ctx.state.alloc_id()
+		d.kind = &"test"
+		ctx.state.pending_decisions.append(d)
+
+
+func test_decision_swap_in_one_step_still_pauses() -> void:
+	var g := _session()
+	var old := Decision.new()
+	old.id = g.state.alloc_id()
+	g.state.pending_decisions.append(old)
+	g.set_speed(1)
+	g.submit(SwapDecisionCommand.new())
+	g.advance(8.0)
+	assert_eq(g.speed, 0)
+	var ev: Array = g.drain_events().filter(func(e: Dictionary) -> bool: return e["name"] == &"decision_required")
+	assert_eq(ev[0]["payload"]["decision_id"], g.state.pending_decisions[0].id)
+
+
+func test_paused_command_adding_decision_emits_decision_required() -> void:
+	var g := _session()
+	g.submit(AddDecisionCommand.new())
+	var names: Array = g.drain_events().map(func(e: Dictionary) -> StringName: return e["name"])
+	assert_has(names, &"decision_required")

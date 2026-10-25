@@ -54,3 +54,11 @@ func test_fixture_pinned_values() -> void:
 	assert_null(db.level_def(9))
 	assert_eq(db.locking_research(&"topic_fx_ghost"), [&"research_fx_adventure"] as Array[StringName])
 	assert_eq(db.review_templates.size(), 22)
+
+
+func test_missing_refs_lists_unknown_equipment_def() -> void:
+	var s: GameState = Fixtures.new_state(1)
+	assert_eq(Fixtures.content().missing_refs(s), [] as Array[String])
+	var eq_id: int = Fixtures.add_equipment(s, {"def_id": &"equipment_gone"})
+	assert_eq(s.equipment[eq_id].def_id, &"equipment_gone")
+	assert_eq(Fixtures.content().missing_refs(s).size(), 1)

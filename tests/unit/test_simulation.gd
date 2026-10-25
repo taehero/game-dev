@@ -1,9 +1,10 @@
 extends GutTest
 
 
-func test_system_order_matches_spec() -> void:
-	assert_eq(Simulation.SYSTEMS, [CalendarSystem, WorldEventSystem, MarketSystem, StaffSystem,
-		ProductionSystem, MarketingSystem, SalesSystem, LiveOpsSystem, FinanceSystem])
+func test_system_order_matches_m2_spec() -> void:
+	assert_eq(Simulation.SYSTEMS, [CalendarSystem, WorldEventSystem, MarketSystem, PlatformSystem, StaffSystem,
+		OwnerSystem, ResearchSystem, ProductionSystem, ContractsSystem, MarketingSystem, SalesSystem,
+		LiveOpsSystem, AwardsSystem, FinanceSystem, HiringSystem])
 
 
 func test_step_advances_week_and_emits_week_ticked_first() -> void:

@@ -29,9 +29,12 @@ func load_game(slot: String) -> LoadResult:
 	var r: LoadResult = SaveService.load_from_slot(slot, save_dir)
 	if not r.ok:
 		return r
+	if not ContentDB.active().missing_refs(r.state).is_empty():
+		return LoadResult.failure(&"error.save_content_missing")
 	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(r.state, tuning)
 	session.set_speed(0)
+	session.push_event(&"game_loaded", {})
 	return r
 
 
