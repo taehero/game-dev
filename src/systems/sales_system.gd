@@ -66,12 +66,12 @@ static func tick(ctx: TickContext) -> void:
 		if first:
 			units = launch_units(state, content, t, p)
 			p.phase = Project.Phase.LIVE
-			ctx.emit(&"project_phase_changed", {"project_id": pid, "phase": p.phase})
+			ctx.emit(&"project_phase_changed", {"project_id": pid, "phase": "LIVE"})
 		else:
 			units = Fixed.mul_bp(p.weekly_units.back(), decay_bp(content, t, p, state.week))
 		if units < t.sales_floor_units:
 			p.phase = Project.Phase.RETIRED
-			ctx.emit(&"project_phase_changed", {"project_id": pid, "phase": p.phase})
+			ctx.emit(&"project_phase_changed", {"project_id": pid, "phase": "RETIRED"})
 			continue
 		p.weekly_units.append(units)
 		while p.weekly_units.size() > Project.WEEKLY_UNITS_CAP:
@@ -84,12 +84,14 @@ static func tick(ctx: TickContext) -> void:
 			if c.kind == Contract.Kind.PUBLISHING:
 				pub = gross * c.revenue_share_pct / 100
 				if pub != 0 and state.companies.has(c.party_b):
-					state.companies[c.party_b].money += pub
+					var publisher: Company = state.companies[c.party_b]
+					publisher.money += pub
+					ctx.emit(&"money_changed", {"company_id": publisher.id, "money": publisher.money})
 		var roy: int = Fixed.mul_bp(gross, royalty_bp(state, content, p))
 		var net: int = gross - pub - roy
 		p.revenue += net
+		ctx.emit(&"sales_updated", {"project_id": pid, "units": units, "revenue": net})
 		if state.companies.has(p.company_id):
 			var company: Company = state.companies[p.company_id]
 			company.money += net
-			ctx.emit(&"sales_updated", {"project_id": pid, "units": units, "revenue": net})
 			ctx.emit(&"money_changed", {"company_id": company.id, "money": company.money})

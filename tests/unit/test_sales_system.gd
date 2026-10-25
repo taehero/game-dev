@@ -30,12 +30,16 @@ func test_launch_week_units_and_revenue() -> void:
 	assert_eq(s.projects[pid].phase, Project.Phase.LIVE)
 	assert_eq(s.projects[pid].revenue, 12600)
 	assert_eq(s.companies[1].money, 20000 + 12600)
-	var names: Array[StringName] = []
+	assert_eq(_payload(ctx, &"sales_updated"), {"project_id": pid, "units": 1050, "revenue": 12600})
+	assert_eq(_payload(ctx, &"project_phase_changed"), {"project_id": pid, "phase": "LIVE"})
+	assert_eq(_payload(ctx, &"money_changed"), {"company_id": 1, "money": 32600})
+
+
+func _payload(ctx: TickContext, event: StringName) -> Dictionary:
 	for e: Dictionary in ctx.events:
-		names.append(e["name"])
-	assert_true(names.has(&"sales_updated"))
-	assert_true(names.has(&"project_phase_changed"))
-	assert_true(names.has(&"money_changed"))
+		if e["name"] == event:
+			return e["payload"]
+	return {}
 
 
 func test_weekly_decay_from_review_table() -> void:
@@ -56,9 +60,23 @@ func test_retired_platform_doubles_decay() -> void:
 func test_below_floor_retires() -> void:
 	var pid: int = _released({"user_score": 10})
 	s.market.platform_install_base[&"platform_fx_micro"] = 100
-	_tick()
+	var ctx: TickContext = _tick()
 	assert_eq(s.projects[pid].phase, Project.Phase.RETIRED)
 	assert_eq(s.projects[pid].weekly_units.size(), 0)
+	var last: Dictionary = {}
+	for e: Dictionary in ctx.events:
+		if e["name"] == &"project_phase_changed":
+			last = e["payload"]
+	assert_eq(last, {"project_id": pid, "phase": "RETIRED"})
+
+
+func test_retires_on_later_decay_tick() -> void:
+	var pid: int = _released()
+	_tick()
+	s.projects[pid].weekly_units[0] = 11  # 11 * 0.86 falls below the floor of 10
+	_tick()
+	assert_eq(s.projects[pid].phase, Project.Phase.RETIRED)
+	assert_eq(s.projects[pid].weekly_units.size(), 1)
 
 
 func test_history_capped_at_104() -> void:
@@ -82,6 +100,21 @@ func test_publisher_share_and_royalty() -> void:
 	# gross 12600; publisher 3780; royalty 1260; net 7560
 	assert_eq(s.projects[pid].revenue, 7560)
 	assert_eq(s.companies[8].money, 3780)
+	assert_eq(s.companies[1].money, 20000 + 7560)
+
+
+func test_non_publishing_contract_takes_no_share() -> void:
+	var c := Contract.new()
+	c.id = s.alloc_id()
+	c.kind = Contract.Kind.OUTSOURCE
+	c.party_a = 1
+	c.party_b = 8
+	c.revenue_share_pct = 30
+	s.contracts[c.id] = c
+	var pid: int = _released({"contract_id": c.id})
+	_tick()
+	assert_eq(s.projects[pid].revenue, 12600)
+	assert_eq(s.companies[8].money, 0)
 
 
 func test_table_bp_clamps_both_ends() -> void:
