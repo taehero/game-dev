@@ -27,14 +27,25 @@ func test_hire_is_deterministic_for_same_seed() -> void:
 	assert_eq(StateHash.of(a), StateHash.of(b))
 
 
-func test_hire_rejected_at_staff_limit() -> void:
+func test_hire_takes_the_free_garage_seat() -> void:
 	var s := Fixtures.new_state(3)
 	var t := Fixtures.tuning()
-	for i: int in t.max_staff_default:
-		Fixtures.add_staff(s)
-	var r := HireStaffCommand.new(s.player_company_id, "X", 800).validate(s, t)
-	assert_false(r.ok)
-	assert_eq(r.reason_key, &"error.staff_limit")
+	var ctx := TickContext.new(s, t)
+	HireStaffCommand.new(s.player_company_id, "Ada", 800).apply(ctx)
+	var st: Staff = s.staff[s.next_id - 1]
+	assert_eq(st.seat_index, 1)
+	assert_eq(st.hired_week, 0)
+	assert_eq(st.last_raise_week, 0)
+	assert_eq(st.level, Staff.Level.JUNIOR)
+	assert_eq(st.exp, {&"art": 0, &"audio": 0, &"design": 0, &"tech": 0})
+
+
+func test_hire_rejected_when_no_free_seat() -> void:
+	var s := Fixtures.new_state(3)
+	var t := Fixtures.tuning()
+	HireStaffCommand.new(s.player_company_id, "Ada", 800).apply(TickContext.new(s, t))
+	var r := HireStaffCommand.new(s.player_company_id, "Bo", 800).validate(s, t)
+	assert_eq(r.reason_key, &"error.no_free_seat")
 
 
 func test_hire_rejected_for_unknown_company() -> void:

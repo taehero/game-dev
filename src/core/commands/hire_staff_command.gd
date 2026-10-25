@@ -17,8 +17,8 @@ func validate(state: GameState, tuning: TuningDef) -> CommandResult:
 		return CommandResult.fail(&"error.company_not_found")
 	if salary <= 0:
 		return CommandResult.fail(&"error.invalid_salary")
-	if state.staff_of(company_id).size() >= tuning.max_staff_default:
-		return CommandResult.fail(&"error.staff_limit")
+	if GameRules.free_seat(state, ContentDB.active(), company_id) == -1:
+		return CommandResult.fail(&"error.no_free_seat")
 	return CommandResult.success()
 
 
@@ -28,6 +28,10 @@ func apply(ctx: TickContext) -> void:
 	s.company_id = company_id
 	s.name = staff_name
 	s.salary = salary
+	s.seat_index = GameRules.free_seat(ctx.state, ctx.content, company_id)
+	s.hired_week = ctx.state.week
+	s.last_raise_week = ctx.state.week
+	s.level = Staff.Level.JUNIOR
 	# Draw order is fixed (design, tech, art, audio); insert sorted so live order
 	# matches the order a loaded save produces (Ruling 14).
 	var drawn: Dictionary[StringName, int] = {}
@@ -35,5 +39,6 @@ func apply(ctx: TickContext) -> void:
 		drawn[skill] = ctx.rng.randi_range(ctx.tuning.hire_skill_min, ctx.tuning.hire_skill_max)
 	for skill: StringName in GameState.sorted_names(drawn):
 		s.skills[skill] = drawn[skill]
+		s.exp[skill] = 0
 	ctx.state.staff[s.id] = s
 	ctx.emit(&"staff_hired", {"staff_id": s.id})

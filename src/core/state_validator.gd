@@ -362,6 +362,9 @@ static func _engine_ok(e: Dictionary) -> bool:
 
 
 static func _candidate_ok(e: Dictionary) -> bool:
+	var level: int = int(e["level"])
+	if level < 0 or level >= Staff.Level.size():
+		return false
 	var skills: Dictionary = e["skills"]
 	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
 		return false

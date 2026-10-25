@@ -9,7 +9,6 @@ max_ticks_per_frame = 4
 start_money = 20000
 start_year = 1980
 weeks_per_year = 52
-max_staff_default = 4
 hire_skill_min = 10
 hire_skill_max = 40
 crunch_speed_bp = 15000

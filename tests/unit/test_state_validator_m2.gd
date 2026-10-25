@@ -172,3 +172,19 @@ func test_rejects_owner_focus_dev_out_of_range() -> void:
 	var d := Fixtures.json_round_trip(Fixtures.new_state(5).to_dict())
 	d["owner"]["focus_dev_bp"] = 10001
 	assert_false(GameState.validate_dict(d))
+
+
+func _dict_with_candidate(level: int) -> Dictionary:
+	var s := Fixtures.new_state(5)
+	var c := Candidate.new()
+	c.id = s.alloc_id()
+	c.skills = {&"art": 1, &"audio": 1, &"design": 1, &"tech": 1}
+	c.level = level
+	s.candidates.append(c)
+	return Fixtures.json_round_trip(s.to_dict())
+
+
+func test_candidate_level_range_is_checked() -> void:
+	assert_true(GameState.validate_dict(_dict_with_candidate(Staff.Level.EXECUTIVE)))
+	assert_false(GameState.validate_dict(_dict_with_candidate(Staff.Level.size())))
+	assert_false(GameState.validate_dict(_dict_with_candidate(-1)))

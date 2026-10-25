@@ -5,6 +5,7 @@ var _saved_locale: String
 var _dir: String = ""
 
 func before_each() -> void:
+	ContentDB.use(Fixtures.content())
 	_saved_dir = GameRunner.save_dir
 	_dir = "user://test_hud_saves_%d" % Time.get_ticks_usec()
 	GameRunner.save_dir = _dir

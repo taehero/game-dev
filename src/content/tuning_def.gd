@@ -7,7 +7,6 @@ extends Resource
 @export var start_money: int = 20000
 @export var start_year: int = 1980
 @export var weeks_per_year: int = 52
-@export var max_staff_default: int = 4
 @export var hire_skill_min: int = 10
 @export var hire_skill_max: int = 40
 @export var crunch_speed_bp: int = 15000
