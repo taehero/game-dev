@@ -166,3 +166,17 @@ review.weak.value.1,Over before you know it. Hard to justify the price.,จบ�
 review.weak.value.2,A rip-off. Save your money.,โดนหลอกชัด ๆ เก็บเงินไว้ดีกว่า
 review.strong.generic,A solid effort overall.,โดยรวมทำออกมาได้ดีทีเดียว
 review.weak.generic,Nothing here really stands out.,โดยรวมไม่มีอะไรโดดเด่น
+ui.pill.date,Date,วันที่
+ui.pill.money,Money,เงิน
+ui.pill.fans,Fans,แฟน
+ui.pill.hype,Hype,กระแส
+ui.pill.currency,$,$
+ui.point.design,Design,ออกแบบ
+ui.point.tech,Tech,เทค
+ui.point.art,Art,ภาพ
+ui.point.audio,Audio,เสียง
+ui.point.bug,Bugs,บั๊ก
+ui.bubble.points,+{amount} {type},+{amount} {type}
+ui.bubble.bug,Bug!,บั๊ก!
+ui.card.subtitle,{topic} · {genre},{topic} · {genre}
+ui.popup.close,Close,ปิด
