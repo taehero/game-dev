@@ -106,3 +106,17 @@ func test_cap_counts_bubbles_not_pills() -> void:
 	assert_eq(l.live_count(), BubbleLayer.MAX_BUBBLES)
 	for child: Node in l.get_children():
 		assert_true(child is Bubble)
+
+
+func test_consecutive_spawns_differ_in_y() -> void:
+	var l := _layer()
+	var a := l.spawn(Vector2(5, 20), &"design", 1)
+	var b := l.spawn(Vector2(5, 20), &"tech", 1)
+	assert_ne(a.position.y, b.position.y)
+
+
+func test_directly_created_unknown_bubble_frees_quietly() -> void:
+	var b := Bubble.new()
+	b.kind = &"juggling"
+	add_child(b)
+	assert_true(b.is_queued_for_deletion())

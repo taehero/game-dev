@@ -14,7 +14,7 @@ func spawn(at: Vector2, kind: StringName, amount: int = 0) -> Bubble:
 	var b := Bubble.new()
 	b.kind = kind
 	b.amount = amount
-	b.position = at + Vector2(((_spawned % 3) - 1) * 3, 0)
+	b.position = at + Vector2(((_spawned % 3) - 1) * 3, -(_spawned % 3) * 8)
 	_spawned += 1
 	add_child(b)
 	return b

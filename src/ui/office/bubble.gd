@@ -18,6 +18,10 @@ var _label: Label = null
 
 
 func _ready() -> void:
+	if not COLORS.has(kind):
+		push_warning("Bubble: unknown kind '%s'" % kind)
+		queue_free()
+		return
 	var icon := Sprite2D.new()
 	icon.name = "Icon"
 	icon.texture = OfficeArt.atlas(OfficeArt.EMOTES[kind])
