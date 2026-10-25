@@ -5,7 +5,7 @@ extends Node2D
 
 const DESK_SCENE: PackedScene = preload("res://src/ui/office/desk_sprite.tscn")
 const STAFF_SCENE: PackedScene = preload("res://src/ui/office/staff_sprite.tscn")
-const BUBBLE_OFFSET: Vector2 = Vector2(0, -12)
+const BUBBLE_OFFSET: Vector2 = Vector2(0, -24)
 
 const REFRESH_SIGNALS: Array[StringName] = [
 	&"week_ticked", &"staff_hired", &"staff_resigned", &"staff_fired", &"equipment_changed",
@@ -20,6 +20,9 @@ var _office_id: StringName = &""
 var _room: OfficeRoom = null
 var _desks: Array[DeskSprite] = []
 var _staff: Dictionary[int, StaffSprite] = {}
+var _burst_frame: int = -1
+var _point_bubbles: Dictionary[int, Bubble] = {}
+var _bug_bubbles: Dictionary[int, Bubble] = {}
 
 @onready var _room_slot: Node2D = $RoomSlot
 @onready var _desks_node: Node2D = $Desks
@@ -94,12 +97,46 @@ func _on_refresh_event(_payload: Dictionary) -> void:
 	refresh(GameRunner.session.state, GameRunner.session.tuning)
 
 
+## Events for one staff member in one frame merge into at most one points bubble and one bug bubble.
 func _on_points_gained(payload: Dictionary) -> void:
-	spawn_bubble(int(payload.get("staff_id", -1)), StringName(payload.get("type", &"")), int(payload.get("amount", 0)))
+	_new_frame_check()
+	var sid: int = int(payload.get("staff_id", -1))
+	var kind: StringName = StringName(payload.get("type", &""))
+	var amount: int = int(payload.get("amount", 0))
+	var existing: Bubble = _point_bubbles.get(sid, null)
+	if existing != null and is_instance_valid(existing) and not existing.is_queued_for_deletion():
+		if amount > existing.amount:
+			existing.set_content(kind, amount)
+		return
+	var sprite: StaffSprite = staff_sprite(sid)
+	if sprite == null:
+		return
+	var made: Bubble = _bubbles.spawn(sprite.position + BUBBLE_OFFSET, kind, amount)
+	if made != null:
+		_point_bubbles[sid] = made
 
 
 func _on_bug_found(payload: Dictionary) -> void:
-	spawn_bubble(int(payload.get("staff_id", -1)), &"bug")
+	_new_frame_check()
+	var sid: int = int(payload.get("staff_id", -1))
+	var existing: Bubble = _bug_bubbles.get(sid, null)
+	if existing != null and is_instance_valid(existing) and not existing.is_queued_for_deletion():
+		existing.set_content(&"bug", existing.amount + 1)
+		return
+	var sprite: StaffSprite = staff_sprite(sid)
+	if sprite == null:
+		return
+	var made: Bubble = _bubbles.spawn(sprite.position + BUBBLE_OFFSET, &"bug", 1)
+	if made != null:
+		_bug_bubbles[sid] = made
+
+
+func _new_frame_check() -> void:
+	var frame: int = Engine.get_process_frames()
+	if frame != _burst_frame:
+		_burst_frame = frame
+		_point_bubbles.clear()
+		_bug_bubbles.clear()
 
 
 func _rebuild_room(office_id: StringName) -> void:

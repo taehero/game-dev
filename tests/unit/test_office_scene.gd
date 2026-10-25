@@ -200,3 +200,43 @@ func test_empty_scene_path_is_unknown_office() -> void:
 	sc.refresh(_state(), Fixtures.tuning())
 	assert_null(sc.room())
 	assert_eq(sc.desk_count(), 0)
+
+
+func test_points_events_in_one_frame_merge_to_max() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	for amount: int in [2, 5, 3, 1]:
+		EventBus.dispatch(&"points_gained", {"staff_id": s.owner.staff_id, "type": &"design", "amount": amount})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	assert_eq(layer.live_count(), 1)
+	assert_eq((layer.get_child(0) as Bubble).amount, 5)
+
+
+func test_bug_events_in_one_frame_merge_to_count() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	for i: int in 3:
+		EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	assert_eq(layer.live_count(), 1)
+	var bubble: Bubble = layer.get_child(0) as Bubble
+	assert_eq(bubble.amount, 3)
+	assert_string_contains(bubble.pill_text(), "3")
+
+
+func test_one_points_and_one_bug_bubble_per_staff_per_frame() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	for i: int in 3:
+		EventBus.dispatch(&"points_gained", {"staff_id": s.owner.staff_id, "type": &"tech", "amount": 1})
+		EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
+	assert_eq((sc.get_node("Bubbles") as BubbleLayer).live_count(), 2)
+	await wait_process_frames(1)
+	EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
+	assert_eq((sc.get_node("Bubbles") as BubbleLayer).live_count(), 3)

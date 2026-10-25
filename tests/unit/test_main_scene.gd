@@ -84,8 +84,8 @@ func test_main_has_hud_and_hidden_debug_hud() -> void:
 
 func test_office_origin_centres_rooms() -> void:
 	var main_script: GDScript = load("res://src/ui/main.gd")
-	assert_eq(main_script.office_origin(Vector2i(192, 128)), Vector2i(128, 50))
-	assert_eq(main_script.office_origin(Vector2i(288, 144)), Vector2i(32, 34))
+	assert_eq(main_script.office_origin(Vector2i(192, 128)), Vector2i(160, 50))
+	assert_eq(main_script.office_origin(Vector2i(288, 144)), Vector2i(64, 34))
 
 
 func test_dock_opens_panel_host() -> void:
@@ -163,9 +163,7 @@ func _worst_case(locale: String) -> void:
 	var m := _main()
 	var st: GameState = GameRunner.session.state
 	var company: Company = st.companies[st.player_company_id]
-	company.money = 1234567
 	company.fan_count = 1234567
-	st.week = 520
 	var pid: int = Fixtures.add_project(st, {
 		"title": "เกมผจญภัยอวกาศที่ยาวมากมาย", "phase": Project.Phase.PRODUCTION, "stage_index": 2,
 		"stage_progress": 9900, "bugs": 9999,
@@ -173,8 +171,17 @@ func _worst_case(locale: String) -> void:
 	st.projects[pid].hype = 9999
 	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
 		st.projects[pid].points[k] = 9999
-	EventBus.dispatch(&"project_changed", {})
-	await wait_process_frames(2)
+	for money: int in [1234567, -1234567]:
+		for week: int in [519, 520]:
+			company.money = money
+			st.week = week
+			EventBus.dispatch(&"project_changed", {})
+			await wait_process_frames(2)
+			_assert_screen_fits(m, locale)
+	TranslationServer.set_locale("en")
+
+
+func _assert_screen_fits(m: Control, locale: String) -> void:
 	var bar: Control = m.get_node("TopBar")
 	var card: Control = m.get_node("ProjectCard").get_node("%Card")
 	var dock: Control = m.get_node("Dock")
@@ -194,7 +201,6 @@ func _worst_case(locale: String) -> void:
 		assert_true(UiFit.text_fits(l), "%s '%s' (%s)" % [l.get_path(), l.text, locale])
 	for id: StringName in Dock.TABS:
 		assert_true(UiFit.button_fits(dock.get_node("Row/Tab_%s" % id)), "%s (%s)" % [id, locale])
-	TranslationServer.set_locale("en")
 
 
 func test_screen_fits_worst_case_en() -> void:

@@ -2,7 +2,7 @@ extends Control
 
 const OFFICE_SCALE: int = 2
 const OFFICE_SCENE: PackedScene = preload("res://src/ui/office/office_scene.tscn")
-const OFFICE_AREA := Rect2i(0, 30, 640, 296)
+const OFFICE_AREA := Rect2i(64, 30, 576, 296)
 
 
 static func office_origin(room_px: Vector2i) -> Vector2i:
@@ -33,7 +33,7 @@ func _ready() -> void:
 	_centre_office()
 
 
-## Ruling 5: the only place the UI reads ContentDB.active().
+## Ruling 5: Main is the only place the UI reads ContentDB.active(), here and in _content_names().
 func _office_content() -> Array:
 	var db: ContentDB = ContentDB.active()
 	return [db.offices, db.equipment]

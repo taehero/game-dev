@@ -4,7 +4,7 @@ extends Node2D
 
 const GARAGE_DESKS: Array[Vector2i] = [Vector2i(3, 3), Vector2i(7, 3)]
 const SMALL_OFFICE_DESKS: Array[Vector2i] = [
-	Vector2i(3, 3), Vector2i(7, 3), Vector2i(11, 3), Vector2i(3, 6), Vector2i(7, 6),
+	Vector2i(6, 3), Vector2i(10, 3), Vector2i(14, 3), Vector2i(6, 6), Vector2i(10, 6),
 ]
 const GROUND_MARGIN := Vector2i(5, 3)
 ## Decor cell -> prop name. The cell is the prop's top-left tile.
@@ -16,8 +16,8 @@ const DECOR: Dictionary[StringName, Dictionary] = {
 	},
 	&"small_office": {
 		Vector2i(11, 0): &"window", Vector2i(14, 0): &"window", Vector2i(1, 0): &"picture",
-		Vector2i(1, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(14, 2): &"shelf",
-		Vector2i(11, 5): &"rug",
+		Vector2i(1, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(2, 2): &"shelf",
+		Vector2i(12, 6): &"rug",
 	},
 }
 

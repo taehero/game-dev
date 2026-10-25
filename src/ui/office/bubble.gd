@@ -15,6 +15,8 @@ var amount: int = 0
 
 var _pill: PanelContainer = null
 var _label: Label = null
+var _icon: Sprite2D = null
+var _box: StyleBoxFlat = null
 
 
 func _ready() -> void:
@@ -27,6 +29,7 @@ func _ready() -> void:
 	icon.texture = OfficeArt.atlas(OfficeArt.EMOTES[kind])
 	icon.position = ICON_OFFSET
 	add_child(icon)
+	_icon = icon
 
 	_pill = PanelContainer.new()
 	_pill.name = "Pill"
@@ -39,6 +42,7 @@ func _ready() -> void:
 	box.content_margin_top = 1
 	box.content_margin_bottom = 1
 	_pill.add_theme_stylebox_override(&"panel", box)
+	_box = box
 	_label = Label.new()
 	_label.theme_type_variation = &"BubbleText"
 	_pill.add_child(_label)
@@ -55,9 +59,26 @@ func _ready() -> void:
 	tween.chain().tween_callback(queue_free)
 
 
+## Merge a later event into this bubble (same staff, same frame).
+func set_content(new_kind: StringName, new_amount: int) -> void:
+	if not COLORS.has(new_kind):
+		return
+	kind = new_kind
+	amount = new_amount
+	if _label == null:
+		return
+	_icon.texture = OfficeArt.atlas(OfficeArt.EMOTES[kind])
+	_box.bg_color = COLORS[kind]
+	var text := pill_text()
+	_label.text = text
+	_pill.visible = text != ""
+
+
 func pill_text() -> String:
-	if kind == &"bug":
+	if kind == &"bug" and amount <= 1:
 		return tr("ui.bubble.bug")
+	if kind == &"bug" and amount > 1:
+		return tr("ui.bubble.points").format({"amount": amount, "type": tr("ui.point.bug")})
 	if amount > 0:
 		return tr("ui.bubble.points").format({"amount": amount, "type": tr("ui.point.%s" % kind)})
 	return ""
