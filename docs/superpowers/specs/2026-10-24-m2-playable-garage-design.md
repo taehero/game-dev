@@ -310,6 +310,21 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 - Theme: one Godot `Theme` resource with the Thai-capable font; all strings via `tr()`.
 - The M1 debug HUD stays reachable behind a debug key (F3) for testing.
 
+### 11.4 Free assets and addons
+
+- Prefer free, ready-made assets and addons over writing new ones: Kenney UI Pack for popup frames and buttons, Kenney Interface Sounds / Audio for sound, Kenney Game Icons for icons (all CC0).
+- Allowed licences: CC0, MIT, OFL. CC-BY only with a `CREDITS.md` row. No GPL or other copyleft code (closed-source Steam release).
+- Godot addons go in `addons/` with their licence file. Addons may provide UI, tweens and popups only. Simulation code stays ours (determinism, ints, sorted iteration).
+
+### 11.5 Mini-games and production events (M2d-panels)
+
+Three small interactive moments, each a popup that pauses the game. All outcomes are decided by `Command`s and seeded RNG, so they stay deterministic and replayable.
+
+- **Production events.** During PRODUCTION a project may roll an event (for example "a big bug appears", "a staff member has a bold idea"). The popup offers 2–3 choices; each choice applies fixed effects (points, bugs, hype, morale, weeks). Events are content (`.tres`), with EN/TH text.
+- **Bug hunt.** During POLISH the player may start a short timed mini-game: catch bugs that pop up in the office scene. The result (bugs caught) is submitted as one command that removes up to that many bugs, capped by tuning. Skipping it is always allowed and costs nothing.
+- **Publisher pitch.** When signing a publishing deal, the player answers 2–3 multiple-choice questions about the game. Good answers improve the deal terms within tuning limits.
+- The real-time part of bug hunt lives in UI only. The simulation sees only the submitted result, validated by the command (never more bugs removed than exist, never more than the tuning cap).
+
 ## 12. Save compatibility
 
 `schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new runtime int id field. Content-id references are not checked by the validator (it stays content-free). `ContentDB.missing_refs(state)` checks them at load time: company office, research, awards and dev kits; equipment defs; project size, platform, genre, topic, engine, feature and outlet ids; contract `locked_genre`, `locked_platform` and the `ENGINE_LICENSE` deliverable; owner perk keys; engine features. `GameRunner.load_game` refuses a save with missing refs using `error.save_content_missing` and leaves the current game untouched.
