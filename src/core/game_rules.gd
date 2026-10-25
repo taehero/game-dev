@@ -90,8 +90,12 @@ static func working_staff(state: GameState, project_id: int) -> Array[int]:
 	return out
 
 
+static func stage_count_of_kind(kind: Project.Kind) -> int:
+	return 1 if kind == Project.Kind.ENGINE else 3
+
+
 static func stage_count(p: Project) -> int:
-	return 1 if p.kind == Project.Kind.ENGINE else 3
+	return stage_count_of_kind(p.kind)
 
 
 @warning_ignore("integer_division")

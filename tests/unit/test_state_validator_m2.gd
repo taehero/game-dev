@@ -188,3 +188,17 @@ func test_candidate_level_range_is_checked() -> void:
 	assert_true(GameState.validate_dict(_dict_with_candidate(Staff.Level.EXECUTIVE)))
 	assert_false(GameState.validate_dict(_dict_with_candidate(Staff.Level.size())))
 	assert_false(GameState.validate_dict(_dict_with_candidate(-1)))
+
+
+func test_rejects_stage_index_out_of_range() -> void:
+	for bad: int in [-1, 3]:
+		var x := _project_dict()
+		x[0]["projects"][x[1]]["stage_index"] = bad
+		assert_false(GameState.validate_dict(x[0]), "game stage_index %d" % bad)
+	var ok := _project_dict()
+	ok[0]["projects"][ok[1]]["stage_index"] = 2
+	assert_true(GameState.validate_dict(ok[0]))
+	var e := _project_dict()
+	e[0]["projects"][e[1]]["kind"] = "ENGINE"
+	e[0]["projects"][e[1]]["stage_index"] = 1
+	assert_false(GameState.validate_dict(e[0]), "engine has one stage")

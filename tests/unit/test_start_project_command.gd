@@ -84,3 +84,15 @@ func test_engine_project() -> void:
 	assert_eq(p.focus, GameRules.ENGINE_FOCUS)
 	assert_eq(p.deadline_week, 6)
 	assert_eq(StartProjectCommand.engine(1, "E", [] as Array[StringName]).validate(s, t).reason_key, &"error.no_features")
+
+
+func test_duplicate_feature_rejected_for_game() -> void:
+	s.companies[1].unlocked = [&"research_fx_scroll"]
+	var eid: int = Fixtures.add_engine(s, {"features": [&"feature_fx_save"] as Array[StringName]})
+	var dup: Array[StringName] = [&"feature_fx_save", &"feature_fx_save"]
+	assert_eq(_game({"engine_id": eid, "lic": &"", "features": dup}).validate(s, t).reason_key, &"error.duplicate_feature")
+
+
+func test_duplicate_feature_rejected_for_engine() -> void:
+	var dup: Array[StringName] = [&"feature_fx_save", &"feature_fx_save"]
+	assert_eq(StartProjectCommand.engine(1, "E", dup).validate(s, t).reason_key, &"error.duplicate_feature")

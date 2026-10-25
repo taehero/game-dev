@@ -78,3 +78,16 @@ func test_remove_decision_drops_decisions_that_reference_it() -> void:
 	assert_eq(s.pending_decisions[0].id, third)
 	assert_false(s.pending_decisions.any(func(d: Decision) -> bool: return d.id == second))
 	assert_true(_valid(s))
+
+
+func test_remove_decision_cascades_through_two_levels() -> void:
+	var s := Fixtures.new_state(1)
+	var a := _decision_about(s, s.owner_staff_id())
+	var b := _decision_about(s, a)
+	var c := _decision_about(s, b)
+	var keep := _decision_about(s, s.owner_staff_id())
+	assert_true(Removal.remove_decision(s, a))
+	assert_eq(s.pending_decisions.size(), 1)
+	assert_eq(s.pending_decisions[0].id, keep)
+	assert_false(s.pending_decisions.any(func(d: Decision) -> bool: return d.id == b or d.id == c))
+	assert_true(_valid(s))

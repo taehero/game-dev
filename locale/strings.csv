@@ -67,6 +67,7 @@ error.genre_not_found,Unknown genre.,ไม่พบแนวเกมนี้
 error.feature_not_found,Unknown engine feature.,ไม่พบฟีเจอร์เอนจินนี้
 error.item_locked,You have not researched this yet.,ยังไม่ได้วิจัยสิ่งนี้
 error.engine_unavailable,That engine is not available.,ใช้เอนจินนี้ไม่ได้
+error.duplicate_feature,Each feature can only be picked once.,เลือกแต่ละฟีเจอร์ได้เพียงครั้งเดียว
 error.feature_not_in_engine,Your engine does not support that feature.,เอนจินของคุณไม่รองรับฟีเจอร์นี้
 error.no_features,Pick at least one feature for the engine.,เลือกฟีเจอร์ให้เอนจินอย่างน้อยหนึ่งอย่าง
 error.not_enough_staff,Not enough free staff at a desk with a computer.,พนักงานว่างที่โต๊ะพร้อมคอมพิวเตอร์ไม่พอ

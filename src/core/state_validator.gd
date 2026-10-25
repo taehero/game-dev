@@ -322,6 +322,10 @@ static func _project_ok(e: Dictionary) -> bool:
 	for i: int in 3:
 		if int(focus[i * 3]) + int(focus[i * 3 + 1]) + int(focus[i * 3 + 2]) != 10000:
 			return false
+	var kind: Project.Kind = Project.Kind[String(e["kind"])]
+	var stage: int = int(e["stage_index"])
+	if stage < 0 or stage >= GameRules.stage_count_of_kind(kind):
+		return false
 	var progress: int = int(e["stage_progress"])
 	if progress < 0 or progress > 10000:
 		return false

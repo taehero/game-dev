@@ -76,6 +76,8 @@ func _validate_game(state: GameState, tuning: TuningDef, content: ContentDB) -> 
 	for f: StringName in features:
 		if not content.engine_features.has(f):
 			return CommandResult.fail(&"error.feature_not_found")
+		if features.count(f) > 1:
+			return CommandResult.fail(&"error.duplicate_feature")
 		if not GameRules.is_unlocked(state, content, company_id, f):
 			return CommandResult.fail(&"error.item_locked")
 		if not supported.has(f):
@@ -91,6 +93,8 @@ func _validate_engine(state: GameState, tuning: TuningDef, content: ContentDB) -
 	for f: StringName in features:
 		if not content.engine_features.has(f):
 			return CommandResult.fail(&"error.feature_not_found")
+		if features.count(f) > 1:
+			return CommandResult.fail(&"error.duplicate_feature")
 		if not GameRules.is_unlocked(state, content, company_id, f):
 			return CommandResult.fail(&"error.item_locked")
 	if GameRules.free_workers(state, company_id).size() < tuning.engine_min_staff:

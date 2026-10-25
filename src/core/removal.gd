@@ -57,9 +57,14 @@ static func remove_decision(state: GameState, decision_id: int) -> bool:
 	return false
 
 
+## Drops decisions mentioning id, then (recursively) decisions mentioning any dropped decision.
 static func _drop_decisions_about(state: GameState, id: int) -> void:
-	var i: int = state.pending_decisions.size() - 1
-	while i >= 0:
-		if state.pending_decisions[i].related_ids.has(id):
-			state.pending_decisions.remove_at(i)
-		i -= 1
+	var pending: Array[int] = [id]
+	while not pending.is_empty():
+		var target: int = pending.pop_back()
+		var i: int = state.pending_decisions.size() - 1
+		while i >= 0:
+			if state.pending_decisions[i].related_ids.has(target):
+				pending.append(state.pending_decisions[i].id)
+				state.pending_decisions.remove_at(i)
+			i -= 1
