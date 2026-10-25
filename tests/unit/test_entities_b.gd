@@ -17,7 +17,17 @@ func _sample_project() -> Project:
 	p.phase = Project.Phase.PRODUCTION
 	p.stage_index = 1
 	p.stage_progress = 42
-	p.focus = [30, 60, 90]
+	p.focus = [2000, 3000, 5000, 3000, 3000, 4000, 5000, 2500, 2500]
+	p.kind = Project.Kind.ENGINE
+	p.features = [&"feature_fx_save"]
+	var rr := ReviewResult.new()
+	rr.outlet_id = &"outlet_fx_a"
+	rr.score_x10 = 77
+	rr.strength_key = &"review.strong.generic"
+	rr.weakness_key = &"review.weak.generic"
+	p.review_results = [rr]
+	p.weekly_units = [5, 3]
+	p.mod_tools = true
 	p.points = {&"design": 10, &"tech": 20, &"art": 30, &"audio": 4}
 	p.bugs = 3
 	p.hype = 15
@@ -85,7 +95,14 @@ func test_project_survives_json_round_trip() -> void:
 	assert_eq(typeof(back.config.keys()[0]), TYPE_STRING_NAME)
 	assert_eq(typeof(back.points.keys()[0]), TYPE_STRING_NAME)
 	assert_eq(typeof(back.focus[2]), TYPE_INT)
-	assert_eq(back.focus, [30, 60, 90] as Array[int])
+	assert_eq(back.focus, [2000, 3000, 5000, 3000, 3000, 4000, 5000, 2500, 2500] as Array[int])
+	assert_eq(back.kind, Project.Kind.ENGINE)
+	assert_eq(back.features, [&"feature_fx_save"] as Array[StringName])
+	assert_eq(back.review_results.size(), 1)
+	assert_eq(back.review_results[0].score_x10, 77)
+	assert_eq(back.weekly_units, [5, 3] as Array[int])
+	assert_true(back.mod_tools)
+	assert_eq(back.engine_id, -1)
 	assert_eq(back.phase, Project.Phase.PRODUCTION)
 	assert_true(back.crunch)
 	assert_eq(back.contract_id, 9)

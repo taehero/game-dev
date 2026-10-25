@@ -89,3 +89,36 @@ func test_rejects_contract_target_points_bad_key() -> void:
 	assert_true(GameState.validate_dict(d))
 	d["contracts"][str(c.id)]["target_points"]["luck"] = 3
 	assert_false(GameState.validate_dict(d))
+
+
+func _project_dict() -> Array:
+	var s := Fixtures.new_state(5)
+	var pid := Fixtures.add_project(s)
+	return [Fixtures.json_round_trip(s.to_dict()), str(pid)]
+
+
+func test_accepts_default_project() -> void:
+	assert_true(GameState.validate_dict(_project_dict()[0]))
+
+
+func test_rejects_stage_not_summing_to_10000() -> void:
+	var x := _project_dict(); x[0]["projects"][x[1]]["focus"][0] = 3333
+	assert_false(GameState.validate_dict(x[0]))
+
+
+func test_rejects_weekly_units_over_cap() -> void:
+	var x := _project_dict()
+	var a: Array = []; a.resize(105); a.fill(1)
+	x[0]["projects"][x[1]]["weekly_units"] = a
+	assert_false(GameState.validate_dict(x[0]))
+
+
+func test_rejects_review_score_out_of_range() -> void:
+	var x := _project_dict()
+	x[0]["projects"][x[1]]["review_results"] = [{"outlet_id": "o", "score_x10": 101, "strength_key": "a", "weakness_key": "b"}]
+	assert_false(GameState.validate_dict(x[0]))
+
+
+func test_rejects_unknown_project_kind() -> void:
+	var x := _project_dict(); x[0]["projects"][x[1]]["kind"] = "MOVIE"
+	assert_false(GameState.validate_dict(x[0]))

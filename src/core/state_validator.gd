@@ -226,12 +226,40 @@ static func _project_ok(e: Dictionary) -> bool:
 	for k: Variant in cfg:
 		if typeof(cfg[k]) != TYPE_STRING:
 			return false
+	if not _enum_ok(Project.Kind.keys(), e["kind"]):
+		return false
 	var focus: Array = e["focus"]
-	if focus.size() != 3:
+	if focus.size() != 9:
 		return false
 	for f: Variant in focus:
-		if not SaveSchema.is_whole(f):
+		if not SaveSchema.is_whole(f) or int(f) < 0 or int(f) > 10000:
 			return false
+	for i: int in 3:
+		if int(focus[i * 3]) + int(focus[i * 3 + 1]) + int(focus[i * 3 + 2]) != 10000:
+			return false
+	var progress: int = int(e["stage_progress"])
+	if progress < 0 or progress > 10000:
+		return false
+	if not _strings_ok(e["features"]):
+		return false
+	for r: Variant in e["review_results"]:
+		if not SaveSchema.check(r, ReviewResult.SCHEMA):
+			return false
+		var rd: Dictionary = r
+		if int(rd["score_x10"]) < 10 or int(rd["score_x10"]) > 100:
+			return false
+	var units: Array = e["weekly_units"]
+	if units.size() > Project.WEEKLY_UNITS_CAP:
+		return false
+	for u: Variant in units:
+		if not SaveSchema.is_whole(u) or int(u) < 0:
+			return false
+	var promo: int = int(e["promo_discount_bp"])
+	if promo < 0 or promo > 10000:
+		return false
+	var eng: int = int(e["engine_id"])
+	if eng != -1 and eng < 1:
+		return false
 	return _whole_values(e["points"])
 
 

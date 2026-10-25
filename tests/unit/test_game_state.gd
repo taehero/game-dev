@@ -119,7 +119,7 @@ func test_validate_rejects_wrong_focus_length() -> void:
 	var s := Fixtures.new_state(5)
 	var pid := Fixtures.add_project(s)
 	var d := _rt(s)
-	d["projects"][str(pid)]["focus"] = [1, 2]
+	d["projects"][str(pid)]["focus"] = [1, 2, 3]
 	assert_false(GameState.validate_dict(d))
 
 

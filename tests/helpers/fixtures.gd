@@ -26,7 +26,7 @@ static func add_staff(state: GameState, overrides: Dictionary = {}) -> int:
 	for skill: StringName in [&"design", &"tech", &"art", &"audio"]:
 		s.skills[skill] = 20
 	for k: Variant in overrides:
-		s.set(String(k), overrides[k])
+		_apply(s, String(k), overrides[k])
 	state.staff[s.id] = s
 	return s.id
 
@@ -37,10 +37,28 @@ static func add_project(state: GameState, overrides: Dictionary = {}) -> int:
 	p.company_id = state.player_company_id
 	p.title = "Project %d" % p.id
 	p.deadline_week = state.week + 24
+	p.kind = Project.Kind.GAME
+	p.size_id = &"size_small"
+	p.config[&"engine"] = &"lic_engine_homebrew"
+	p.config[&"genre"] = &"genre_fx_action"
+	p.config[&"platform"] = &"platform_fx_micro"
+	p.config[&"topic"] = &"topic_fx_space"
+	p.phase = Project.Phase.PRODUCTION
 	for k: Variant in overrides:
-		p.set(String(k), overrides[k])
+		_apply(p, String(k), overrides[k])
 	state.projects[p.id] = p
 	return p.id
+
+
+## Arrays and Dictionaries are assigned into the existing typed container so tests can pass untyped literals.
+static func _apply(obj: Object, field: String, value: Variant) -> void:
+	var current: Variant = obj.get(field)
+	if current is Array and value is Array:
+		(current as Array).assign(value)
+	elif current is Dictionary and value is Dictionary:
+		(current as Dictionary).assign(value)
+	else:
+		obj.set(field, value)
 
 
 # --- fixture content (in-memory, never reads data/) ---
