@@ -42,9 +42,6 @@ static func staff_pose(state: GameState, staff_id: int, t: TuningDef) -> StaffPo
 	return StaffPose.CRUNCHING if project.crunch else StaffPose.WORKING
 
 
-const STAGE_COUNT: int = 3
-
-
 ## Ruling 7: the player company's lowest-id project in PRODUCTION or POLISH, else -1.
 static func active_project_id(state: GameState) -> int:
 	for project_id: int in state.sorted_ids(state.projects):

@@ -77,3 +77,13 @@ func test_hide_panel() -> void:
 	host.hide_panel()
 	assert_false(host.visible)
 	assert_eq(host.current_tab(), &"")
+
+
+func test_labels_refresh_on_translation_change() -> void:
+	var bar: TabBarShell = _bar()
+	var saved: String = TranslationServer.get_locale()
+	TranslationServer.set_locale("th")
+	bar.notification(NOTIFICATION_TRANSLATION_CHANGED)
+	assert_eq(_tab(bar, &"team").text, tr("ui.tab.team"))
+	assert_ne(_tab(bar, &"team").text, "Team")
+	TranslationServer.set_locale(saved)

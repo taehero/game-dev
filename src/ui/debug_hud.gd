@@ -22,6 +22,7 @@ func _ready() -> void:
 	%Hire.text = tr("ui.hud.hire")
 	%Save.text = tr("ui.hud.save")
 	%Load.text = tr("ui.hud.load")
+	%TestProject.text = tr("ui.debug.test_project")
 	%Pause.pressed.connect(_on_speed.bind(0))
 	%Speed1x.pressed.connect(_on_speed.bind(1))
 	%Speed2x.pressed.connect(_on_speed.bind(2))
@@ -29,6 +30,7 @@ func _ready() -> void:
 	%Hire.pressed.connect(_on_hire)
 	%Save.pressed.connect(_on_save)
 	%Load.pressed.connect(_on_load)
+	%TestProject.pressed.connect(_on_test_project)
 	EventBus.week_ticked.connect(_on_refresh_event)
 	EventBus.money_changed.connect(_on_refresh_event)
 	EventBus.staff_hired.connect(_on_refresh_event)
@@ -87,3 +89,13 @@ func _on_load() -> void:
 		_refresh()
 	else:
 		_message.text = tr(String(r.error_key))
+
+
+## Debug only: the first game of the M2a acceptance scenario, for checking work bubbles by hand.
+func _on_test_project() -> void:
+	var st: GameState = GameRunner.session.state
+	var cmd: StartProjectCommand = StartProjectCommand.game(
+		StateQueries.player_company_id(st), "Star Run", &"size_small", &"platform_nova8",
+		&"topic_space", &"genre_action", -1, &"lic_engine_homebrew", [] as Array[StringName])
+	var r: CommandResult = GameRunner.submit(cmd)
+	_message.text = "" if r.ok else tr(String(r.reason_key))

@@ -9,6 +9,14 @@ func _scene() -> OfficeScene:
 	return sc
 
 
+func after_each() -> void:
+	GameRunner.session = null
+
+
+func _session(s: GameState) -> void:
+	GameRunner.session = GameSession.new(s, Fixtures.tuning())
+
+
 func _state() -> GameState:
 	var s: GameState = Fixtures.new_state(1)
 	OfficeFixtures.set_office(s, &"office_garage")
@@ -106,3 +114,72 @@ func test_spawn_bubble_for_seated_staff_only() -> void:
 	assert_true(sc.spawn_bubble(s.owner.staff_id, &"design"))
 	assert_false(sc.spawn_bubble(loose, &"design"))
 	assert_false(sc.spawn_bubble(-1, &"design"))
+
+
+func test_points_gained_spawns_bubble_at_staff() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	EventBus.dispatch(&"points_gained", {"staff_id": s.owner.staff_id, "type": &"design", "amount": 3})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	assert_eq(layer.live_count(), 1)
+	assert_eq((layer.get_child(0) as Bubble).kind, &"design")
+
+
+func test_bug_found_spawns_bug_bubble() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	assert_eq(layer.live_count(), 1)
+	assert_eq((layer.get_child(0) as Bubble).kind, &"bug")
+
+
+func test_event_for_unshown_staff_spawns_nothing() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	var loose: int = Fixtures.add_staff(s, {})
+	var other: int = Fixtures.add_staff(s, {"company_id": 999})
+	var gone: int = Fixtures.add_worker(s, {})
+	sc.refresh(s, Fixtures.tuning())
+	Removal.remove_staff(s, gone)
+	sc.refresh(s, Fixtures.tuning())
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	for sid: int in [loose, other, gone, 987654]:
+		EventBus.dispatch(&"points_gained", {"staff_id": sid, "type": &"tech", "amount": 1})
+		EventBus.dispatch(&"bug_found", {"staff_id": sid})
+	EventBus.dispatch(&"points_gained", {})
+	EventBus.dispatch(&"bug_found", {})
+	assert_eq(layer.live_count(), 0)
+	await wait_process_frames(1)
+
+
+func test_game_loaded_rebuilds_from_new_session() -> void:
+	var sc := _scene()
+	var old: GameState = _state()
+	_session(old)
+	sc.refresh(old, Fixtures.tuning())
+	var old_owner: int = old.owner.staff_id
+	assert_not_null(sc.staff_sprite(old_owner))
+	var fresh: GameState = Fixtures.new_state(2)
+	OfficeFixtures.set_office(fresh, &"office_garage")
+	var other: int = Fixtures.add_worker(fresh, {"seat_index": 1})
+	_session(fresh)
+	EventBus.dispatch(&"game_loaded", {})
+	assert_not_null(sc.staff_sprite(other))
+	await wait_process_frames(1)
+	assert_eq(sc.get_node("Staff").get_child_count(), 2)
+
+
+func test_empty_scene_path_is_unknown_office() -> void:
+	var sc := _scene()
+	var offices: Dictionary[StringName, OfficeDef] = OfficeFixtures.offices()
+	offices[&"office_garage"].scene_path = ""
+	sc.configure(offices, OfficeFixtures.equipment_defs())
+	sc.refresh(_state(), Fixtures.tuning())
+	assert_null(sc.room())
+	assert_eq(sc.desk_count(), 0)

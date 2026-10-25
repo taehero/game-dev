@@ -24,6 +24,14 @@ func _ready() -> void:
 		add_child(btn)
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		for id: StringName in TABS:
+			var btn: Button = get_node_or_null("Tab_%s" % id) as Button
+			if btn != null:
+				btn.text = tr("ui.tab.%s" % id)
+
+
 func open_tab() -> StringName:
 	for id: StringName in TABS:
 		var btn: Button = get_node_or_null("Tab_%s" % id) as Button

@@ -10,5 +10,5 @@ seats = 2
 rent_per_month = 0
 electricity_base = 20
 moving_cost = 0
-scene_path = ""
+scene_path = "res://src/ui/office/rooms/garage_room.tscn"
 desk_positions = Array[Vector2i]([Vector2i(3, 3), Vector2i(7, 3)])

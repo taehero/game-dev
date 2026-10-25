@@ -22,29 +22,21 @@ text_overrun_behavior = 3
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
-clip_text = true
-text_overrun_behavior = 3
 
 [node name="Points" type="Label" parent="Row"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
-clip_text = true
-text_overrun_behavior = 3
 
 [node name="Bugs" type="Label" parent="Row"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
-clip_text = true
-text_overrun_behavior = 3
 
 [node name="Hype" type="Label" parent="Row"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"LabelSmall"
-clip_text = true
-text_overrun_behavior = 3
 
 [node name="Date" type="Label" parent="Row"]
 unique_name_in_owner = true

@@ -4,22 +4,26 @@ extends PanelContainer
 ## Reads state only through StateQueries and re-reads GameRunner.session on every event.
 
 const BAR_HEIGHT: int = 22
-const TITLE_MIN_WIDTH: int = 120
+const TITLE_MIN_WIDTH: int = 60
+const DATE_MIN_WIDTH: int = 104
+const MONEY_MIN_WIDTH: int = 80
 
 const EVENT_SIGNALS: Array[StringName] = [
-	&"week_ticked", &"money_changed", &"project_changed", &"project_phase_changed",
+	&"week_ticked", &"money_changed", &"project_changed", &"project_phase_changed", &"game_loaded",
 ]
 
 
 func _ready() -> void:
 	custom_minimum_size.y = BAR_HEIGHT
-	for node_name: String in ["Title", "Stage", "Points", "Bugs", "Hype", "Date", "Money"]:
+	for node_name: String in ["Title", "Date", "Money"]:
 		var label: Label = get_node("%" + node_name)
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var title: Label = %Title
 	title.custom_minimum_size.x = TITLE_MIN_WIDTH
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	%Date.custom_minimum_size.x = DATE_MIN_WIDTH
+	%Money.custom_minimum_size.x = MONEY_MIN_WIDTH
 	%Pause.text = tr("ui.hud.pause")
 	%Speed1x.text = tr("ui.hud.speed").format({"speed": 1})
 	%Speed2x.text = tr("ui.hud.speed").format({"speed": 2})
@@ -54,7 +58,7 @@ func refresh(view: GameState, t: TuningDef) -> void:
 		return
 	%Title.text = String(info["title"])
 	%Stage.text = tr("ui.status.stage").format({
-		"stage": info["stage"], "count": StateQueries.STAGE_COUNT, "progress": info["progress"],
+		"stage": info["stage"], "count": GameRules.stage_count(view.projects[pid]), "progress": info["progress"],
 	})
 	%Points.text = tr("ui.status.points").format({
 		"design": info["design"], "tech": info["tech"], "art": info["art"], "audio": info["audio"],

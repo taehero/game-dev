@@ -1,6 +1,7 @@
 extends Control
 
 const OFFICE_SCALE: int = 2
+const OFFICE_SCENE: PackedScene = preload("res://src/ui/office/office_scene.tscn")
 const OFFICE_AREA := Rect2i(0, 0, 640, 316)
 
 
@@ -12,8 +13,35 @@ func _enter_tree() -> void:
 	GameRunner.start_new_game(int(Time.get_unix_time_from_system()), tr("ui.default_studio_name"))
 
 
+var _office: OfficeScene
+
+
 func _ready() -> void:
 	(get_node("TabBarShell") as TabBarShell).tab_changed.connect(_on_tab_changed)
+	_office = OFFICE_SCENE.instantiate() as OfficeScene
+	_office.scale = Vector2(OFFICE_SCALE, OFFICE_SCALE)
+	get_node("OfficeSlot").add_child(_office)
+	var content: Array = _office_content()
+	var offices: Dictionary[StringName, OfficeDef] = content[0]
+	var equipment: Dictionary[StringName, EquipmentDef] = content[1]
+	_office.configure(offices, equipment)
+	_office.room_changed.connect(_centre_office)
+	if GameRunner.session != null:
+		_office.refresh(GameRunner.session.state, GameRunner.session.tuning)
+	_centre_office()
+
+
+## Ruling 5: the only place the UI reads ContentDB.active().
+func _office_content() -> Array:
+	var db: ContentDB = ContentDB.active()
+	return [db.offices, db.equipment]
+
+
+func _centre_office() -> void:
+	var room: OfficeRoom = _office.room()
+	if room == null:
+		return
+	_office.position = Vector2(office_origin(room.pixel_size()))
 
 
 func toggle_debug_hud() -> void:

@@ -78,3 +78,12 @@ func test_state_queries_player_company_id() -> void:
 	var st: GameState = GameRunner.session.state
 	assert_eq(StateQueries.player_company_id(st), st.player_company_id)
 	assert_gt(StateQueries.player_company_id(st), 0)
+
+func test_test_project_button_starts_game_project() -> void:
+	Fixtures.use_real_content()
+	GameRunner.start_new_game(1, "T")
+	var hud: Control = _make_hud()
+	hud.get_node("%TestProject").pressed.emit()
+	var st: GameState = GameRunner.session.state
+	assert_ne(StateQueries.active_project_id(st), -1)
+	ContentDB.use(Fixtures.content())

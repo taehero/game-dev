@@ -10,5 +10,5 @@ seats = 5
 rent_per_month = 400
 electricity_base = 40
 moving_cost = 1500
-scene_path = ""
+scene_path = "res://src/ui/office/rooms/small_office_room.tscn"
 desk_positions = Array[Vector2i]([Vector2i(3, 3), Vector2i(7, 3), Vector2i(11, 3), Vector2i(3, 6), Vector2i(7, 6)])

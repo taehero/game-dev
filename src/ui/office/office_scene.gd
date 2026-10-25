@@ -7,6 +7,13 @@ const DESK_SCENE: PackedScene = preload("res://src/ui/office/desk_sprite.tscn")
 const STAFF_SCENE: PackedScene = preload("res://src/ui/office/staff_sprite.tscn")
 const BUBBLE_OFFSET: Vector2 = Vector2(0, -12)
 
+const REFRESH_SIGNALS: Array[StringName] = [
+	&"week_ticked", &"staff_hired", &"staff_resigned", &"staff_fired", &"equipment_changed",
+	&"project_changed", &"project_phase_changed", &"game_loaded",
+]
+
+signal room_changed
+
 var _offices: Dictionary[StringName, OfficeDef] = {}
 var _equipment_defs: Dictionary[StringName, EquipmentDef] = {}
 var _office_id: StringName = &""
@@ -20,6 +27,24 @@ var _staff: Dictionary[int, StaffSprite] = {}
 @onready var _bubbles: BubbleLayer = $Bubbles
 
 
+func _ready() -> void:
+	EventBus.points_gained.connect(_on_points_gained)
+	EventBus.bug_found.connect(_on_bug_found)
+	for sig_name: StringName in REFRESH_SIGNALS:
+		Signal(EventBus, sig_name).connect(_on_refresh_event)
+
+
+func _exit_tree() -> void:
+	if EventBus.points_gained.is_connected(_on_points_gained):
+		EventBus.points_gained.disconnect(_on_points_gained)
+	if EventBus.bug_found.is_connected(_on_bug_found):
+		EventBus.bug_found.disconnect(_on_bug_found)
+	for sig_name: StringName in REFRESH_SIGNALS:
+		var sig: Signal = Signal(EventBus, sig_name)
+		if sig.is_connected(_on_refresh_event):
+			sig.disconnect(_on_refresh_event)
+
+
 func configure(offices: Dictionary[StringName, OfficeDef], equipment_defs: Dictionary[StringName, EquipmentDef]) -> void:
 	_offices = offices
 	_equipment_defs = equipment_defs
@@ -30,6 +55,7 @@ func refresh(state: GameState, t: TuningDef) -> void:
 	var office_id: StringName = StateQueries.player_office_id(state)
 	if office_id != _office_id:
 		_rebuild_room(office_id)
+		room_changed.emit()
 	if _room == null:
 		return
 	var views: Array[SeatView] = StateQueries.seat_views(state, _offices[office_id], _equipment_defs, t)
@@ -62,10 +88,24 @@ func spawn_bubble(staff_id: int, kind: StringName) -> bool:
 	return _bubbles.spawn(sprite.position + BUBBLE_OFFSET, kind) != null
 
 
+func _on_refresh_event(_payload: Dictionary) -> void:
+	if GameRunner.session == null:
+		return
+	refresh(GameRunner.session.state, GameRunner.session.tuning)
+
+
+func _on_points_gained(payload: Dictionary) -> void:
+	spawn_bubble(int(payload.get("staff_id", -1)), StringName(payload.get("type", &"")))
+
+
+func _on_bug_found(payload: Dictionary) -> void:
+	spawn_bubble(int(payload.get("staff_id", -1)), &"bug")
+
+
 func _rebuild_room(office_id: StringName) -> void:
 	_office_id = office_id
 	_clear()
-	if not _offices.has(office_id):
+	if not _offices.has(office_id) or _offices[office_id].scene_path.is_empty():
 		push_warning("OfficeScene: unknown office '%s'" % office_id)
 		return
 	var packed: PackedScene = load(_offices[office_id].scene_path) as PackedScene

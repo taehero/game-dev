@@ -120,3 +120,19 @@ func test_date_and_money_labels() -> void:
 	var st: GameState = _st()
 	assert_eq(bar.get_node("%Date").text, StateQueries.date_text(st, GameRunner.session.tuning))
 	assert_eq(bar.get_node("%Money").text, tr("ui.hud.money").format({"money": StateQueries.player_money(st)}))
+
+
+func test_stage_count_comes_from_game_rules() -> void:
+	Fixtures.add_project(_st(), {"kind": Project.Kind.ENGINE, "phase": Project.Phase.PRODUCTION})
+	var bar: StatusBar = _bar()
+	_refresh(bar)
+	assert_string_contains(bar.get_node("%Stage").text, "1/1")
+
+
+func test_refreshes_on_game_loaded() -> void:
+	var bar: StatusBar = _bar()
+	var fresh: GameState = Fixtures.new_state(2)
+	Fixtures.add_project(fresh, {"title": "Loaded"})
+	GameRunner.session = GameSession.new(fresh, Fixtures.tuning())
+	EventBus.dispatch(&"game_loaded", {})
+	assert_eq(bar.get_node("%Title").text, "Loaded")
