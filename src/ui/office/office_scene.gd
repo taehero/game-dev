@@ -5,7 +5,9 @@ extends Node2D
 
 const DESK_SCENE: PackedScene = preload("res://src/ui/office/desk_sprite.tscn")
 const STAFF_SCENE: PackedScene = preload("res://src/ui/office/staff_sprite.tscn")
-const BUBBLE_OFFSET: Vector2 = Vector2(0, -24)
+## Slot-0 icon sits above the monitor top. Bug bubbles shift sideways of the points bubble.
+const BUBBLE_OFFSET: Vector2 = Vector2(0, -34)
+const BUG_BUBBLE_SHIFT: Vector2 = Vector2(12, 0)
 
 const REFRESH_SIGNALS: Array[StringName] = [
 	&"week_ticked", &"staff_hired", &"staff_resigned", &"staff_fired", &"equipment_changed",
@@ -126,7 +128,7 @@ func _on_bug_found(payload: Dictionary) -> void:
 	var sprite: StaffSprite = staff_sprite(sid)
 	if sprite == null:
 		return
-	var made: Bubble = _bubbles.spawn(sprite.position + BUBBLE_OFFSET, &"bug", 1)
+	var made: Bubble = _bubbles.spawn(sprite.position + BUBBLE_OFFSET + BUG_BUBBLE_SHIFT, &"bug", 1)
 	if made != null:
 		_bug_bubbles[sid] = made
 

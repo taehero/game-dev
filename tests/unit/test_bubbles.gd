@@ -32,12 +32,12 @@ func test_bubble_rises_and_frees_itself() -> void:
 	await wait_seconds(Bubble.LIFETIME_S + 0.2)
 	assert_eq(l.live_count(), 0)
 
-func test_successive_spawns_shift_x_deterministically() -> void:
+func test_successive_spawns_keep_x() -> void:
 	var l := _layer()
 	var xs: Array[float] = []
 	for i: int in 4:
 		xs.append(l.spawn(Vector2(10, 0), &"art").position.x)
-	assert_eq(xs, [7.0, 10.0, 13.0, 7.0] as Array[float])
+	assert_eq(xs, [10.0, 10.0, 10.0, 10.0] as Array[float])
 
 
 func test_bubble_rises_and_fades_midway() -> void:
@@ -115,8 +115,18 @@ func test_consecutive_spawns_differ_in_y() -> void:
 	assert_ne(a.position.y, b.position.y)
 
 
+func test_bubbles_use_two_vertical_slots() -> void:
+	var l := _layer()
+	var a := l.spawn(Vector2(5, 20), &"design", 1)
+	var b := l.spawn(Vector2(5, 20), &"tech", 1)
+	var c := l.spawn(Vector2(5, 20), &"art", 1)
+	assert_eq(a.position, Vector2(5, 20))
+	assert_eq(c.position, a.position)
+	assert_eq(a.position.y - b.position.y, float(BubbleLayer.SLOT_STEP_PX))
+
+
 func test_directly_created_unknown_bubble_frees_quietly() -> void:
 	var b := Bubble.new()
 	b.kind = &"juggling"
-	add_child(b)
+	add_child_autofree(b)
 	assert_true(b.is_queued_for_deletion())

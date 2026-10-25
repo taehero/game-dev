@@ -240,3 +240,17 @@ func test_one_points_and_one_bug_bubble_per_staff_per_frame() -> void:
 	await wait_process_frames(1)
 	EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
 	assert_eq((sc.get_node("Bubbles") as BubbleLayer).live_count(), 3)
+
+
+func test_bug_bubble_offset_sideways_of_points_bubble() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	EventBus.dispatch(&"points_gained", {"staff_id": s.owner.staff_id, "type": &"design", "amount": 3})
+	EventBus.dispatch(&"bug_found", {"staff_id": s.owner.staff_id})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	var pts: Bubble = layer.get_child(0)
+	var bug: Bubble = layer.get_child(1)
+	assert_eq(bug.position.x - pts.position.x, OfficeScene.BUG_BUBBLE_SHIFT.x)
+	assert_ne(bug.position.y, pts.position.y)

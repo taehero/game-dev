@@ -2,6 +2,9 @@ class_name BubbleLayer
 extends Node2D
 
 const MAX_BUBBLES := 24
+## Two vertical slots; the pill of one is about 12px tall.
+const SLOTS := 2
+const SLOT_STEP_PX := 14
 
 var _spawned: int = 0
 
@@ -14,7 +17,7 @@ func spawn(at: Vector2, kind: StringName, amount: int = 0) -> Bubble:
 	var b := Bubble.new()
 	b.kind = kind
 	b.amount = amount
-	b.position = at + Vector2(((_spawned % 3) - 1) * 3, -(_spawned % 3) * 8)
+	b.position = at + Vector2(0, -(_spawned % SLOTS) * SLOT_STEP_PX)
 	_spawned += 1
 	add_child(b)
 	return b

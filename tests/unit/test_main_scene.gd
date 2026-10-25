@@ -90,7 +90,7 @@ func test_office_origin_centres_rooms() -> void:
 
 func test_dock_opens_panel_host() -> void:
 	var m := _main()
-	m.get_node("Dock/Row/Tab_market").button_pressed = true
+	(m.get_node("Dock") as Dock).select(&"market")
 	assert_eq((m.get_node("PanelHost") as PanelHost).current_tab(), &"market")
 
 
@@ -106,7 +106,7 @@ func test_second_press_on_open_tab_closes_panel() -> void:
 
 func test_panel_close_releases_dock() -> void:
 	var m := _main()
-	m.get_node("Dock/Row/Tab_market").button_pressed = true
+	(m.get_node("Dock") as Dock).select(&"market")
 	m.get_node("PanelHost").get_node("%Close").pressed.emit()
 	assert_eq((m.get_node("Dock") as Dock).open_tab(), &"")
 	assert_false((m.get_node("PanelHost") as PanelHost).visible)
