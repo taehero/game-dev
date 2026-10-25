@@ -67,7 +67,7 @@ func test_speed_button_text_is_translated() -> void:
 
 func test_main_scene_fills_labels_at_launch() -> void:
 	var main: Control = add_child_autofree(load("res://src/ui/main.tscn").instantiate())
-	var label: Label = main.get_node("DebugHud/Box/DateLabel")
+	var label: Label = main.get_node("DebugLayer/DebugHud/Box/DateLabel")
 	var st: GameState = GameRunner.session.state
 	assert_ne(label.text, "")
 	assert_eq(label.text, StateQueries.date_text(st, GameRunner.session.tuning))
