@@ -2,7 +2,7 @@ extends Control
 
 const OFFICE_SCALE: int = 2
 const OFFICE_SCENE: PackedScene = preload("res://src/ui/office/office_scene.tscn")
-const OFFICE_AREA := Rect2i(0, 0, 640, 316)
+const OFFICE_AREA := Rect2i(0, 30, 640, 296)
 
 
 static func office_origin(room_px: Vector2i) -> Vector2i:
@@ -17,7 +17,9 @@ var _office: OfficeScene
 
 
 func _ready() -> void:
-	(get_node("TabBarShell") as TabBarShell).tab_changed.connect(_on_tab_changed)
+	(get_node("Dock") as Dock).tab_changed.connect(_on_tab_changed)
+	(get_node("PanelHost") as PanelHost).close_requested.connect((get_node("Dock") as Dock).close_all)
+	(get_node("ProjectCard") as ProjectCard).configure(_content_names())
 	_office = OFFICE_SCENE.instantiate() as OfficeScene
 	_office.scale = Vector2(OFFICE_SCALE, OFFICE_SCALE)
 	get_node("OfficeSlot").add_child(_office)
@@ -35,6 +37,21 @@ func _ready() -> void:
 func _office_content() -> Array:
 	var db: ContentDB = ContentDB.active()
 	return [db.offices, db.equipment]
+
+
+## Ruling 13: id -> name_key for every topic and genre, for the project card.
+func _content_names() -> Dictionary[StringName, StringName]:
+	var db: ContentDB = ContentDB.active()
+	var out: Dictionary[StringName, StringName] = {}
+	for id: StringName in db.topics:
+		out[id] = db.topics[id].name_key
+	for id: StringName in db.genres:
+		out[id] = db.genres[id].name_key
+	return out
+
+
+func show_popup(popup: PopupCard) -> void:
+	get_node("Popups").add_child(popup)
 
 
 func _centre_office() -> void:

@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://src/ui/hud/tab_bar_shell.gd" id="1"]
-
-[node name="TabBarShell" type="HBoxContainer"]
-script = ExtResource("1")
