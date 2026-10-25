@@ -1,5 +1,9 @@
 extends GutTest
 
+func after_each() -> void:
+	TranslationServer.set_locale("en")
+
+
 func _layer() -> BubbleLayer:
 	return add_child_autofree(BubbleLayer.new())
 
@@ -54,3 +58,51 @@ func test_oldest_bubble_is_freed_first_at_cap() -> void:
 	l.spawn(Vector2.ZERO, &"art")
 	assert_true(first.is_queued_for_deletion(), "oldest freed")
 	assert_false(second.is_queued_for_deletion())
+
+
+func test_points_bubble_shows_amount_pill() -> void:
+	var b := _layer().spawn(Vector2.ZERO, &"design", 3)
+	var pill: PanelContainer = b.get_node("Pill")
+	assert_eq(b.pill_text(), tr("ui.bubble.points").format({"amount": 3, "type": tr("ui.point.design")}))
+	assert_true(pill.visible)
+	var box: StyleBoxFlat = pill.get_theme_stylebox(&"panel") as StyleBoxFlat
+	assert_eq(box.bg_color, UiPalette.POINT_COLORS[&"design"])
+
+
+func test_bug_bubble_says_bug() -> void:
+	var b := _layer().spawn(Vector2.ZERO, &"bug")
+	assert_eq(b.pill_text(), tr("ui.bubble.bug"))
+	assert_true((b.get_node("Pill") as PanelContainer).visible)
+
+
+func test_zero_amount_hides_pill() -> void:
+	var b := _layer().spawn(Vector2.ZERO, &"art")
+	assert_false((b.get_node("Pill") as PanelContainer).visible)
+
+
+func test_icon_uses_emote_cell() -> void:
+	var l := _layer()
+	for kind: StringName in OfficeArt.EMOTES:
+		var b := l.spawn(Vector2.ZERO, kind)
+		var tex := (b.get_node("Icon") as Sprite2D).texture as AtlasTexture
+		assert_eq(tex.region, Rect2(OfficeArt.region(OfficeArt.EMOTES[kind])), str(kind))
+
+
+func test_pill_renders_at_logical_scale() -> void:
+	var root: Node2D = add_child_autofree(Node2D.new())
+	root.scale = Vector2(2, 2)
+	var l := BubbleLayer.new()
+	root.add_child(l)
+	var b := l.spawn(Vector2.ZERO, &"tech", 1)
+	await wait_process_frames(1)
+	assert_true((b.get_node("Pill") as Control).get_global_transform().get_scale().is_equal_approx(Vector2.ONE))
+
+
+func test_cap_counts_bubbles_not_pills() -> void:
+	var l := _layer()
+	for i: int in 30:
+		l.spawn(Vector2.ZERO, &"tech", 5)
+	await wait_process_frames(1)
+	assert_eq(l.live_count(), BubbleLayer.MAX_BUBBLES)
+	for child: Node in l.get_children():
+		assert_true(child is Bubble)

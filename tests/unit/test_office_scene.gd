@@ -127,6 +127,16 @@ func test_points_gained_spawns_bubble_at_staff() -> void:
 	assert_eq((layer.get_child(0) as Bubble).kind, &"design")
 
 
+func test_points_gained_amount_reaches_bubble() -> void:
+	var sc := _scene()
+	var s := _state()
+	_session(s)
+	sc.refresh(s, Fixtures.tuning())
+	EventBus.dispatch(&"points_gained", {"staff_id": s.owner.staff_id, "type": &"design", "amount": 4})
+	var layer: BubbleLayer = sc.get_node("Bubbles")
+	assert_eq((layer.get_child(0) as Bubble).amount, 4)
+
+
 func test_bug_found_spawns_bug_bubble() -> void:
 	var sc := _scene()
 	var s := _state()

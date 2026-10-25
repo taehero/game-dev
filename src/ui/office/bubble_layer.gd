@@ -5,7 +5,7 @@ const MAX_BUBBLES := 24
 
 var _spawned: int = 0
 
-func spawn(at: Vector2, kind: StringName) -> Bubble:
+func spawn(at: Vector2, kind: StringName, amount: int = 0) -> Bubble:
 	if not Bubble.COLORS.has(kind):
 		push_warning("BubbleLayer: unknown bubble kind '%s'" % kind)
 		return null
@@ -13,6 +13,7 @@ func spawn(at: Vector2, kind: StringName) -> Bubble:
 		_free_oldest()
 	var b := Bubble.new()
 	b.kind = kind
+	b.amount = amount
 	b.position = at + Vector2(((_spawned % 3) - 1) * 3, 0)
 	_spawned += 1
 	add_child(b)

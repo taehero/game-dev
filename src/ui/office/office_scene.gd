@@ -81,11 +81,11 @@ func staff_sprite(staff_id: int) -> StaffSprite:
 	return _staff.get(staff_id, null)
 
 
-func spawn_bubble(staff_id: int, kind: StringName) -> bool:
+func spawn_bubble(staff_id: int, kind: StringName, amount: int = 0) -> bool:
 	var sprite: StaffSprite = staff_sprite(staff_id)
 	if sprite == null:
 		return false
-	return _bubbles.spawn(sprite.position + BUBBLE_OFFSET, kind) != null
+	return _bubbles.spawn(sprite.position + BUBBLE_OFFSET, kind, amount) != null
 
 
 func _on_refresh_event(_payload: Dictionary) -> void:
@@ -95,7 +95,7 @@ func _on_refresh_event(_payload: Dictionary) -> void:
 
 
 func _on_points_gained(payload: Dictionary) -> void:
-	spawn_bubble(int(payload.get("staff_id", -1)), StringName(payload.get("type", &"")))
+	spawn_bubble(int(payload.get("staff_id", -1)), StringName(payload.get("type", &"")), int(payload.get("amount", 0)))
 
 
 func _on_bug_found(payload: Dictionary) -> void:
