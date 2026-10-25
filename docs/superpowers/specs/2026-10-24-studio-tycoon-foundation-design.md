@@ -129,7 +129,7 @@ The era is not stored. It is derived from `week` through the era table.
 
 **Company** — one type for the player, AI competitors and AI publishers.
 
-- `id`, `name`, `kind` (`PLAYER`, `AI_DEVELOPER`, `AI_PUBLISHER`), `money` (int, whole currency units), `reputation` (0–100), `fan_count`
+- `id`, `name`, `kind` (`PLAYER`, `AI_DEVELOPER`, `AI_PUBLISHER`, `BANK`, `LENDER`, `VENDOR`), `money` (int, whole currency units), `reputation` (0–100), `fan_count`; M2 adds `office_id`, `research_points`, `unlocked`, `dev_kits`, `months_negative`, `awards` (M2 spec §4.2)
 - Hook for later: subsidiaries, ownership and acting as a publisher use the same type. This slice creates the player and 3 AI publishers.
 
 **Staff**
@@ -139,24 +139,27 @@ The era is not stored. It is derived from `week` through the era table.
 - `traits`: Array[StringName] that refer to `TraitDef` content
 - `morale` (0–100), `burnout` (0–100), `salary` (per month)
 - `assigned_project_id` (project id, or -1 for none) and `role` (`NONE`, `LEAD_DESIGN`, `LEAD_TECH`, `LEAD_ART`, `MEMBER`)
+- M2 adds `exp`, `seat_index`, `last_raise_week`, `asking_raise`, `is_owner`, `level`, `title`, `hired_week`, `week_points` (M2 spec §4.3, §7.2a)
 
 **Project**
 
 - `id`, `company_id`, `title`
 - `config`: platform id, engine id, genre id, topic id, art style id, business model id
-- `phase` (see §6), `stage_index`, `stage_progress`
-- `focus`: per stage, a split between tech and creative (sliders that sum to 100)
+- `phase` (see §6), `stage_index`, `stage_progress` (bp, 0–10000)
+- `focus`: nine sliders in bp, three per stage, each stage's three summing to 10000 (M2 spec §4.5)
 - `points`: design, tech, art, audio (accumulated quality)
 - `bugs` (int), `hype` (0–100)
 - `deadline_week`, `crunch` (bool), `delay_weeks_total`
 - `contract_id` (or -1)
 - After release: `release_week`, `review_results`, `units_sold`, `revenue`, `user_score`, `sentiment`
+- M2 adds `kind`, `size_id`, `engine_id`, `features`, `weekly_units`, `promo_until_week`, `promo_discount_bp`, `mod_tools`, `dlc_count` (M2 spec §4.5)
 
 **Contract** — generic agreement between two companies.
 
-- `id`, `kind` (this slice: `PUBLISHING`), `party_a`, `party_b`
+- `id`, `kind` (`PUBLISHING`; M2 adds `OUTSOURCE`, `CONTRACT_WORK`, `ENGINE_LICENSE`), `party_a`, `party_b`
 - `advance`, `revenue_share_pct`, `deadline_week`, `late_penalty_per_week`
 - Typed constraint fields: `locked_genre` (StringName, empty for none), `locked_platform` (StringName, empty for none), `min_score` (int, 0 for none). New constraint kinds add new typed fields.
+- M2 adds `price`, `royalty_bp`, `target_points` (per point type), `quality_roll`, `delivery_week`, `project_id`, `deliverable` (M2 spec §4.6).
 - Hook for later: store revenue cut, console exclusives and outsourcing reuse this type with new `kind` values.
 
 **Market**
@@ -177,16 +180,17 @@ The era is not stored. It is derived from `week` through the era table.
 | Class | Key fields |
 |---|---|
 | `EraDef` | id, start/end year, allowed business models, office level, max staff |
-| `PlatformDef` | id, start/end week, `owner_company_id` (-1 for AI-owned), base install base, growth curve, tech ceiling, handheld flag |
+| `PlatformDef` | id, `name_key`, `kind`, `launch_week`, `end_week`, `owner_company_id` (-1 for AI-owned), `install_curve`, `tech_ceiling`, `handheld`, `dev_kit_cost`, `rumor_weeks`, `genre_fit_bp` |
 | `EngineDef` | id, era, tech bonus, cost |
-| `GenreDef` | id, hidden ideal focus weights per stage, base audience |
-| `TopicDef` | id, genre affinities |
+| `GenreDef` | id, `name_key`, `ideal_sliders` (nine bp values), base audience |
+| `TopicDef` | id, `name_key`, `genre_fit_bp` (genre id to bp) |
 | `ArtStyleDef` | id, art point multiplier, tech cost |
 | `BusinessModelDef` | id, revenue formula parameters |
 | `TraitDef` | id, stat modifiers, conflicting trait ids, synergy trait ids |
 | `WorldEventDef` | id, probability window, duration, taste modifiers, segment modifiers |
 | `ReviewOutletDef` | id, dimension weights, bias |
 | `ReviewTemplateDef` | id, dimension, strength or weakness, threshold, `tr` key, required params |
+| M2 classes | `OfficeDef`, `EquipmentDef`, `EngineFeatureDef`, `LicensedEngineDef`, `ResearchDef`, `ProjectSizeDef` (with `price`, `par_points`), `LevelDef`, `PerkDef`, `MarketingChannelDef`, `AwardDef`: see M2 spec §4.7 |
 
 All player-facing text in content is a `tr()` key, never a literal string.
 
@@ -213,19 +217,9 @@ A future player-owned console is a `PlatformDef`-shaped runtime record whose `ow
 
 ### 4.2 Tick order
 
-Each tick runs these steps in this order:
+The tick order has 15 steps. See M2 spec §5, which replaces the nine-step list that was here. `Simulation.SYSTEMS` holds all 15.
 
-1. `CalendarSystem`: `week += 1`; emit `era_changed` if the era changes
-2. `WorldEventSystem`: start and end events; apply market modifiers
-3. `MarketSystem`: taste drift and segment growth
-4. `StaffSystem`: morale, burnout, crunch effects, resignation checks
-5. `ProductionSystem`: stage progress, quality points, bugs
-6. `MarketingSystem`: hype growth and decay
-7. `SalesSystem`: weekly units and revenue for released games
-8. `LiveOpsSystem`: patch and DLC progress, forum posts, sentiment
-9. `FinanceSystem`: salaries and rent (on the first week of each month), contract payments and penalties, bankruptcy check
-
-Systems push events into a queue during the tick. `GameRunner` flushes the queue to `EventBus` after step 9, so the UI always sees the complete state of a tick.
+Systems push events into a queue during the tick. `GameRunner` flushes the queue to `EventBus` after the last step, so the UI always sees the complete state of a tick.
 
 ## 5. Commands and EventBus
 
@@ -248,7 +242,7 @@ func apply(ctx: TickContext) -> void:
 
 ### 5.2 EventBus signals
 
-`week_ticked`, `era_changed`, `money_changed`, `project_phase_changed`, `project_changed`, `decision_required`, `review_published`, `sales_updated`, `staff_hired`, `staff_resigned`, `forum_post_created`, `command_rejected`.
+`week_ticked`, `era_changed`, `money_changed`, `project_phase_changed`, `project_changed`, `decision_required`, `review_published`, `sales_updated`, `staff_hired`, `staff_resigned`, `forum_post_created`, `command_rejected`. M2 adds `points_gained`, `bug_found`, `project_stage_changed`, `research_done`, `platform_rumored`, `platform_launched`, `platform_retired`, `raise_requested`, `staff_fired`, `equipment_changed`, `loan_taken`, `payment_missed`, `repossessed`, `contract_offered`, `contract_completed`, `award_result`, `promotion_started`, `game_over`, `game_loaded` (M2 spec §10).
 
 ## 6. Project lifecycle
 
@@ -264,7 +258,7 @@ CONCEPT -> PRODUCTION -> [POLISH] -> RELEASED -> LIVE -> RETIRED
 
 ### 6.2 PRODUCTION
 
-- Three stages. Each stage has a tech-versus-creative focus slider.
+- Three stages. Each stage has three sliders (Code / Design / Story, Levels / Characters / AI, Graphics / Audio / Balance), nine in all, each stage's three summing to 10000 bp (M2 spec §6.3).
 - Each `GenreDef` has hidden ideal weights per stage. Market taste shifts these ideals slightly over time. The player learns them from review text and from post-mortem notes after release.
 - Weekly points per staff member = skill × role multiplier × morale factor × chemistry factor.
 - **Chemistry:** trait pairs listed as conflicting in `TraitDef` reduce efficiency and raise the bug rate for both people. Synergy pairs do the opposite. A lead with low skill in their role's discipline also raises the bug rate.
