@@ -1,5 +1,8 @@
 # Credits
 
-| Asset | Author | License | Source | Files |
+| Asset | Files | Source | Author | Licence |
 |---|---|---|---|---|
-| Noto Sans Thai (variable, wdth/wght) | The Noto Project Authors | SIL OFL 1.1 (the one non-CC0 asset) | https://github.com/google/fonts/tree/main/ofl/notosansthai | `assets/fonts/NotoSansThai-Variable.ttf`, `assets/fonts/OFL.txt` |
+| Kenney 1-Bit Pack | assets/art/kenney_1bit/colored_packed.png, assets/art/kenney_1bit/License.txt | https://kenney.nl/assets/1-bit-pack | Kenney | CC0 1.0 |
+| Noto Sans Thai | assets/fonts/NotoSansThai-Variable.ttf | https://github.com/google/fonts/tree/main/ofl/notosansthai | Google / Noto project | SIL Open Font License 1.1 (assets/fonts/OFL.txt) |
+
+Release exports must include `assets/**/*.txt` and `assets/CREDITS.md` (export filter for non-resource files).
