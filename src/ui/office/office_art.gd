@@ -1,10 +1,10 @@
 class_name OfficeArt
 extends RefCounted
-## Single source of art coordinates (Kenney 1-Bit Pack, colored_packed.png, CC0).
+## Single source of art coordinates (Kenney 1-Bit Pack, colored-transparent_packed.png, CC0).
 ## Cells are (column, row) in 16 px tiles; the sheet is 49 x 22 with no spacing.
 
 const TILE: int = 16
-const SHEET_PATH: String = "res://assets/art/kenney_1bit/colored_packed.png"
+const SHEET_PATH: String = "res://assets/art/kenney_1bit/colored-transparent_packed.png"
 const MARGIN: Vector2i = Vector2i(0, 0)
 const SEPARATION: Vector2i = Vector2i(0, 0)
 
