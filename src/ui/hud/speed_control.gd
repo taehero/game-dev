@@ -36,8 +36,9 @@ func _translate() -> void:
 	for s: int in SPEEDS:
 		var seg: Button = _seg(s)
 		if s == 0:
-			seg.icon = UiIcons.texture(&"pause")
-			seg.expand_icon = true
+			seg.icon = _cropped(UiIcons.texture(&"pause"))
+			seg.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			seg.add_theme_constant_override(&"icon_max_width", 10)
 			seg.text = ""
 			seg.tooltip_text = tr("ui.hud.pause")
 		else:
@@ -49,9 +50,24 @@ func _seg(s: int) -> Button:
 
 
 func _choose(s: int) -> void:
-	_seg(s).set_pressed_no_signal(true)
 	if GameRunner.session != null:
 		GameRunner.set_speed(s)
+		sync(GameRunner.session.speed)
+	else:
+		sync(s)
+
+
+## Crops the transparent padding so a small glyph reads at button size.
+func _cropped(tex: Texture2D) -> Texture2D:
+	if tex == null:
+		return null
+	var used: Rect2i = tex.get_image().get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0:
+		return tex
+	var atlas := AtlasTexture.new()
+	atlas.atlas = tex
+	atlas.region = Rect2(used)
+	return atlas
 
 
 func sync(speed: int) -> void:

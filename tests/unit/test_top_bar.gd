@@ -51,12 +51,44 @@ func test_pill_tooltips_translated() -> void:
 	assert_eq((bar.get_node("%Fans") as ResourcePill).tooltip_text, tr("ui.pill.fans"))
 
 
+func _pressed_count(speed: SpeedControl) -> int:
+	var n: int = 0
+	for sp: int in SpeedControl.SPEEDS:
+		if (speed.get_node("Row/Seg_%d" % sp) as Button).button_pressed:
+			n += 1
+	return n
+
+
 func test_speed_segment_sets_speed_and_sync() -> void:
 	var bar: TopBar = _bar()
-	var seg: Button = bar.get_node("%Speed/Row/Seg_2")
-	seg.button_pressed = true
+	var speed: SpeedControl = bar.get_node("%Speed")
+	speed.sync(1)
+	GameRunner.session.speed = 1
+	(speed.get_node("Row/Seg_2") as Button).pressed.emit()
 	assert_eq(GameRunner.session.speed, 2)
-	assert_eq((bar.get_node("%Speed") as SpeedControl).active_speed(), 2)
+	assert_eq(speed.active_speed(), 2)
+	assert_eq(_pressed_count(speed), 1)
+
+
+func test_auto_pause_shows_on_next_event() -> void:
+	var bar: TopBar = _bar()
+	var speed: SpeedControl = bar.get_node("%Speed")
+	GameRunner.session.speed = 2
+	EventBus.week_ticked.emit({})
+	assert_eq(speed.active_speed(), 2)
+	GameRunner.session.speed = 0
+	EventBus.week_ticked.emit({})
+	assert_eq(speed.active_speed(), 0)
+
+
+func test_translation_change_updates_tooltip_and_segments() -> void:
+	var bar: TopBar = _bar()
+	TranslationServer.set_locale("th")
+	bar.notification(Node.NOTIFICATION_TRANSLATION_CHANGED)
+	assert_eq((bar.get_node("%Fans") as ResourcePill).tooltip_text, tr("ui.pill.fans"))
+	assert_eq((bar.get_node("%Fans") as ResourcePill).tooltip_text, "แฟน")
+	assert_eq((bar.get_node("%Speed/Row/Seg_1") as Button).text, tr("ui.hud.speed").format({"speed": 1}))
+	assert_eq((bar.get_node("%Speed/Row/Seg_0") as Button).tooltip_text, "หยุด")
 
 
 func test_sync_unknown_speed_presses_none() -> void:
@@ -70,6 +102,9 @@ func test_sync_unknown_speed_presses_none() -> void:
 
 func test_refreshes_from_replaced_session_on_game_loaded() -> void:
 	var bar: TopBar = _bar()
+	GameRunner.session.speed = 2
+	EventBus.week_ticked.emit({})
+	assert_eq((bar.get_node("%Speed") as SpeedControl).active_speed(), 2)
 	var fresh: GameState = Fixtures.new_state(2)
 	fresh.week = 60
 	GameRunner.session = GameSession.new(fresh, Fixtures.tuning())
