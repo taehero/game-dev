@@ -16,6 +16,23 @@ static func player_money(state: GameState) -> int:
 	return state.companies[state.player_company_id].money
 
 
+## Top-bar view: date text, player money, player fans, active project hype.
+static func resource_view(state: GameState, t: TuningDef) -> Dictionary:
+	var fans: int = 0
+	if state.companies.has(state.player_company_id):
+		fans = state.companies[state.player_company_id].fan_count
+	var hype: int = 0
+	var project_id: int = active_project_id(state)
+	if state.projects.has(project_id):
+		hype = state.projects[project_id].hype
+	return {
+		"date_text": date_text(state, t),
+		"money": player_money(state),
+		"fans": fans,
+		"hype": hype,
+	}
+
+
 static func staff_count(state: GameState, company_id: int) -> int:
 	return state.staff_of(company_id).size()
 
