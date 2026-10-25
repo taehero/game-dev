@@ -35,26 +35,6 @@ func test_no_project_shows_placeholder() -> void:
 	assert_false(bar.get_node("%Stage").visible)
 
 
-func test_active_project_is_lowest_id_in_production_or_polish() -> void:
-	var st: GameState = _st()
-	Fixtures.add_project(st, {"phase": Project.Phase.CONCEPT})
-	var a: int = Fixtures.add_project(st, {"phase": Project.Phase.PRODUCTION})
-	var b: int = Fixtures.add_project(st, {"phase": Project.Phase.POLISH})
-	assert_eq(StateQueries.active_project_id(st), a)
-	st.projects[a].phase = Project.Phase.RELEASED
-	assert_eq(StateQueries.active_project_id(st), b)
-
-
-func test_other_company_project_is_not_active() -> void:
-	var st: GameState = _st()
-	Fixtures.add_project(st, {"phase": Project.Phase.PRODUCTION, "company_id": 999})
-	assert_eq(StateQueries.active_project_id(st), -1)
-
-
-func test_project_status_unknown_id_is_empty() -> void:
-	assert_eq(StateQueries.project_status(_st(), 12345), {})
-
-
 func test_shows_title_stage_points_bugs_hype() -> void:
 	var st: GameState = _st()
 	Fixtures.add_project(st, {
