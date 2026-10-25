@@ -69,6 +69,8 @@ Every tuning number named in this spec (UPPER_SNAKE names such as `WAGE_PER_SKIL
 | `candidates` | `Array[Candidate]` | Hiring pool, refreshed monthly |
 | `game_over` | `bool` | Set by bankruptcy |
 
+`GameState.new_game` creates, in this id order: the player company, the owner `Staff` (`is_owner`, seat 0, all skills `owner_start_skill`, salary 0), one BOUGHT starter `Equipment` at seat 0, `OwnerProfile`, one BANK, one LENDER, two VENDORs and three AI_PUBLISHERs. The office is `tuning.start_office_id`. An AI company's `name` holds a `tr()` key; the UI shows `tr(company.name)`.
+
 ### 4.2 Company additions
 
 `office_id: StringName` (content `OfficeDef`), `research_points: int`, `unlocked: Array[StringName]` (research ids done), `dev_kits: Array[StringName]` (platform ids), `months_negative: int`, `awards: Array[StringName]`.
@@ -78,8 +80,11 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 ### 4.3 Staff additions
 
 - `exp: Dictionary[StringName, int]` (same keys as `skills`); every 100 exp in a skill raises it by 1 (cap 100).
-- `seat_index: int` (-1 = none); a staff member without a seat produces 0 points.
+- `seat_index: int` (-1 = none); a staff member without a seat produces 0 points. Seats are derived: a seat is taken when a staff member of that company has that `seat_index`, and the seat count comes from `OfficeDef.seats`.
+- A **worker** is a staff member who is seated, has equipment at the same seat index, and is assigned to the project. Only workers produce.
 - `last_raise_week: int`, `asking_raise: int` (0 = none pending).
+- `hired_week: int`, set by hiring. M2b uses it for the hire anniversary.
+- `week_points: Dictionary[StringName, int]`: the points this staff member produced in the most recent Production step. Production clears it at the start of every tick, so Staff, Owner and Research (steps 5–7) read the previous tick's work.
 - `is_owner: bool`. The owner is a Staff with `is_owner = true`: sits at a desk, produces points, cannot be fired, never resigns.
 
 ### 4.4 New entities
@@ -92,7 +97,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 
 **Loan** — `id`, `company_id`, `lender_id` (a BANK or LENDER company), `principal`, `balance`, `rate_bp_per_month`, `payment_per_month`, `missed_payments: int`, `taken_week`.
 
-**Candidate** — `id`, `name: String`, `skills: Dictionary[StringName, int]`, `traits: Array[StringName]`, `asking_salary: int`, `expires_week: int`. Not a Staff until hired.
+**Candidate** — `id`, `name: String`, `skills: Dictionary[StringName, int]`, `traits: Array[StringName]`, `level: int` (a `Staff.Level` value; the validator range-checks it), `asking_salary: int`, `expires_week: int`. Not a Staff until hired.
 
 ### 4.5 Project changes
 
@@ -100,6 +105,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 - `size_id: StringName` (`ProjectSizeDef`: SMALL, MEDIUM in the 1980s).
 - `focus` becomes `Array[int]` of 9 values: 3 sliders per stage, each stage's 3 values summing to 10000 (bp). Stage slider names: Stage 1 Code / Design / Story; Stage 2 Levels / Characters / AI; Stage 3 Graphics / Audio / Balance.
 - `engine_id: int` (-1 = licensed engine named in `config.engine`).
+- `stage_progress` is in bp (0–10000), not 0–100. Weekly progress uses ceiling division, so a 6-week stage ends in exactly 6 weeks.
 - `features: Array[StringName]` chosen features for the game.
 - `review_results: Array[ReviewResult]` (deferred from M1): each `outlet_id: StringName`, `score_x10: int`, `strength_key: StringName`, `weakness_key: StringName`.
 - `weekly_units: Array[int]` (sales history for the graph, capped at 104 entries).
@@ -107,33 +113,33 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 
 ### 4.6 Contract changes
 
-`Contract.Kind` adds `OUTSOURCE` (we pay a vendor), `CONTRACT_WORK` (a publisher pays us), `ENGINE_LICENSE` (we pay a licensor). New typed fields: `price: int`, `royalty_bp: int`, `target_points: int`, `quality_roll: int` (0–100, fixed at signing from rng, hidden), `delivery_week: int`, `project_id: int` (-1 = none), `deliverable: StringName` (e.g. `art`, `audio`, `engine`).
+`Contract.Kind` adds `OUTSOURCE` (we pay a vendor), `CONTRACT_WORK` (a publisher pays us), `ENGINE_LICENSE` (we pay a licensor). New typed fields: `price: int`, `royalty_bp: int`, `target_points: Dictionary[StringName, int]` (target per point type), `quality_roll: int` (0–100, fixed at signing from rng, hidden), `delivery_week: int`, `project_id: int` (-1 = none), `deliverable: StringName` (e.g. `art`, `audio`, `engine`). For `ENGINE_LICENSE`, `deliverable` holds the `LicensedEngineDef` id.
 
 ### 4.7 New content resources
 
 | Class | Key fields |
 |---|---|
-| `OfficeDef` | id, seats, rent_per_month, electricity_base, tilemap scene path, desk positions (Array of Vector2i) |
+| `OfficeDef` | id, name_key, seats, rent_per_month, electricity_base, moving_cost, `scene_path`, `desk_positions` (Array of Vector2i). `scene_path` and `desk_positions` of `office_garage` and `office_small` are owned by the M2d room layouts. |
 | `EquipmentDef` | id, era tier, price, lease_per_month, power_per_month, speed_bp, bug_bp, recommended_until_year |
 | `EngineFeatureDef` | id, research id required, tech_cap_add, dev_weeks |
-| `LicensedEngineDef` | id, available years, fee, royalty_bp, tech_cap, features |
+| `LicensedEngineDef` | id, year_from, year_to, fee, royalty_bp, tech_cap, features |
 | `ResearchDef` | id, cost_rp, prerequisites, unlocks (topic, genre, feature, size, channel ids) |
-| `ProjectSizeDef` | id, base_weeks, min_staff, cost_multiplier_bp, audience_bp |
+| `ProjectSizeDef` | id, base_weeks, min_staff, cost_multiplier_bp, audience_bp, `price` (per unit), `par_points` (points that score a par review) |
 | `LevelDef` | level, min best skill, min total exp, salary_bp, output_bp |
 | `PerkDef` | id, path (DEV/BUSINESS), max_rank, effects per rank (Dictionary of effect id → bp) |
 | `MarketingChannelDef` | id, era years, cost, hype_gain, audience segment |
 | `AwardDef` | id, fictional name key, week_in_year, entry_fee, prize, fans |
 
-Existing `PlatformDef` gains: `dev_kit_cost`, `install_curve: Array[int]` (install base per quarter since launch), `rumor_weeks: int`.
+Existing `PlatformDef` gains: `dev_kit_cost`, `install_curve: Array[int]` (install base per quarter since launch), `rumor_weeks: int`, `genre_fit_bp: Dictionary[genre_id, int]` (platform-fit review dimension). Existing `TopicDef` gains `genre_fit_bp` (§6.2). `GenreDef` gains `ideal_sliders` (§6.3). All content values are ints, never floats.
 
 ### 4.8 Entity removal (one path for everything)
 
 New `src/core/removal.gd` (`class_name Removal`) is the only code allowed to delete entities: `remove_staff`, `remove_equipment`, `remove_contract`, `remove_loan`, `remove_decision`, `remove_candidate`. Each scrubs every reference before deleting:
 
-- `staff`: clear its seat; drop it from any project assignment; cancel decisions whose `related_ids` contain it.
+- `staff`: clear its seat; drop it from any project assignment; cancel decisions whose `related_ids` contain it. The owner cannot be removed.
 - `equipment`: free the seat.
 - `contract`: set `project.contract_id = -1` where referenced; cancel related decisions.
-- Any removal of an id listed in a decision's `related_ids` removes that decision.
+- Any removal of an id listed in a decision's `related_ids` removes that decision. This includes `remove_decision`: removing a decision also drops decisions whose `related_ids` contain its id.
 
 Every removal type has a test that runs `GameState.validate_dict(state.to_dict())` afterwards and expects `true`. A rule test forbids `.erase(` on `state.staff/equipment/contracts/loans/projects` outside `removal.gd`.
 
@@ -159,15 +165,19 @@ Every removal type has a test that runs `GameState.validate_dict(state.to_dict()
 14. Finance: monthly salaries, rent, electricity, leases, loan payments, depreciation; repossession; bankruptcy check
 15. **Hiring**: monthly candidate refresh and expiry
 
-New systems are files in `src/systems/`; `Simulation.SYSTEMS` is updated in the plan that adds each one.
+`Simulation.SYSTEMS` lists all 15 steps from M2a. Owner, Contracts, Hiring, Awards, Marketing and LiveOps are no-op stubs in M2a, and Staff and Finance keep their M1 behaviour (Staff is still a stub). M2b and M2c fill them in, so the two parallel plans never both edit the array. Each system is a file in `src/systems/`.
 
 ## 6. Game loop (M2a)
 
 ### 6.1 Concept
 
-Commands: `StartProject(kind, title, size_id, platform_id, topic_id, genre_id, engine_ref, features)`.
+Commands: `StartProject` has two static constructors, `game(...)` and `engine(...)`. `engine_ref` is split into `engine_id: int` and `licensed_engine_id: StringName` (used when `engine_id == -1`). `StartProject` assigns every free worker of the company to the new project (there is no AssignStaff in M2).
 
 Validation: platform on sale and dev kit owned; topic, genre, size and features unlocked; enough free seated staff for `min_staff`; engine available. A publisher deal (foundation §6.1) can attach at this point.
+
+Unlock rule: an item (topic, genre, size, feature, channel) is unlocked when no `ResearchDef.unlocks` lists it, or when the company has done one research that lists it. A platform with `dev_kit_cost == 0` counts as owned. The built-in licensed engine `lic_engine_homebrew` (fee 0) needs no contract. Any other licensed engine needs an `ENGINE_LICENSE` contract (M2b).
+
+Content access: `ContentDB.active()` is a process-wide instance (loaded lazily from `res://data`; `ContentDB.use(db)` replaces it). Commands read it in `validate`; `TickContext.content` carries it to systems. Tests install a small in-memory DB through `Fixtures.new_state()`.
 
 ### 6.2 Topic + genre fit
 
@@ -175,10 +185,11 @@ Validation: platform on sale and dev kit owned; topic, genre, size and features 
 
 ### 6.3 Production
 
-- Three stages; each stage lasts `size.base_weeks / 3` weeks at full staffing.
+- Three stages; each stage lasts `size.base_weeks / 3` weeks at full staffing. After the last stage a GAME goes to POLISH. An ENGINE project has one stage (its length is the sum of feature `dev_weeks`).
+- Each Production step does, per project: (1) clear every `Staff.week_points` (always, first); (2) only in PRODUCTION: points, bug rolls and stage progress; (3) only in POLISH: bug fixing (no points). POLISH draws no RNG. In PRODUCTION there is one bug roll per working staff member, in sorted staff id order. Points and bug events are emitted per staff member, interleaved: A's points, then A's bugs, then B's. If all workers leave, the project stalls with no events.
 - Weekly points per seated, assigned person: `skill × slider share × equipment speed_bp × morale factor × chemistry factor`, all via `Fixed.mul_bp`.
 - Each slider maps to point types: Code/AI/Balance → tech; Design/Levels/Story → design; Characters/Graphics → art; Audio → audio.
-- The genre has ideal slider weights per stage (`GenreDef.ideal_sliders: Array[int]` of 9 bp values). Match quality = 10000 − sum of absolute differences, floored at 0, feeds the gameplay review dimension.
+- The genre has ideal slider weights per stage (`GenreDef.ideal_sliders: Array[int]` of 9 bp values). Match quality is computed per stage as `max(0, 10000 − Σ|focus − ideal|)` over that stage's 3 values; gameplay uses the average of the 3 stage matches. (Summing all nine at once would floor almost every real setting at 0.)
 - Bugs per week: base rate × crunch × chemistry × equipment `bug_bp` × engine age.
 - **Bubbles:** every point gain and every bug emits `points_gained {staff_id, type, amount}` / `bug_found {staff_id}` for the scene.
 
@@ -192,14 +203,16 @@ Every production week adds research points: `RESEARCH_PER_POINT_BP` of points pr
 
 ### 6.6 Release, reviews and sales
 
-- Reviews: dimension scores as foundation §7.1, stored ×10. Four fictional outlets with their own weights and an int bias (−5..+5). Noise `randi_range(-3, 3)`. Strength and weakness template keys come from the highest and lowest dimension.
+- Reviews: dimension scores as foundation §7.1, stored ×10. Four fictional outlets with their own weights and an int bias (−5..+5). Noise `randi_range(-3, 3)`. Strength and weakness template keys come from the highest and lowest dimension. Scores clamp to 10–100; a missing template falls back to the generic key.
+- **Known limitation:** strength and weakness are the argmax and argmin of the shared dimension scores, so every outlet gives the same reason keys for a game. Outlet weights only include or exclude a dimension. Per-outlet variety is left for a later milestone.
+- Lifecycle: `ReleaseProject` is valid only in POLISH and sets RELEASED. The first sales tick sets LIVE; sales below the floor set RETIRED. An ENGINE project goes from its last stage straight to RETIRED and creates the `GameEngine`.
 - Launch week units = `install_base(platform, week) × fit_bp × size.audience_bp × hype factor × review factor`, each factor an int table lookup or `mul_bp` step.
 - Every later week: `units = mul_bp(units, decay_bp)`, where `decay_bp` comes from a table keyed by average review score. Sales stop below `SALES_FLOOR_UNITS`.
 - Revenue = units × price, minus publisher share and engine royalty.
 
 ### 6.7 Platforms
 
-Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet licence, one late-decade handheld. Each has a launch week, an install curve and an end week. `rumor_weeks` before launch, a `platform_rumored` event fires. After the end week, the platform leaves the concept wizard, its dev kit stops counting, and sales on it decay twice as fast.
+Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet licence, one late-decade handheld. Each has a launch week, an install curve and an end week. `rumor_weeks` before launch, a `platform_rumored` event fires. After the end week, the platform leaves the concept wizard, its dev kit stops counting, and sales on it decay twice as fast. With `mul_bp` steps this is `decay_bp' = max(0, 2 × decay_bp − 10000)`. A project already in development on a retired platform can still be released; a new `StartProject` on it is refused.
 
 ## 7. People and money (M2b)
 
@@ -215,7 +228,7 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 
 - Market salary = `era_wage_base + sum(skills) × WAGE_PER_SKILL_POINT`.
 - Each year on their hire anniversary, staff paid below 90% of market salary ask for a raise to market. Accept: salary rises. Refuse: morale −15; refused twice → resignation chance doubles.
-- The M1 `max_staff_default` limit is replaced by free seats: `HireStaffCommand` (and `HireCandidate`) require a free seat in the current office.
+- The M1 `max_staff_default` limit is removed from `TuningDef`. Hiring is limited by free seats: `HireStaffCommand` (and `HireCandidate`) require a free seat in the current office and fail with `error.no_free_seat`.
 - Hiring pool: on each month start, `CANDIDATES_PER_MONTH` candidates appear with skills drawn by era, asking salary = market ± `randi_range(-10, 15)`%; each expires after 8 weeks. Hiring needs a free seat.
 - Firing pays `SEVERANCE_MONTHS` of salary and lowers everyone's morale by 5.
 
@@ -272,7 +285,7 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 
 ## 10. Events added in M2
 
-`points_gained`, `bug_found`, `project_stage_changed`, `research_done`, `platform_rumored`, `platform_launched`, `platform_retired`, `raise_requested`, `staff_hired`, `staff_fired`, `equipment_changed`, `loan_taken`, `payment_missed`, `repossessed`, `contract_offered`, `contract_completed`, `award_result`, `promotion_started`, `game_over`, `game_loaded` (emitted by `GameRunner.load_game` so panels refresh).
+`points_gained`, `bug_found`, `project_stage_changed`, `research_done`, `platform_rumored`, `platform_launched`, `platform_retired`, `raise_requested`, `staff_hired`, `staff_fired`, `equipment_changed`, `loan_taken`, `payment_missed`, `repossessed`, `contract_offered`, `contract_completed`, `award_result`, `promotion_started`, `game_over`, `game_loaded` (emitted by `GameRunner.load_game` and `GameRunner.start_new_game` so panels refresh). All of them exist on `EventBus` from M2a, because `dispatch` drops unknown names and the M2d scene runs in parallel.
 
 ## 11. Office scene and UI (M2d)
 
@@ -299,7 +312,7 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 
 ## 12. Save compatibility
 
-`schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new id field.
+`schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new runtime int id field. Content-id references are not checked by the validator (it stays content-free). `ContentDB.missing_refs(state)` checks them at load time: company office, research, awards and dev kits; equipment defs; project size, platform, genre, topic, engine, feature and outlet ids; contract `locked_genre`, `locked_platform` and the `ENGINE_LICENSE` deliverable; owner perk keys; engine features. `GameRunner.load_game` refuses a save with missing refs using `error.save_content_missing` and leaves the current game untouched.
 
 ## 13. Testing
 
