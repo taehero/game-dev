@@ -66,9 +66,27 @@ func test_shared_seat_lowest_id_wins() -> void:
 
 func test_storage_and_other_company_equipment_ignored() -> void:
 	var s := _garage_state()
-	Fixtures.add_equipment(s, {"seat_index": -1})
-	Fixtures.add_equipment(s, {"seat_index": 1, "company_id": 999})
-	assert_eq(_views(s)[1].computer_tier, 0)
+	var before: Array[SeatView] = _views(s)
+	Fixtures.add_equipment(s, {"seat_index": -1, "def_id": &"equipment_fx_fast"})
+	Fixtures.add_equipment(s, {"seat_index": 1, "company_id": 999, "def_id": &"equipment_fx_fast"})
+	var views := _views(s)
+	assert_eq(views[1].computer_tier, 0)
+	assert_eq(views[0].computer_tier, 1)
+	for i: int in views.size():
+		assert_eq(views[i].computer_tier, before[i].computer_tier)
+
+
+func test_two_machines_on_one_seat_lowest_id_wins() -> void:
+	var s := _garage_state()
+	Fixtures.add_equipment(s, {"seat_index": 1, "def_id": &"equipment_micro_1980"})
+	Fixtures.add_equipment(s, {"seat_index": 1, "def_id": &"equipment_fx_fast"})
+	assert_eq(_views(s)[1].computer_tier, 1)
+
+
+func test_other_company_staff_ignored() -> void:
+	var s := _garage_state()
+	Fixtures.add_staff(s, {"seat_index": 1, "company_id": 999})
+	assert_eq(_views(s)[1].staff_id, -1)
 
 
 func test_unknown_def_id_gives_tier_zero() -> void:

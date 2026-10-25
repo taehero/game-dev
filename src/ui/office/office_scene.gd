@@ -23,11 +23,12 @@ var _staff: Dictionary[int, StaffSprite] = {}
 func configure(offices: Dictionary[StringName, OfficeDef], equipment_defs: Dictionary[StringName, EquipmentDef]) -> void:
 	_offices = offices
 	_equipment_defs = equipment_defs
+	_office_id = &""
 
 
 func refresh(state: GameState, t: TuningDef) -> void:
 	var office_id: StringName = StateQueries.player_office_id(state)
-	if office_id != _office_id or (_room == null and _offices.has(office_id)):
+	if office_id != _office_id:
 		_rebuild_room(office_id)
 	if _room == null:
 		return
@@ -71,7 +72,13 @@ func _rebuild_room(office_id: StringName) -> void:
 	if packed == null:
 		push_warning("OfficeScene: cannot load room '%s'" % _offices[office_id].scene_path)
 		return
-	_room = packed.instantiate() as OfficeRoom
+	var node: Node = packed.instantiate()
+	var built: OfficeRoom = node as OfficeRoom
+	if built == null:
+		push_warning("OfficeScene: room '%s' is not an OfficeRoom" % _offices[office_id].scene_path)
+		node.free()
+		return
+	_room = built
 	_room_slot.add_child(_room)
 
 

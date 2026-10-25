@@ -72,6 +72,7 @@ func test_removed_staff_sprite_freed_on_refresh() -> void:
 	Removal.remove_staff(s, id)
 	sc.refresh(s, Fixtures.tuning())
 	assert_null(sc.staff_sprite(id))
+	await wait_process_frames(1)
 
 
 func test_office_change_rebuilds_room() -> void:
@@ -82,6 +83,9 @@ func test_office_change_rebuilds_room() -> void:
 	sc.refresh(s, Fixtures.tuning())
 	assert_eq(sc.room().size_tiles, Vector2i(18, 9))
 	assert_eq(sc.desk_count(), 5)
+	await wait_process_frames(1)
+	assert_eq(sc.get_node("RoomSlot").get_child_count(), 1)
+	assert_eq(sc.get_node("Desks").get_child_count(), 5)
 
 
 func test_unknown_office_leaves_scene_empty() -> void:
