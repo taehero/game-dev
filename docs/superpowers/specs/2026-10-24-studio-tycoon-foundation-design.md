@@ -179,7 +179,7 @@ The era is not stored. It is derived from `week` through the era table.
 
 | Class | Key fields |
 |---|---|
-| `EraDef` | id, start/end year, allowed business models, office level, max staff |
+| `EraDef` | id, start/end year, allowed business models, office level |
 | `PlatformDef` | id, `name_key`, `kind`, `launch_week`, `end_week`, `owner_company_id` (-1 for AI-owned), `install_curve`, `tech_ceiling`, `handheld`, `dev_kit_cost`, `rumor_weeks`, `genre_fit_bp` |
 | `EngineDef` | id, era, tech bonus, cost |
 | `GenreDef` | id, `name_key`, `ideal_sliders` (nine bp values), base audience |
@@ -260,7 +260,7 @@ CONCEPT -> PRODUCTION -> [POLISH] -> RELEASED -> LIVE -> RETIRED
 
 - Three stages. Each stage has three sliders (Code / Design / Story, Levels / Characters / AI, Graphics / Audio / Balance), nine in all, each stage's three summing to 10000 bp (M2 spec §6.3).
 - Each `GenreDef` has hidden ideal weights per stage. Market taste shifts these ideals slightly over time. The player learns them from review text and from post-mortem notes after release.
-- Weekly points per staff member = skill × role multiplier × morale factor × chemistry factor.
+- Weekly points per staff member = skill × role multiplier × morale factor × chemistry factor. (M2 spec §6.3 replaces this with slider share × equipment speed.)
 - **Chemistry:** trait pairs listed as conflicting in `TraitDef` reduce efficiency and raise the bug rate for both people. Synergy pairs do the opposite. A lead with low skill in their role's discipline also raises the bug rate.
 - **Crunch:** progress speed ×1.5, bug rate ×1.8, burnout +6 per week, morale −4 per week. When burnout is above 80, the weekly resignation chance starts at 5% and rises.
 - **Delay:** pushes `deadline_week` back by N weeks. Each week of delay costs running expenses and −3 hype. Under a contract, each late week also costs `late_penalty_per_week`.
