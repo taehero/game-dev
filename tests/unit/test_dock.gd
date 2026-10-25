@@ -101,3 +101,18 @@ func test_dock_labels_fit_en() -> void:
 
 func test_dock_labels_fit_th() -> void:
 	await _check_fit("th")
+
+
+func test_select_opens_and_closes_without_duplicate_signal() -> void:
+	var dock: Dock = _dock()
+	watch_signals(dock)
+	dock.select(&"finance")
+	assert_eq(dock.open_tab(), &"finance")
+	dock.select(&"finance")
+	assert_signal_emit_count(dock, "tab_changed", 1)
+	dock.select(&"team")
+	assert_eq(dock.open_tab(), &"team")
+	assert_signal_emit_count(dock, "tab_changed", 2)
+	dock.select(&"")
+	assert_eq(dock.open_tab(), &"")
+	assert_signal_emit_count(dock, "tab_changed", 3)

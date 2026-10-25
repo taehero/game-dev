@@ -66,6 +66,17 @@ func open_tab() -> StringName:
 	return &""
 
 
+## Code-driven open: selects `tab` (or closes with &""). Emits tab_changed once, like a click.
+func select(tab: StringName) -> void:
+	if tab == &"" or not TABS.has(tab):
+		close_all()
+		return
+	var btn: Button = get_node_or_null("Row/Tab_%s" % tab) as Button
+	if btn != null:
+		btn.button_pressed = true
+	_sync()
+
+
 func close_all() -> void:
 	var btn: Button = get_node_or_null("Row/Tab_%s" % open_tab()) as Button
 	if btn != null:
