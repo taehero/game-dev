@@ -13,3 +13,4 @@ install_curve = Array[int]([15000, 24000, 33000, 42000, 51000, 60000, 69000, 780
 tech_ceiling = 55
 dev_kit_cost = 4000
 rumor_weeks = 0
+genre_fit_bp = Dictionary[StringName, int]({&"genre_action": 14000})

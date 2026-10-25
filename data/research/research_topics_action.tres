@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ResearchDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/research_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"research_topics_action"
+name_key = &"content.research.topics_action.name"
+cost_rp = 400
+prerequisites = Array[StringName]([&"research_topics_scifi"])
+unlocks = Array[StringName]([&"topic_war", &"topic_superhero"])

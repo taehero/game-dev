@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LicensedEngineDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/licensed_engine_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lic_engine_sprite_works"
+name_key = &"content.engine.sprite_works.name"
+year_from = 1985
+year_to = 1989
+fee = 9000
+royalty_bp = 800
+tech_cap = 70
+features = Array[StringName]([&"feature_scrolling", &"feature_save_game", &"feature_sound_chip_music"])

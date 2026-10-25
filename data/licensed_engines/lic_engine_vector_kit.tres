@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LicensedEngineDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/licensed_engine_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lic_engine_vector_kit"
+name_key = &"content.engine.vector_kit.name"
+year_from = 1982
+year_to = 1989
+fee = 4000
+royalty_bp = 500
+tech_cap = 55
+features = Array[StringName]([&"feature_scrolling", &"feature_save_game"])

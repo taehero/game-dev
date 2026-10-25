@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ResearchDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/research_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"research_sprite_animation"
+name_key = &"content.research.sprite_animation.name"
+cost_rp = 600
+prerequisites = Array[StringName]([&"research_scrolling"])
+unlocks = Array[StringName]([&"feature_sprite_animation"])

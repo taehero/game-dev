@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="GenreDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/genre_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"genre_action"
+name_key = &"content.genre.action.name"
+ideal_sliders = Array[int]([5000, 3000, 2000, 3000, 3000, 4000, 4000, 3000, 3000])

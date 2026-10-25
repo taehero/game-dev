@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TopicDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/topic_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"topic_western"
+name_key = &"content.topic.western.name"
+genre_fit_bp = Dictionary[StringName, int]({&"genre_action": 13000, &"genre_adventure": 12000, &"genre_rpg": 9000, &"genre_simulation": 7000, &"genre_strategy": 8000, &"genre_puzzle": 6000})

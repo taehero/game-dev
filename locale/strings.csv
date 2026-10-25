@@ -76,3 +76,47 @@ error.invalid_sliders,Each stage's sliders must add up to 100%.,สไลเด�
 error.past_stage_locked,A finished stage cannot be changed.,ขั้นที่เสร็จแล้วแก้ไม่ได้
 error.project_not_ready,Finish development before release.,ต้องพัฒนาให้เสร็จก่อนวางขาย
 error.save_content_missing,This save needs game content that is missing.,เซฟนี้ต้องใช้คอนเทนต์ที่ไม่มีในเกม
+content.genre.action.name,Action,แอ็กชัน
+content.genre.adventure.name,Adventure,ผจญภัย
+content.genre.rpg.name,RPG,RPG
+content.genre.simulation.name,Simulation,จำลองสถานการณ์
+content.genre.strategy.name,Strategy,วางแผนกลยุทธ์
+content.genre.puzzle.name,Puzzle,ปริศนา
+content.topic.space.name,Space,อวกาศ
+content.topic.fantasy.name,Fantasy,แฟนตาซี
+content.topic.detective.name,Detective,นักสืบ
+content.topic.racing.name,Racing,แข่งรถ
+content.topic.sports.name,Sports,กีฬา
+content.topic.pirates.name,Pirates,โจรสลัด
+content.topic.ninja.name,Ninja,นินจา
+content.topic.robots.name,Robots,หุ่นยนต์
+content.topic.western.name,Wild West,คาวบอย
+content.topic.medieval.name,Medieval,ยุคกลาง
+content.topic.farming.name,Farming,ทำฟาร์ม
+content.topic.city.name,City Builder,สร้างเมือง
+content.topic.school.name,School Life,ชีวิตนักเรียน
+content.topic.music.name,Music,ดนตรี
+content.topic.thai_ghost.name,Thai Ghost,ผีไทย
+content.topic.horror.name,Horror,สยองขวัญ
+content.topic.cyberpunk.name,Cyberpunk,ไซเบอร์พังก์
+content.topic.dinosaurs.name,Dinosaurs,ไดโนเสาร์
+content.topic.war.name,War,สงคราม
+content.topic.superhero.name,Superhero,ซูเปอร์ฮีโร่
+content.feature.scrolling.name,Scrolling Engine,ระบบฉากเลื่อน
+content.research.scrolling.name,Research: Scrolling Engine,วิจัย: ระบบฉากเลื่อน
+content.feature.save_game.name,Save Game,ระบบเซฟเกม
+content.research.save_game.name,Research: Save Game,วิจัย: ระบบเซฟเกม
+content.feature.sound_chip_music.name,Sound Chip Music,เพลงจากชิปเสียง
+content.research.sound_chip_music.name,Research: Sound Chip Music,วิจัย: เพลงจากชิปเสียง
+content.feature.colour_palette.name,Colour Palette,ชุดสีขยายเพิ่ม
+content.research.colour_palette.name,Research: Colour Palette,วิจัย: ชุดสีขยายเพิ่ม
+content.feature.sprite_animation.name,Sprite Animation,แอนิเมชันสไปรต์
+content.research.sprite_animation.name,Research: Sprite Animation,วิจัย: แอนิเมชันสไปรต์
+content.research.size_medium.name,Research: Medium Projects,วิจัย: โปรเจกต์ขนาดกลาง
+content.research.genre_rpg.name,Research: RPG Genre,วิจัย: แนวเกม RPG
+content.research.genre_strategy.name,Research: Strategy Genre,วิจัย: แนวเกมวางแผนกลยุทธ์
+content.research.topics_folklore.name,Research: Folklore and Horror Topics,วิจัย: ธีมเรื่องผีและสยองขวัญ
+content.research.topics_scifi.name,Research: Sci-Fi Topics,วิจัย: ธีมไซไฟและไดโนเสาร์
+content.research.topics_action.name,Research: Action Hero Topics,วิจัย: ธีมสงครามและซูเปอร์ฮีโร่
+content.engine.vector_kit.name,Vector Kit,เวกเตอร์คิต (Vector Kit)
+content.engine.sprite_works.name,Sprite Works,สไปรต์เวิร์กส์ (Sprite Works)
