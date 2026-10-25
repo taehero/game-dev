@@ -43,7 +43,7 @@ static func dimension_scores(state: GameState, content: ContentDB, t: TuningDef,
 		genre = GenreDef.new()
 	var q: Dictionary[StringName, int] = {}
 	var total_points: int = 0
-	for type: StringName in [&"design", &"tech", &"art", &"audio"]:
+	for type: StringName in GameRules.SKILL_ORDER:
 		var pts: int = p.points.get(type, 0)
 		total_points += pts
 		q[type] = quality_x10(pts, par_for(type, size, genre), t)

@@ -39,10 +39,9 @@ static func royalty_bp(state: GameState, content: ContentDB, p: Project) -> int:
 	if state.engines.has(p.engine_id):
 		return 0
 	var licensed_id: StringName = p.config.get(&"engine", &"")
-	for cid: int in state.sorted_ids(state.contracts):
-		var c: Contract = state.contracts[cid]
-		if c.kind == Contract.Kind.ENGINE_LICENSE and c.party_a == p.company_id and c.deliverable == licensed_id:
-			return c.royalty_bp
+	var c: Contract = GameRules.engine_license_contract(state, p.company_id, licensed_id)
+	if c != null:
+		return c.royalty_bp
 	if content.licensed_engines.has(licensed_id):
 		return content.licensed_engines[licensed_id].royalty_bp
 	return 0

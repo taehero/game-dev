@@ -99,3 +99,8 @@ func test_licensed_engine_needs_contract_unless_free() -> void:
 	s.contracts[c.id] = c
 	assert_true(GameRules.licensed_engine_available(s, db, 1, &"lic_engine_fx_pro", 0, t))
 	assert_false(GameRules.licensed_engine_available(s, db, 1, &"lic_missing", 0, t))
+
+
+func test_working_staff_of_no_project_is_empty() -> void:
+	var s := Fixtures.new_state(1)
+	assert_eq(GameRules.working_staff(s, -1), [] as Array[int])

@@ -47,6 +47,15 @@ var hired_week: int = 0
 var week_points: Dictionary[StringName, int] = {}  # points produced in the latest Production step
 
 
+## Sets every skill (keys inserted sorted, Ruling 14) and seeds exp to 0 for each, like a loaded save.
+func set_skills(values: Dictionary[StringName, int]) -> void:
+	skills.clear()
+	exp.clear()
+	for k: StringName in GameState.sorted_names(values):
+		skills[k] = values[k]
+		exp[k] = 0
+
+
 func to_dict() -> Dictionary:
 	var skills_out: Dictionary = {}
 	for k: StringName in skills:

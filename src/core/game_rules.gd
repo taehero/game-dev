@@ -7,6 +7,8 @@ enum PlatformStatus { UNANNOUNCED, RUMORED, ON_SALE, RETIRED }
 ## Spec 6.3: point type of each of the nine sliders, in focus index order.
 const SLIDER_TYPES: Array[StringName] = [&"tech", &"design", &"design", &"design", &"art", &"tech", &"art", &"audio", &"tech"]
 ## All Code, so engine work produces tech points. Duplicate before storing.
+## Point/skill types in the fixed RNG draw order (design, tech, art, audio).
+const SKILL_ORDER: Array[StringName] = [&"design", &"tech", &"art", &"audio"]
 const ENGINE_FOCUS: Array[int] = [10000, 0, 0, 10000, 0, 0, 10000, 0, 0]
 
 
@@ -81,6 +83,8 @@ static func free_workers(state: GameState, company_id: int) -> Array[int]:
 
 static func working_staff(state: GameState, project_id: int) -> Array[int]:
 	var out: Array[int] = []
+	if project_id < 0:
+		return out
 	for sid: int in state.sorted_ids(state.staff):
 		var st: Staff = state.staff[sid]
 		if st.assigned_project_id != project_id:
@@ -88,6 +92,11 @@ static func working_staff(state: GameState, project_id: int) -> Array[int]:
 		if st.seat_index >= 0 and equipment_at_seat(state, st.company_id, st.seat_index) != -1:
 			out.append(sid)
 	return out
+
+
+## True when the three sliders of the stage add up to 1.0 (10000 bp). Accepts typed or JSON arrays.
+static func stage_sliders_ok(focus: Array, stage: int) -> bool:
+	return int(focus[stage * 3]) + int(focus[stage * 3 + 1]) + int(focus[stage * 3 + 2]) == Fixed.ONE_BP
 
 
 static func stage_count_of_kind(kind: Project.Kind) -> int:
@@ -128,13 +137,27 @@ static func engine_features(state: GameState, content: ContentDB, engine_id: int
 	return out
 
 
+## The licensed engine def a project uses, or null when it uses a built engine or none is found.
+static func project_licensed_engine(state: GameState, content: ContentDB, p: Project) -> LicensedEngineDef:
+	if state.engines.has(p.engine_id):
+		return null
+	return content.licensed_engines.get(p.config.get(&"engine", &""), null)
+
+
 static func engine_tech_cap(state: GameState, content: ContentDB, p: Project) -> int:
 	if state.engines.has(p.engine_id):
 		return state.engines[p.engine_id].tech_cap
-	var licensed_id: StringName = p.config.get(&"engine", &"")
-	if content.licensed_engines.has(licensed_id):
-		return content.licensed_engines[licensed_id].tech_cap
-	return 0
+	var def: LicensedEngineDef = project_licensed_engine(state, content, p)
+	return def.tech_cap if def != null else 0
+
+
+## The company's ENGINE_LICENSE contract for a licensed engine (lowest id wins), or null.
+static func engine_license_contract(state: GameState, company_id: int, licensed_id: StringName) -> Contract:
+	for cid: int in state.sorted_ids(state.contracts):
+		var c: Contract = state.contracts[cid]
+		if c.kind == Contract.Kind.ENGINE_LICENSE and c.party_a == company_id and c.deliverable == licensed_id:
+			return c
+	return null
 
 
 ## Ruling A7 / A11: free engines need no contract; others need an ENGINE_LICENSE contract.
@@ -147,8 +170,4 @@ static func licensed_engine_available(state: GameState, content: ContentDB, comp
 		return false
 	if def.fee == 0:
 		return true
-	for cid: int in state.sorted_ids(state.contracts):
-		var c: Contract = state.contracts[cid]
-		if c.kind == Contract.Kind.ENGINE_LICENSE and c.party_a == company_id and c.deliverable == licensed_id:
-			return true
-	return false
+	return engine_license_contract(state, company_id, licensed_id) != null

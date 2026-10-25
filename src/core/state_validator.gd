@@ -4,8 +4,6 @@ extends RefCounted
 ## enum names, and reference integrity. GameState.from_dict crashes on bad input,
 ## so this must reject anything from_dict cannot read.
 
-const SKILL_KEYS: Array[String] = ["art", "audio", "design", "tech"]
-
 const STATE_SCHEMA: Dictionary = {
 	"schema_version": "int",
 	"week": "int",
@@ -259,7 +257,7 @@ static func _strings_ok(a: Array) -> bool:
 ## Keys are a subset of SKILL_KEYS and every value is a whole number >= min_value.
 static func _skill_map_ok(d: Dictionary, min_value: int) -> bool:
 	for k: Variant in d:
-		if typeof(k) != TYPE_STRING or not SKILL_KEYS.has(String(k)):
+		if typeof(k) != TYPE_STRING or not GameRules.SKILL_ORDER.has(StringName(String(k))):
 			return false
 		if not SaveSchema.is_whole(d[k]) or int(d[k]) < min_value:
 			return false
@@ -293,10 +291,10 @@ static func _staff_ok(e: Dictionary) -> bool:
 	if int(e["seat_index"]) < -1:
 		return false
 	var skills: Dictionary = e["skills"]
-	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
+	if not _whole_values(skills) or skills.size() != GameRules.SKILL_ORDER.size():
 		return false
-	for sk: String in SKILL_KEYS:
-		if not skills.has(sk):
+	for sk: StringName in GameRules.SKILL_ORDER:
+		if not skills.has(String(sk)):
 			return false
 	for t: Variant in e["traits"]:
 		if typeof(t) != TYPE_STRING:
@@ -320,7 +318,7 @@ static func _project_ok(e: Dictionary) -> bool:
 		if not SaveSchema.is_whole(f) or int(f) < 0 or int(f) > 10000:
 			return false
 	for i: int in 3:
-		if int(focus[i * 3]) + int(focus[i * 3 + 1]) + int(focus[i * 3 + 2]) != 10000:
+		if not GameRules.stage_sliders_ok(focus, i):
 			return false
 	var kind: Project.Kind = Project.Kind[String(e["kind"])]
 	var stage: int = int(e["stage_index"])
@@ -370,10 +368,10 @@ static func _candidate_ok(e: Dictionary) -> bool:
 	if level < 0 or level >= Staff.Level.size():
 		return false
 	var skills: Dictionary = e["skills"]
-	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
+	if not _whole_values(skills) or skills.size() != GameRules.SKILL_ORDER.size():
 		return false
-	for sk: String in SKILL_KEYS:
-		if not skills.has(sk):
+	for sk: StringName in GameRules.SKILL_ORDER:
+		if not skills.has(String(sk)):
 			return false
 	return _strings_ok(e["traits"])
 

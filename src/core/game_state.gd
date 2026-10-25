@@ -44,8 +44,10 @@ static func new_game(p_seed: int, studio_name: String, t: TuningDef) -> GameStat
 	o.is_owner = true
 	o.seat_index = 0
 	o.salary = 0
-	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
-		o.skills[k] = t.owner_start_skill
+	var owner_skills: Dictionary[StringName, int] = {}
+	for k: StringName in GameRules.SKILL_ORDER:
+		owner_skills[k] = t.owner_start_skill
+	o.set_skills(owner_skills)
 	s.staff[o.id] = o
 	var eq := Equipment.new()
 	eq.id = s.alloc_id()

@@ -22,7 +22,7 @@ func validate(state: GameState, _tuning: TuningDef) -> CommandResult:
 		if v < 0 or v > Fixed.ONE_BP:
 			return CommandResult.fail(&"error.invalid_sliders")
 	for stage: int in 3:
-		if focus[stage * 3] + focus[stage * 3 + 1] + focus[stage * 3 + 2] != Fixed.ONE_BP:
+		if not GameRules.stage_sliders_ok(focus, stage):
 			return CommandResult.fail(&"error.invalid_sliders")
 	for i: int in mini(p.stage_index, 3) * 3:
 		if focus[i] != p.focus[i]:

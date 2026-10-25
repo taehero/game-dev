@@ -106,3 +106,18 @@ func test_morale_bp_bounds() -> void:
 	assert_eq(ProductionSystem.morale_bp(70, t), 10200)
 	assert_eq(ProductionSystem.morale_bp(0, t), t.morale_factor_min_bp)
 	assert_eq(ProductionSystem.morale_bp(100, t), t.morale_factor_max_bp)
+
+
+func test_engine_age_bp_built_engine_uses_weeks_per_year() -> void:
+	var eid: int = Fixtures.add_engine(s, {"built_week": 0})
+	s.projects[pid].engine_id = eid
+	s.week = 2 * t.weeks_per_year + 5
+	assert_eq(ProductionSystem.engine_age_bp(s, Fixtures.content(), s.projects[pid], t), Fixed.ONE_BP + 2 * t.engine_age_bug_bp_per_year)
+
+
+func test_engine_age_bp_licensed_engine_uses_year_from() -> void:
+	s.projects[pid].engine_id = -1
+	s.projects[pid].config[&"engine"] = &"lic_engine_homebrew"
+	var lic: LicensedEngineDef = Fixtures.content().licensed_engines[&"lic_engine_homebrew"]
+	var years: int = Calendar.year(s.week, t) - lic.year_from
+	assert_eq(ProductionSystem.engine_age_bp(s, Fixtures.content(), s.projects[pid], t), Fixed.ONE_BP + years * t.engine_age_bug_bp_per_year)

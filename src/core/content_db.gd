@@ -243,8 +243,8 @@ func validate() -> Array[String]:
 			errs.append("%s: ideal_sliders size %d, expected 9" % [id, s.size()])
 			continue
 		for stage: int in 3:
-			var sum: int = s[stage * 3] + s[stage * 3 + 1] + s[stage * 3 + 2]
-			if sum != Fixed.ONE_BP:
+			if not GameRules.stage_sliders_ok(s, stage):
+				var sum: int = s[stage * 3] + s[stage * 3 + 1] + s[stage * 3 + 2]
 				errs.append("%s: stage %d sliders sum to %d" % [id, stage, sum])
 	for id: StringName in GameState.sorted_names(topics):
 		_check_fit(errs, id, topics[id].genre_fit_bp)

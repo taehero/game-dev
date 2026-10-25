@@ -3,11 +3,11 @@ extends GutTest
 
 func test_install_base_interpolates_and_holds_last_value() -> void:
 	var p: PlatformDef = Fixtures.content().platforms[&"platform_fx_console"]
-	assert_eq(PlatformSystem.install_base(p, 19), 0)
-	assert_eq(PlatformSystem.install_base(p, 20), 0)
-	assert_eq(PlatformSystem.install_base(p, 33), 13000)
-	assert_eq(PlatformSystem.install_base(p, 39), 19000)
-	assert_eq(PlatformSystem.install_base(p, 200), 26000)
+	assert_eq(PlatformSystem.install_base(p, 19, Fixtures.tuning()), 0)
+	assert_eq(PlatformSystem.install_base(p, 20, Fixtures.tuning()), 0)
+	assert_eq(PlatformSystem.install_base(p, 33, Fixtures.tuning()), 13000)
+	assert_eq(PlatformSystem.install_base(p, 39, Fixtures.tuning()), 19000)
+	assert_eq(PlatformSystem.install_base(p, 200, Fixtures.tuning()), 26000)
 
 
 func test_events_fire_on_exact_weeks() -> void:

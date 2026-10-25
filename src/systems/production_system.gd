@@ -21,11 +21,11 @@ static func engine_age_bp(state: GameState, content: ContentDB, p: Project, t: T
 		return Fixed.ONE_BP
 	var years: int = 0
 	if state.engines.has(p.engine_id):
-		years = (state.week - state.engines[p.engine_id].built_week) / 52
+		years = (state.week - state.engines[p.engine_id].built_week) / t.weeks_per_year
 	else:
-		var licensed_id: StringName = p.config.get(&"engine", &"")
-		if content.licensed_engines.has(licensed_id):
-			years = Calendar.year(state.week, t) - content.licensed_engines[licensed_id].year_from
+		var def: LicensedEngineDef = GameRules.project_licensed_engine(state, content, p)
+		if def != null:
+			years = Calendar.year(state.week, t) - def.year_from
 	return Fixed.ONE_BP + maxi(0, years) * t.engine_age_bug_bp_per_year
 
 

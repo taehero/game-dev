@@ -434,3 +434,11 @@ func test_add_worker_seat_override_shares_seat_with_equipment() -> void:
 	assert_true(found)
 	var next := Fixtures.add_worker(s)
 	assert_eq(s.staff[next].seat_index, 1)
+
+
+func test_owner_skills_and_exp_are_sorted_and_seeded() -> void:
+	var s := Fixtures.new_state(1)
+	var o: Staff = s.staff[s.owner_staff_id()]
+	assert_eq(o.skills.keys(), [&"art", &"audio", &"design", &"tech"])
+	assert_eq(o.exp.keys(), [&"art", &"audio", &"design", &"tech"])
+	assert_eq(o.exp[&"art"], 0)
