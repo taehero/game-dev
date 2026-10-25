@@ -6,26 +6,35 @@ const GARAGE_DESKS: Array[Vector2i] = [Vector2i(3, 3), Vector2i(7, 3)]
 const SMALL_OFFICE_DESKS: Array[Vector2i] = [
 	Vector2i(3, 3), Vector2i(7, 3), Vector2i(11, 3), Vector2i(3, 6), Vector2i(7, 6),
 ]
-## Backing colours: the sheet's floor and wall tiles are sparse, so solid rects sit underneath.
-const FLOOR_COLORS: Dictionary[StringName, Color] = {
-	&"concrete": Color("#6b6f76"),
-	&"wood": Color("#8a5a35"),
+const GROUND_MARGIN := Vector2i(5, 3)
+## Decor cell -> prop name. The cell is the prop's top-left tile.
+const DECOR: Dictionary[StringName, Dictionary] = {
+	&"garage": {
+		Vector2i(8, 0): &"window", Vector2i(1, 0): &"picture", Vector2i(1, 2): &"plant",
+		Vector2i(5, 2): &"shelf", Vector2i(9, 2): &"barrel", Vector2i(10, 2): &"bag",
+		Vector2i(4, 5): &"rug", Vector2i(10, 6): &"cone",
+	},
+	&"small_office": {
+		Vector2i(13, 0): &"window", Vector2i(15, 0): &"window", Vector2i(1, 0): &"picture",
+		Vector2i(1, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(14, 2): &"shelf",
+		Vector2i(11, 5): &"rug",
+	},
 }
-const WALL_COLOR: Color = Color("#2b2d33")
 
 @export var size_tiles: Vector2i = Vector2i(12, 8)
 @export var floor_style: StringName = &"concrete"
+@export var decor_set: StringName = &""
 
+@onready var _ground: TileMapLayer = $Ground
 @onready var _floor: TileMapLayer = $Floor
 @onready var _walls: TileMapLayer = $Walls
+@onready var _decor: TileMapLayer = $Decor
 
 
 func _ready() -> void:
-	if _floor.tile_set == null:
-		_floor.tile_set = OfficeArt.tileset()
-	if _walls.tile_set == null:
-		_walls.tile_set = OfficeArt.tileset()
-	_add_backing()
+	for layer: TileMapLayer in [_ground, _floor, _walls, _decor]:
+		if layer.tile_set == null:
+			layer.tile_set = OfficeArt.tileset()
 	if _floor.get_used_cells().is_empty():
 		_paint()
 
@@ -42,34 +51,28 @@ func pixel_size() -> Vector2i:
 	return size_tiles * OfficeArt.TILE
 
 
-func _add_backing() -> void:
-	var t: float = float(OfficeArt.TILE)
-	var wall_back := ColorRect.new()
-	wall_back.name = "WallBacking"
-	wall_back.color = WALL_COLOR
-	wall_back.size = Vector2(pixel_size())
-	wall_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var floor_back := ColorRect.new()
-	floor_back.name = "FloorBacking"
-	floor_back.color = FLOOR_COLORS.get(floor_style, FLOOR_COLORS[&"concrete"])
-	floor_back.position = Vector2(t, 2.0 * t)
-	floor_back.size = Vector2(float(size_tiles.x - 2) * t, float(size_tiles.y - 2) * t)
-	floor_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(wall_back)
-	add_child(floor_back)
-	move_child(wall_back, 0)
-	move_child(floor_back, 1)
-
-
 func _paint() -> void:
 	var w: int = size_tiles.x
 	var h: int = size_tiles.y
+	var floor_ref: Vector3i = OfficeArt.FLOORS.get(floor_style, OfficeArt.FLOORS[&"concrete"])
 	for x: int in range(w):
-		_walls.set_cell(Vector2i(x, 0), 0, OfficeArt.WALL_TOP)
-		_walls.set_cell(Vector2i(x, 1), 0, OfficeArt.WALL_FACE)
-		_walls.set_cell(Vector2i(x, h - 1), 0, OfficeArt.WALL_BOTTOM)
+		OfficeArt.paint(_walls, Vector2i(x, 0), OfficeArt.WALL_UPPER[x % 2])
+		OfficeArt.paint(_walls, Vector2i(x, 1), OfficeArt.WALL_LOWER[x % 2])
+		OfficeArt.paint(_walls, Vector2i(x, h - 1), OfficeArt.WALL_TOP)
 	for y: int in range(2, h - 1):
-		_walls.set_cell(Vector2i(0, y), 0, OfficeArt.WALL_SIDE)
-		_walls.set_cell(Vector2i(w - 1, y), 0, OfficeArt.WALL_SIDE)
+		OfficeArt.paint(_walls, Vector2i(0, y), OfficeArt.WALL_TOP)
+		OfficeArt.paint(_walls, Vector2i(w - 1, y), OfficeArt.WALL_TOP)
 		for x: int in range(1, w - 1):
-			_floor.set_cell(Vector2i(x, y), 0, OfficeArt.FLOORS[floor_style])
+			OfficeArt.paint(_floor, Vector2i(x, y), floor_ref)
+	var room_rect := Rect2i(Vector2i.ZERO, size_tiles)
+	for y: int in range(-GROUND_MARGIN.y, h + GROUND_MARGIN.y):
+		for x: int in range(-GROUND_MARGIN.x, w + GROUND_MARGIN.x):
+			if not room_rect.has_point(Vector2i(x, y)):
+				OfficeArt.paint(_ground, Vector2i(x, y), OfficeArt.GROUND)
+	var props: Dictionary = DECOR.get(decor_set, {})
+	for cell: Vector2i in props:
+		var prop: StringName = props[cell]
+		var sz: Vector2i = OfficeArt.prop_size(prop)
+		for dy: int in range(sz.y):
+			for dx: int in range(sz.x):
+				OfficeArt.paint(_decor, cell + Vector2i(dx, dy), OfficeArt.PROPS[prop] + Vector3i(0, dx, dy))

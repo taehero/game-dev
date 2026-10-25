@@ -11,7 +11,7 @@ var computer_tier: int = 0
 
 
 func _ready() -> void:
-	_desk.texture = OfficeArt.atlas(OfficeArt.DESK)
+	_desk.texture = OfficeArt.atlas(OfficeArt.DESK_LEFT)
 	_computer.position = COMPUTER_OFFSET
 	set_computer_tier(computer_tier)
 
@@ -21,5 +21,5 @@ func set_computer_tier(tier: int) -> void:
 	if tier <= 0:
 		_computer.visible = false
 		return
-	_computer.texture = OfficeArt.atlas(OfficeArt.computer_cell(tier))
+	_computer.texture = OfficeArt.atlas(OfficeArt.computer_ref(tier))
 	_computer.visible = true

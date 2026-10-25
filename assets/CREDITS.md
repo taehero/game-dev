@@ -2,7 +2,6 @@
 
 | Asset | Files | Source | Author | Licence |
 |---|---|---|---|---|
-| Kenney 1-Bit Pack | assets/art/kenney_1bit/colored-transparent_packed.png, assets/art/kenney_1bit/License.txt | https://kenney.nl/assets/1-bit-pack | Kenney | CC0 1.0 |
 | Kenney Roguelike Modern City | assets/art/kenney_modern_city/tilemap_packed.png, assets/art/kenney_modern_city/License.txt | https://kenney.nl/assets/roguelike-modern-city | Kenney | CC0 1.0 |
 | Kenney Roguelike Indoors | assets/art/kenney_indoors/roguelikeIndoor_transparent.png, assets/art/kenney_indoors/License.txt | https://kenney.nl/assets/roguelike-indoors | Kenney | CC0 1.0 |
 | Kenney RPG Urban Pack | assets/art/kenney_urban/tilemap_packed.png, assets/art/kenney_urban/License.txt | https://kenney.nl/assets/rpg-urban-pack | Kenney | CC0 1.0 |

@@ -34,7 +34,7 @@ func test_staff_look_is_stable_per_id() -> void:
 	sprite.set_look(7)
 	var second: Rect2 = (sprite.get_node("Body") as Sprite2D).texture.region
 	assert_eq(first, second)
-	assert_eq(first, Rect2(OfficeArt.region(OfficeArt.body_cell(7))))
+	assert_eq(first, Rect2(OfficeArt.region(OfficeArt.body_ref(7))))
 
 
 func test_desk_tier_zero_hides_computer() -> void:
@@ -49,4 +49,4 @@ func test_desk_tier_picks_computer_cell() -> void:
 	desk.set_computer_tier(2)
 	var comp := desk.get_node("Computer") as Sprite2D
 	assert_true(comp.visible)
-	assert_eq(comp.texture.region, Rect2(OfficeArt.region(OfficeArt.computer_cell(2))))
+	assert_eq(comp.texture.region, Rect2(OfficeArt.region(OfficeArt.computer_ref(2))))

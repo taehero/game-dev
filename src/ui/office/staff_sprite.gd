@@ -14,7 +14,7 @@ var _tween: Tween = null
 
 
 func set_look(staff_id: int) -> void:
-	_body.texture = OfficeArt.atlas(OfficeArt.body_cell(staff_id))
+	_body.texture = OfficeArt.atlas(OfficeArt.body_ref(staff_id))
 
 
 func set_pose(p: StateQueries.StaffPose) -> void:

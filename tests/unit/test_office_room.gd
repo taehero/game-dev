@@ -29,22 +29,55 @@ func test_cell_to_local_is_tile_centre() -> void:
 	var r := _room("res://src/ui/office/rooms/garage_room.tscn")
 	assert_eq(r.cell_to_local(Vector2i(3, 3)), Vector2(56, 56))
 
-func test_prepainted_floor_is_kept() -> void:
-	var r: OfficeRoom = load("res://src/ui/office/rooms/garage_room.tscn").instantiate()
-	(r.get_node("Floor") as TileMapLayer).tile_set = OfficeArt.tileset()
-	(r.get_node("Floor") as TileMapLayer).set_cell(Vector2i(1, 2), 0, OfficeArt.FLOORS[&"wood"])
-	add_child_autofree(r)
-	assert_eq(r.get_node("Floor").get_used_cells().size(), 1)
+const GARAGE := "res://src/ui/office/rooms/garage_room.tscn"
+const SMALL := "res://src/ui/office/rooms/small_office_room.tscn"
 
-func test_backing_rects_sit_under_layers_with_floor_colour() -> void:
-	var g := _room("res://src/ui/office/rooms/garage_room.tscn")
-	var w := _room("res://src/ui/office/rooms/small_office_room.tscn")
-	for r: OfficeRoom in [g, w]:
-		var wall_back := r.get_node("WallBacking") as ColorRect
-		var floor_back := r.get_node("FloorBacking") as ColorRect
-		assert_eq(wall_back.size, Vector2(r.pixel_size()))
-		assert_eq(floor_back.position, Vector2(16, 32))
-		assert_eq(floor_back.size, Vector2((r.size_tiles.x - 2) * 16, (r.size_tiles.y - 2) * 16))
-		assert_lt(wall_back.get_index(), r.get_node("Floor").get_index())
-		assert_lt(floor_back.get_index(), r.get_node("Floor").get_index())
-	assert_ne((g.get_node("FloorBacking") as ColorRect).color, (w.get_node("FloorBacking") as ColorRect).color)
+func test_prepainted_floor_is_kept() -> void:
+	var r: OfficeRoom = load(GARAGE).instantiate()
+	var fl := r.get_node("Floor") as TileMapLayer
+	fl.tile_set = OfficeArt.tileset()
+	OfficeArt.paint(fl, Vector2i(1, 2), OfficeArt.FLOORS[&"wood"])
+	add_child_autofree(r)
+	assert_eq(fl.get_used_cells().size(), 1)
+	assert_eq(r.get_node("Walls").get_used_cells().size(), 0)
+
+func _atlas(layer: TileMapLayer, cell: Vector2i) -> Vector3i:
+	var a := layer.get_cell_atlas_coords(cell)
+	return Vector3i(layer.get_cell_source_id(cell), a.x, a.y)
+
+func test_walls_paint_brick_rows_and_wall_tops() -> void:
+	var walls := _room(GARAGE).get_node("Walls") as TileMapLayer
+	assert_eq(walls.get_cell_source_id(Vector2i(0, 0)), OfficeArt.Sheet.CITY)
+	assert_eq(walls.get_cell_atlas_coords(Vector2i(0, 0)), Vector2i(9, 6))
+	assert_eq(walls.get_cell_atlas_coords(Vector2i(1, 0)), Vector2i(10, 6))
+	assert_eq(walls.get_cell_atlas_coords(Vector2i(0, 1)), Vector2i(9, 8))
+	assert_eq(_atlas(walls, Vector2i(0, 3)), OfficeArt.WALL_TOP)
+	assert_eq(_atlas(walls, Vector2i(5, 7)), OfficeArt.WALL_TOP)
+
+func test_ground_rings_the_room() -> void:
+	var ground := _room(GARAGE).get_node("Ground") as TileMapLayer
+	assert_eq(ground.get_used_cells().size(), (12 + 10) * (8 + 6) - 12 * 8)
+	assert_eq(_atlas(ground, Vector2i(-5, -3)), OfficeArt.GROUND)
+	assert_eq(ground.get_cell_source_id(Vector2i(0, 0)), -1)
+
+func test_decor_avoids_desks_chairs_and_computers() -> void:
+	for pair: Array in [[GARAGE, OfficeRoom.GARAGE_DESKS], [SMALL, OfficeRoom.SMALL_OFFICE_DESKS]]:
+		var r := _room(pair[0])
+		var forbidden: Array[Vector2i] = []
+		for d: Vector2i in pair[1]:
+			forbidden.append_array([d, d + Vector2i(1, 0), d + Vector2i(-1, 0), d + Vector2i(0, 1), d + Vector2i(0, -1)])
+		for cell: Vector2i in OfficeRoom.DECOR[r.decor_set]:
+			var prop: StringName = OfficeRoom.DECOR[r.decor_set][cell]
+			var sz := OfficeArt.prop_size(prop)
+			for dx: int in range(sz.x):
+				for dy: int in range(sz.y):
+					var c := cell + Vector2i(dx, dy)
+					assert_false(c in forbidden, "%s %s" % [prop, c])
+					var ok := r.is_floor(c) or (c.y <= 1 and c.x >= 0 and c.x < r.size_tiles.x)
+					assert_true(ok, "%s %s" % [prop, c])
+
+func test_decor_painted() -> void:
+	var decor := _room(GARAGE).get_node("Decor") as TileMapLayer
+	var shelf: Vector3i = OfficeArt.PROPS[&"shelf"]
+	assert_eq(_atlas(decor, Vector2i(5, 2)), shelf)
+	assert_eq(_atlas(decor, Vector2i(6, 2)), shelf + Vector3i(0, 1, 0))

@@ -6,7 +6,12 @@
 script = ExtResource("1")
 size_tiles = Vector2i(18, 9)
 floor_style = &"wood"
+decor_set = &"small_office"
+
+[node name="Ground" type="TileMapLayer" parent="."]
 
 [node name="Floor" type="TileMapLayer" parent="."]
 
 [node name="Walls" type="TileMapLayer" parent="."]
+
+[node name="Decor" type="TileMapLayer" parent="."]
