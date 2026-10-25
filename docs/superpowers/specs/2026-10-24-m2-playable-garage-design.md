@@ -296,6 +296,8 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 - Bubbles rise from a staff sprite on `points_gained` (colour per type) and `bug_found`.
 - The scene reads state only through `StateQueries` and refreshes on events; it works with seats and equipment from §4 even before M2b systems exist (fixtures place them).
 
+> **Superseded visuals (2026-10-25):** the look of §11.1–11.3 (art packs, bottom status bar, flat tabs) is replaced by `docs/superpowers/specs/2026-10-25-ui-restyle-design.md` (direction C, "Clean Modern Tycoon"). Behaviour and data rules here still apply.
+
 ### 11.2 Art and font licensing
 
 - Art: CC0 only. **M2d task 1 chooses a top-down 16 px Kenney pack, downloads it, and confirms the `License.txt` inside says CC0 before any file is committed.** Every asset is listed in `assets/CREDITS.md` with pack name, URL and licence.
