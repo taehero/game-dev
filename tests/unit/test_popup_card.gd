@@ -76,3 +76,19 @@ func test_closable_setter_updates_visibility() -> void:
 	var popup: PopupCard = _popup()[1]
 	popup.closable = false
 	assert_false((popup.get_node("%Close") as Button).visible)
+
+
+func test_card_stays_centred_when_content_grows_it() -> void:
+	var popup: PopupCard = _popup()[1]
+	popup.card_size = Vector2(200, 80)
+	popup.open("T")
+	await wait_frames(1)
+	var filler := Control.new()
+	filler.custom_minimum_size = Vector2(300, 220)
+	popup.body().add_child(filler)
+	await wait_frames(2)
+	var card: Control = popup.get_node("%Card")
+	assert_gte(card.size.x, 300.0)
+	var c: Vector2 = card.get_global_rect().get_center()
+	assert_almost_eq(c.x, 320.0, 1.5)
+	assert_almost_eq(c.y, 180.0, 1.5)

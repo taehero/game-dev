@@ -4,6 +4,7 @@ extends RefCounted
 
 const DIR := "res://assets/art/kenney_game_icons/"
 const FILES: Dictionary[StringName, String] = {
+	# Kenney Game Icons has no clock or calendar glyph, so the date pill keeps `home`.
 	&"date": "home.png",
 	&"fans": "multiplayer.png",
 	&"hype": "star.png",

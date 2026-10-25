@@ -16,7 +16,7 @@ Turn the M1 simulation core into the first playable game: a 1980s garage studio 
 | Reference game | Copy Game Dev Tycoon's loop and feel. Never copy its art, text, names, numbers or formulas. All names in this game are fictional. |
 | GDT mechanics in M2 | All of: topic + genre combos; 3 development stages with sliders; research points and unlocks; floating work bubbles; 4 review outlets with a 1–10 score and a sales graph; platforms that launch and die and need dev kits |
 | Camera | Top-down 3/4 view, 16 px pixel art |
-| Screen layout | Large office scene; bottom status bar for the active project; bottom tabs Project / Team / Equipment / Finance / Market that slide panels up |
+| Screen layout | Large office scene; floating project card for the active project (see the restyle spec, 2026-10-25-ui-restyle-design.md); bottom tabs Project / Team / Equipment / Finance / Market that slide panels up |
 | Computers | One workstation per seat; each machine has its own tier and age |
 | Running out of money | Survival path before game over: bank loan, loan shark, contract work, sell equipment, lay off staff |
 | Engines | Build in-house, outsource the build, or license someone else's |
@@ -36,7 +36,7 @@ M2 is one spec and four implementation plans:
 | **M2a** Game loop | Content data for the 1980s, ContentDB, project lifecycle, production, research, engine projects, reviews, sales, platform lifecycle, scenario test | M1 |
 | **M2b** People and money | Owner and skill tree, staff economy, hiring pool, seats and equipment, office levels, rent, electricity, engine licences, outsourcing, loans, contract work, bankruptcy | M2a interfaces (§4) |
 | **M2c** After launch | Marketing channels, promotions, patches, DLC, forum, mod tools, game awards | M2a interfaces |
-| **M2d** Office and UI | Art import, theme and font, office scene, bubbles, status bar, tabs and panels, concept wizard, review popup, sales graph | Scene: §4 shapes only. Panels: M2a–c |
+| **M2d** Office and UI | Art import, theme and font, office scene, bubbles, project card and HUD (restyle spec), dock tabs and panels, concept wizard, review popup, sales graph | Scene: §4 shapes only. Panels: M2a–c |
 
 **Order:** M2a and the M2d scene run in parallel. Then M2b and M2c run in parallel. M2d panels finish last. All entity shapes, signal names and the tick order in §4–§5 are fixed by this spec, so parallel plans agree.
 
@@ -306,7 +306,7 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 
 ### 11.3 Screens
 
-- Bottom status bar: active project title, stage progress, D/T/A/S points, bugs, hype.
+- Project card (restyle spec 2026-10-25-ui-restyle-design.md replaces the bottom status bar): active project title, stage progress, D/T/A/S points, bugs, hype.
 - Tabs: **Project** (sliders, staff assignment, release), **Team** (staff, candidates, owner tree, raises), **Equipment** (seats, buy/lease/sell, dev kits, office move, engines), **Finance** (cash, monthly costs, loans, contract work offers), **Market** (platforms, research list, marketing, promotions, awards).
 - Concept wizard (multi-step popup), review popup (4 outlet cards with reason text), sales graph (from `weekly_units`).
 - Theme: one Godot `Theme` resource with the Thai-capable font; all strings via `tr()`.

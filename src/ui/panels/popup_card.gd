@@ -22,6 +22,7 @@ func _ready() -> void:
 	close_btn.visible = closable
 	close_btn.pressed.connect(close)
 	resized.connect(_centre)
+	(get_node("%Card") as Control).resized.connect(_reposition)
 	_centre()
 
 
@@ -50,4 +51,10 @@ func close() -> void:
 func _centre() -> void:
 	var card: Control = get_node("%Card") as Control
 	card.size = card_size
-	card.position = ((size - card_size) / 2.0).round()
+	_reposition()
+
+
+## Centres on the card's real size: content that grows the card keeps it centred.
+func _reposition() -> void:
+	var card: Control = get_node("%Card") as Control
+	card.position = ((size - card.size) / 2.0).round()
