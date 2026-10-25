@@ -52,6 +52,7 @@ static func remove_decision(state: GameState, decision_id: int) -> bool:
 	for i: int in state.pending_decisions.size():
 		if state.pending_decisions[i].id == decision_id:
 			state.pending_decisions.remove_at(i)
+			_drop_decisions_about(state, decision_id)
 			return true
 	return false
 

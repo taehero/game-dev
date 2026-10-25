@@ -98,7 +98,8 @@ func test_entity_removal_only_in_removal_gd() -> void:
 class RuleScan:
 	const GLOBAL_RNG := "(?<![\\w.])(randi|randf|randomize|randi_range|randf_range)\\s*\\("
 	const RESOURCE_IO := "ResourceSaver|ResourceLoader"
-	const ENTITY_ERASE := "\\bstate\\.(staff|equipment|contracts|loans|projects)\\.erase\\s*\\("
+	## Known limit: only identifiers ending in "state." match; aliases (var s := state) are not caught.
+	const ENTITY_ERASE := "\\b\\w*state\\.(staff|equipment|contracts|loans|projects)\\.erase\\s*\\("
 	const FLOAT_WORD := "\\bfloat\\b"
 	const GLOBAL_RNG_EXTRA := "(?<![\\w.])(randfn|seed)\\s*\\(|\\.(shuffle|pick_random)\\s*\\("
 	const FLOAT_LITERAL := "(?<![\\w.])\\d+\\.\\d"
