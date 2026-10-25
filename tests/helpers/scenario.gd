@@ -21,10 +21,10 @@ const SCRIPT_M2A: Dictionary = {
 }
 
 
-static func advance(state: GameState, script: Dictionary, weeks: int, content: ContentDB = null) -> void:
+static func advance(state: GameState, script: Dictionary, weeks: int, content: ContentDB = null, tuning: TuningDef = null) -> void:
 	if content != null:
 		ContentDB.use(content)
-	var session := GameSession.new(state, Fixtures.tuning())
+	var session := GameSession.new(state, tuning if tuning != null else Fixtures.tuning())
 	for i: int in weeks:
 		if script.has(state.week):
 			for spec: Array in script[state.week]:

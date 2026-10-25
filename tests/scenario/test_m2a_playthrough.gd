@@ -1,10 +1,12 @@
 extends GutTest
 const WEEKS := 80
 var real: ContentDB
+var tuning: TuningDef
 
 
 func before_all() -> void:
 	real = ContentDB.load_dir()
+	tuning = TuningDef.load_default()
 
 
 func after_all() -> void:
@@ -12,9 +14,14 @@ func after_all() -> void:
 
 
 func _run(p_seed: int, weeks: int = WEEKS) -> GameState:
-	var s := Fixtures.new_state(p_seed)
-	Scenario.advance(s, Scenario.SCRIPT_M2A, weeks, real)
+	var s := _new_state(p_seed)
+	Scenario.advance(s, Scenario.SCRIPT_M2A, weeks, real, tuning)
 	return s
+
+
+## Runs with the shipped data/tuning.tres, not the Fixtures defaults.
+func _new_state(p_seed: int) -> GameState:
+	return GameState.new_game(p_seed, "Test Studio", tuning)
 
 
 func _games(s: GameState) -> Array[Project]:
@@ -36,12 +43,9 @@ func test_playthrough_reaches_every_m2a_milestone() -> void:
 	for g: Project in games:
 		assert_true(g.phase >= Project.Phase.RELEASED)
 		assert_eq(g.review_results.size(), 4)
-		var scores: Array[int] = []
 		for r: ReviewResult in g.review_results:
-			scores.append(r.score_x10)
 			assert_ne(tr(r.strength_key), String(r.strength_key))
 			assert_ne(tr(r.weakness_key), String(r.weakness_key))
-		gut.p("REPORT %s scores=%s weekly=%d units=%d revenue=%d phase=%d keys=%s" % [g.title, scores, g.weekly_units.size(), g.units_sold, g.revenue, g.phase, g.review_results.map(func(r: ReviewResult) -> String: return "%s/%s" % [r.strength_key, r.weakness_key])])
 	assert_gte(games[0].weekly_units.size(), 20)
 	assert_true(games[0].units_sold > 0 and games[1].units_sold > 0)
 	assert_eq(games[1].engine_id, s.engines.keys()[0])
@@ -52,10 +56,10 @@ func test_playthrough_reaches_every_m2a_milestone() -> void:
 func test_review_reasons_match_dimensions() -> void:
 	var s := _run(2026)
 	for g: Project in _games(s):
-		var dims := ReviewSystem.dimension_scores(s, real, Fixtures.tuning(), g.id)
+		var dims := ReviewSystem.dimension_scores(s, real, tuning, g.id)
 		for r: ReviewResult in g.review_results:
 			var o: ReviewOutletDef = real.outlets[r.outlet_id]
-			var expect := ReviewSystem.outlet_review(dims, o, real, RandomNumberGenerator.new(), Fixtures.tuning())
+			var expect := ReviewSystem.outlet_review(dims, o, real, RandomNumberGenerator.new(), tuning)
 			assert_eq(r.strength_key, expect.strength_key)
 			assert_eq(r.weakness_key, expect.weakness_key)
 
@@ -73,11 +77,11 @@ func test_different_seed_different_hash() -> void:
 func test_save_load_continue_matches_uninterrupted() -> void:
 	var full := StateHash.of(_run(7))
 	for save_week: int in [0, 13, 20, 22, 26, 28, 50]:
-		var s := Fixtures.new_state(7)
-		Scenario.advance(s, Scenario.SCRIPT_M2A, save_week, real)
+		var s := _new_state(7)
+		Scenario.advance(s, Scenario.SCRIPT_M2A, save_week, real, tuning)
 		var loaded := SaveService.deserialize(SaveService.serialize(s))
 		assert_true(loaded.ok, "load at %d" % save_week)
-		Scenario.advance(loaded.state, Scenario.SCRIPT_M2A, WEEKS - save_week, real)
+		Scenario.advance(loaded.state, Scenario.SCRIPT_M2A, WEEKS - save_week, real, tuning)
 		assert_eq(StateHash.of(loaded.state), full, "save at week %d" % save_week)
 
 

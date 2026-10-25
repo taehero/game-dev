@@ -19,3 +19,13 @@ func test_default_tuning_matches_spec() -> void:
 	assert_eq(t.sales_decay_table_bp.size(), 11)
 	assert_eq(t.sales_review_table_bp.size(), 11)
 	assert_eq(t.sales_hype_table_bp.size(), 11)
+
+
+func test_shipped_tuning_matches_script_defaults() -> void:
+	var shipped: TuningDef = TuningDef.load_default()
+	var defaults := TuningDef.new()
+	for prop: Dictionary in defaults.get_property_list():
+		if not (int(prop["usage"]) & PROPERTY_USAGE_SCRIPT_VARIABLE):
+			continue
+		var n: String = String(prop["name"])
+		assert_eq(shipped.get(n), defaults.get(n), "tuning field %s" % n)
