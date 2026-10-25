@@ -87,12 +87,12 @@ static func build() -> Theme:
     t.default_font_size = 12
     t.set_color(&"font_color", &"Label", UiPalette.TEXT)
 
-    # Base styles: light colours, thin 6/1 margins until the old bars are gone (Ruling 7).
-    t.set_stylebox(&"panel", &"PanelContainer", _box(UiPalette.SURFACE, 6, 6, 6, 1, 1))
+    # Base styles: light colours with real padding; HUD widgets use their own variations.
+    t.set_stylebox(&"panel", &"PanelContainer", _box(UiPalette.SURFACE, 6, 8, 8, 6, 6))
     t.set_stylebox(&"panel", &"Panel", _box(UiPalette.SURFACE, 6, 6, 6, 1, 1))
-    t.set_stylebox(&"normal", &"Button", _box(UiPalette.SURFACE_ALT, 6, 6, 6, 1, 1))
-    t.set_stylebox(&"hover", &"Button", _box(UiPalette.TRACK, 6, 6, 6, 1, 1))
-    t.set_stylebox(&"pressed", &"Button", _box(UiPalette.ACCENT, 6, 6, 6, 1, 1))
+    t.set_stylebox(&"normal", &"Button", _box(UiPalette.SURFACE_ALT, 6, 10, 10, 6, 6))
+    t.set_stylebox(&"hover", &"Button", _box(UiPalette.TRACK, 6, 10, 10, 6, 6))
+    t.set_stylebox(&"pressed", &"Button", _box(UiPalette.ACCENT, 6, 10, 10, 6, 6))
     t.set_color(&"font_color", &"Button", UiPalette.TEXT)
     t.set_color(&"font_hover_color", &"Button", UiPalette.TEXT)
     t.set_color(&"font_pressed_color", &"Button", Color.WHITE)

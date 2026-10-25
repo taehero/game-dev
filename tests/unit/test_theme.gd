@@ -90,10 +90,13 @@ func test_radii_and_shadow() -> void:
     assert_eq(_panel(theme, &"TilePanel").corner_radius_top_left, 8)
     assert_eq(_panel(theme, &"DockPanel").corner_radius_top_left, 14)
 
-func test_base_margins_keep_old_bars_slim() -> void:
+func test_base_margins_are_real_padding() -> void:
     var theme := load(THEME_PATH) as Theme
-    assert_eq(_panel(theme, &"PanelContainer").content_margin_top, 1.0)
-    assert_eq((theme.get_stylebox(&"normal", &"Button") as StyleBoxFlat).content_margin_top, 1.0)
+    assert_eq(_panel(theme, &"PanelContainer").content_margin_left, 8.0)
+    assert_eq(_panel(theme, &"PanelContainer").content_margin_top, 6.0)
+    var btn := theme.get_stylebox(&"normal", &"Button") as StyleBoxFlat
+    assert_eq(btn.content_margin_left, 10.0)
+    assert_eq(btn.content_margin_top, 6.0)
 
 func test_committed_theme_matches_builder() -> void:
     var built := ThemeBuilder.build()
