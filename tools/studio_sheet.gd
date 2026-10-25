@@ -32,9 +32,9 @@ const TIER_3: Array[String] = [
 ]
 const COMPUTERS: Array = [TIER_1, TIER_2, TIER_3]
 
-const WOOD_A: Color = Color("#b9824f")
-const WOOD_B: Color = Color("#a87443")
-const WOOD_SEAM: Color = Color("#7a5230")
+const WOOD_A: Color = Color("#dcae72")
+const WOOD_B: Color = Color("#d2a265")
+const WOOD_SEAM: Color = Color("#b98a55")
 const CARPET: Color = Color("#5b6b8c")
 const CARPET_DOT: Color = Color("#66779a")
 const WALL: Color = Color("#6d6a60")
@@ -62,8 +62,9 @@ static func build() -> Image:
 
 
 static func _wood(x: int, y: int) -> Color:
-	var plank_row: int = y / 4
-	if y % 4 == 3 or x == (plank_row * 6 + 3) % 16:
+	# Long planks: 8px tall, one end joint per tile, staggered between rows.
+	var plank_row: int = y / 8
+	if y % 8 == 7 or x == (plank_row * 8) % 16:
 		return WOOD_SEAM
 	return WOOD_A if plank_row % 2 == 0 else WOOD_B
 

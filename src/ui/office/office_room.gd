@@ -8,15 +8,16 @@ const SMALL_OFFICE_DESKS: Array[Vector2i] = [
 ]
 const GROUND_MARGIN := Vector2i(5, 3)
 ## Decor cell -> prop name. The cell is the prop's top-left tile.
+## Plants and shelves stay right of col 4: the project card covers the top-left corner.
 const DECOR: Dictionary[StringName, Dictionary] = {
 	&"garage": {
-		Vector2i(8, 0): &"window", Vector2i(1, 0): &"picture", Vector2i(1, 2): &"plant",
+		Vector2i(8, 0): &"window", Vector2i(1, 0): &"picture", Vector2i(2, 2): &"plant",
 		Vector2i(5, 2): &"shelf", Vector2i(9, 2): &"barrel", Vector2i(10, 2): &"bag",
 		Vector2i(4, 5): &"rug", Vector2i(10, 6): &"cone",
 	},
 	&"small_office": {
 		Vector2i(11, 0): &"window", Vector2i(14, 0): &"window", Vector2i(1, 0): &"picture",
-		Vector2i(1, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(2, 2): &"shelf",
+		Vector2i(5, 2): &"plant", Vector2i(16, 2): &"plant", Vector2i(8, 2): &"shelf",
 		Vector2i(12, 6): &"rug",
 	},
 }

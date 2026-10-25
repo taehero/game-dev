@@ -82,3 +82,12 @@ func test_decor_painted() -> void:
 	var shelf: Vector3i = OfficeArt.PROPS[&"shelf"]
 	assert_eq(_atlas(decor, Vector2i(5, 2)), shelf)
 	assert_eq(_atlas(decor, Vector2i(6, 2)), shelf + Vector3i(0, 1, 0))
+
+
+func test_plants_and_shelves_clear_of_project_card() -> void:
+	var clear_cols: Dictionary[StringName, int] = {&"garage": 2, &"small_office": 5}
+	for set_name: StringName in clear_cols:
+		for cell: Vector2i in OfficeRoom.DECOR[set_name]:
+			var prop: StringName = OfficeRoom.DECOR[set_name][cell]
+			if cell.y == 2 and (prop == &"plant" or prop == &"shelf"):
+				assert_gte(cell.x, clear_cols[set_name], "%s %s" % [set_name, prop])
