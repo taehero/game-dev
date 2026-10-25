@@ -21,7 +21,7 @@ const DESK: Vector2i = Vector2i(2, 8)
 ## Index 0 = tier 1. Terminal, monitor on stand, flat monitor.
 const COMPUTERS: Array[Vector2i] = [Vector2i(8, 8), Vector2i(17, 10), Vector2i(0, 12)]
 const STAFF_BODIES: Array[Vector2i] = [
-	Vector2i(24, 4), Vector2i(25, 4), Vector2i(27, 4), Vector2i(28, 8),
+	Vector2i(24, 4), Vector2i(25, 4), Vector2i(28, 4), Vector2i(29, 4),
 ]
 
 static var _tileset: TileSet = null
