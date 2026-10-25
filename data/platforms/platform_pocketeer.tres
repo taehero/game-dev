@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PlatformDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/platform_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"platform_pocketeer"
+name_key = &"content.platform.pocketeer.name"
+kind = &"handheld"
+launch_week = 468
+end_week = 884
+install_curve = Array[int]([0, 18000, 36000, 54000, 72000, 90000, 108000, 126000, 144000, 162000, 180000, 198000, 216000, 234000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000, 252000])
+tech_ceiling = 30
+handheld = true
+dev_kit_cost = 5000
+rumor_weeks = 26

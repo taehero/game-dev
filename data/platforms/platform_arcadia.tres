@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlatformDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/platform_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"platform_arcadia"
+name_key = &"content.platform.arcadia.name"
+kind = &"arcade_cabinet"
+launch_week = -104
+end_week = 416
+install_curve = Array[int]([15000, 24000, 33000, 42000, 51000, 60000, 69000, 78000, 87000, 96000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000, 105000])
+tech_ceiling = 55
+dev_kit_cost = 4000
+rumor_weeks = 0

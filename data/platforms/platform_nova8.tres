@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlatformDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/platform_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"platform_nova8"
+name_key = &"content.platform.nova8.name"
+kind = &"home_micro"
+launch_week = -26
+end_week = 364
+install_curve = Array[int]([40000, 52000, 64000, 76000, 88000, 100000, 112000, 124000, 136000, 148000, 160000, 172000, 184000, 184000, 184000, 184000])
+tech_ceiling = 35
+dev_kit_cost = 0
+rumor_weeks = 0

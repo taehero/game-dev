@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="LevelDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/level_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"level_junior"
+level = 0
+min_best_skill = 0
+min_total_exp = 0
+salary_bp = 10000
+output_bp = 10000

@@ -25,3 +25,54 @@ ui.status.points,D {design}  T {tech}  A {art}  S {audio},ออกแบบ {de
 ui.status.bugs,Bugs {bugs},บั๊ก {bugs}
 ui.status.hype,Hype {hype},กระแส {hype}
 ui.debug.test_project,Test project,โปรเจกต์ทดสอบ
+content.platform.nova8.name,Nova 8,Nova 8
+content.platform.kestrel64.name,Kestrel 64,Kestrel 64
+content.platform.orbit_vs.name,Orbit VS,Orbit VS
+content.platform.arcadia.name,Arcadia Cabinet,ตู้อาร์เคด Arcadia
+content.platform.pocketeer.name,Pocketeer,Pocketeer
+content.size.small.name,Small game,เกมเล็ก
+content.size.medium.name,Medium game,เกมกลาง
+content.office.garage.name,Garage,โรงรถ
+content.office.small.name,Small office,ออฟฟิศเล็ก
+content.equipment.micro_1980.name,Micro computer ('80),คอมไมโคร รุ่นปี 80
+content.equipment.micro_1985.name,Micro computer ('85),คอมไมโคร รุ่นปี 85
+content.engine.homebrew.name,Homebrew Engine,เอนจินทำเอง (Homebrew)
+company.bank.name,Harbor Savings Bank,ธนาคารฮาร์เบอร์เซฟวิ่ง
+company.lender.name,Quick Penny Loans,เงินด่วนควิกเพนนี
+company.vendor_1.name,Bytewise Supply,ไบต์ไวซ์ ซัพพลาย
+company.vendor_2.name,Pixel Barn Electronics,พิกเซลบาร์น อิเล็กทรอนิกส์
+company.publisher_1.name,Lantern Interactive,แลนเทิร์น อินเทอร์แอกทีฟ
+company.publisher_2.name,Redwood Software,เรดวูด ซอฟต์แวร์
+company.publisher_3.name,Blue Kite Entertainment,บลูไคท์ เอนเตอร์เทนเมนต์
+ui.default_owner_name,Alex,เอ็กซ์
+ui.combo.great,Great,เยี่ยม
+ui.combo.good,Good,ดี
+ui.combo.okay,Okay,พอใช้
+ui.combo.bad,Bad,แย่
+ui.combo.unknown,Unknown,ไม่ทราบ
+error.no_free_seat,No free desk. Move to a bigger office first.,ไม่มีโต๊ะว่าง ย้ายไปออฟฟิศที่ใหญ่กว่าก่อน
+error.not_enough_money,Not enough money.,เงินไม่พอ
+error.not_enough_rp,Not enough research points.,แต้มวิจัยไม่พอ
+error.research_not_found,Unknown research.,ไม่พบงานวิจัยนี้
+error.research_done,Already researched.,วิจัยไปแล้ว
+error.research_locked,Research the earlier topics first.,ต้องวิจัยหัวข้อก่อนหน้าให้เสร็จก่อน
+error.platform_not_found,Unknown platform.,ไม่พบแพลตฟอร์มนี้
+error.platform_not_on_sale,That platform is not on sale.,แพลตฟอร์มนี้ยังไม่วางขาย
+error.dev_kit_owned,You already own this dev kit.,คุณมี Dev Kit นี้แล้ว
+error.no_dev_kit,Buy the dev kit for this platform first.,ต้องซื้อ Dev Kit ของแพลตฟอร์มนี้ก่อน
+error.title_empty,Give your project a title.,ตั้งชื่อโปรเจกต์ก่อน
+error.size_not_found,Unknown project size.,ไม่พบขนาดโปรเจกต์นี้
+error.topic_not_found,Unknown topic.,ไม่พบธีมนี้
+error.genre_not_found,Unknown genre.,ไม่พบแนวเกมนี้
+error.feature_not_found,Unknown engine feature.,ไม่พบฟีเจอร์เอนจินนี้
+error.item_locked,You have not researched this yet.,ยังไม่ได้วิจัยสิ่งนี้
+error.engine_unavailable,That engine is not available.,ใช้เอนจินนี้ไม่ได้
+error.feature_not_in_engine,Your engine does not support that feature.,เอนจินของคุณไม่รองรับฟีเจอร์นี้
+error.no_features,Pick at least one feature for the engine.,เลือกฟีเจอร์ให้เอนจินอย่างน้อยหนึ่งอย่าง
+error.not_enough_staff,Not enough free staff at a desk with a computer.,พนักงานว่างที่โต๊ะพร้อมคอมพิวเตอร์ไม่พอ
+error.project_not_found,Project not found.,ไม่พบโปรเจกต์
+error.project_not_in_production,This project is not in development.,โปรเจกต์นี้ไม่ได้อยู่ในช่วงพัฒนา
+error.invalid_sliders,Each stage's sliders must add up to 100%.,สไลเดอร์ของแต่ละขั้นต้องรวมกันได้ 100%
+error.past_stage_locked,A finished stage cannot be changed.,ขั้นที่เสร็จแล้วแก้ไม่ได้
+error.project_not_ready,Finish development before release.,ต้องพัฒนาให้เสร็จก่อนวางขาย
+error.save_content_missing,This save needs game content that is missing.,เซฟนี้ต้องใช้คอนเทนต์ที่ไม่มีในเกม

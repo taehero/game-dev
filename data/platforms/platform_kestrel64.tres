@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PlatformDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/platform_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"platform_kestrel64"
+name_key = &"content.platform.kestrel64.name"
+kind = &"home_micro"
+launch_week = 104
+end_week = 572
+install_curve = Array[int]([0, 15000, 30000, 45000, 60000, 75000, 90000, 105000, 120000, 135000, 150000, 165000, 180000, 195000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000, 210000])
+tech_ceiling = 50
+dev_kit_cost = 2000
+rumor_weeks = 13

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="OfficeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/office_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"office_small"
+name_key = &"content.office.small.name"
+seats = 5
+rent_per_month = 400
+electricity_base = 40
+moving_cost = 1500
+scene_path = ""
+desk_positions = Array[Vector2i]([Vector2i(3, 3), Vector2i(7, 3), Vector2i(11, 3), Vector2i(3, 6), Vector2i(7, 6)])

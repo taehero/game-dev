@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LicensedEngineDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/licensed_engine_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lic_engine_homebrew"
+name_key = &"content.engine.homebrew.name"
+year_from = 1975
+year_to = 1999
+fee = 0
+royalty_bp = 0
+tech_cap = 35
+features = Array[StringName]([])

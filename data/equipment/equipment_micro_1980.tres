@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipmentDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/equipment_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"equipment_micro_1980"
+name_key = &"content.equipment.micro_1980.name"
+tier = 1
+price = 1500
+lease_per_month = 60
+power_per_month = 10
+speed_bp = 10000
+bug_bp = 10000
+recommended_until_year = 1985

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ProjectSizeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/project_size_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"size_small"
+name_key = &"content.size.small.name"
+base_weeks = 18
+min_staff = 1
+cost_multiplier_bp = 10000
+audience_bp = 100
+price = 12
+par_points = 9000
