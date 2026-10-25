@@ -61,6 +61,7 @@ static func project_status(state: GameState, project_id: int) -> Dictionary:
 	return {
 		"title": project.title,
 		"stage": project.stage_index + 1,
+		"stage_count": GameRules.stage_count(project),
 		"progress": project.stage_progress / 100,
 		"design": project.points.get(&"design", 0),
 		"tech": project.points.get(&"tech", 0),

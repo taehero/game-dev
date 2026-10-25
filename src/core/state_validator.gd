@@ -4,6 +4,9 @@ extends RefCounted
 ## enum names, and reference integrity. GameState.from_dict crashes on bad input,
 ## so this must reject anything from_dict cannot read.
 
+## Contract target points are whole numbers of at least this.
+const MIN_TARGET_POINTS: int = 0
+
 const STATE_SCHEMA: Dictionary = {
 	"schema_version": "int",
 	"week": "int",
@@ -275,7 +278,7 @@ static func _company_ok(e: Dictionary) -> bool:
 static func _contract_ok(e: Dictionary) -> bool:
 	if not _enum_ok(Contract.Kind.keys(), e["kind"]):
 		return false
-	if not _skill_map_ok(e["target_points"], -9223372036854775807):
+	if not _skill_map_ok(e["target_points"], MIN_TARGET_POINTS):
 		return false
 	var q: int = int(e["quality_roll"])
 	return q >= 0 and q <= 100
@@ -341,6 +344,8 @@ static func _project_ok(e: Dictionary) -> bool:
 	for u: Variant in units:
 		if not SaveSchema.is_whole(u) or int(u) < 0:
 			return false
+	if int(e["dlc_count"]) < 0 or int(e["promo_until_week"]) < -1:
+		return false
 	var promo: int = int(e["promo_discount_bp"])
 	if promo < 0 or promo > 10000:
 		return false

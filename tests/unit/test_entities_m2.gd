@@ -11,7 +11,7 @@ func _owner() -> OwnerProfile:
 	o.xp = 120
 	o.skill_points = 3
 	o.perks = {&"perk_coder": 2, &"perk_artist": 1}
-	o.focus_dev_bp = 12500
+	o.focus_dev_bp = 7500
 	return o
 
 

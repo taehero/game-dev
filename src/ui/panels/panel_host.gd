@@ -17,6 +17,11 @@ func _ready() -> void:
 	visible = false
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and _current != &"" and is_node_ready():
+		(get_node("%PanelTitle") as Label).text = tr("ui.tab.%s" % _current)
+
+
 func set_panel(tab: StringName, panel: Control) -> void:
 	var content: Control = get_node("%Content") as Control
 	if panel.get_parent() != null:

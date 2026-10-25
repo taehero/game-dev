@@ -70,7 +70,7 @@ func refresh(view: GameState, t: TuningDef) -> void:
 		return
 	%Title.text = String(info["title"])
 	%Stage.text = tr("ui.status.stage").format({
-		"stage": info["stage"], "count": GameRules.stage_count(view.projects[pid]), "progress": info["progress"],
+		"stage": info["stage"], "count": info["stage_count"], "progress": info["progress"],
 	})
 	%Points.text = tr("ui.status.points").format({
 		"design": info["design"], "tech": info["tech"], "art": info["art"], "audio": info["audio"],

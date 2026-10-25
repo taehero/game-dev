@@ -18,6 +18,10 @@ func test_regexes_catch_known_bad_strings() -> void:
 	assert_true(RuleScan.matches(RuleScan.TRIG_POW, "var a = sinh(x)"))
 	assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "game_state.cash = 5"))
 	assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "_state.cash = 5"))
+	assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "st.cash = 5"))
+	assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "view.projects[1].bugs -= 1"))
+	assert_false(RuleScan.matches(RuleScan.STATE_WRITE, "first.cash = 5"))
+	assert_false(RuleScan.matches(RuleScan.STATE_WRITE, "shown[view.staff_id] = true"))
 	for op: String in ["%=", "|=", "&=", "^=", "<<=", ">>=", "**=", "+=", "/="]:
 		assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "state.cash " + op + " 2"), op)
 	assert_true(RuleScan.matches(RuleScan.STATE_WRITE, "state.staff[a + 1].morale = 3"))
@@ -106,7 +110,7 @@ class RuleScan:
 	const TRIG_POW := "(?<!\\w)(pow|exp|exp2|log|sqrt|sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh)\\s*\\("
 	## Known limit: method-call mutations (.erase(), .append()) and aliased writes
 	## (var s := state; s.x = 1) cannot be caught by a line regex.
-	const STATE_WRITE := "\\b\\w*state\\.[\\w.\\[\\]\"&+*/%|^\\- ]*?\\s*(?:<<|>>|\\*\\*|[-+*/%|&^])?=[^=]"
+	const STATE_WRITE := "\\b(?:\\w*state|(?<![.\\[(,])(?:st|view))\\.[\\w.\\[\\]\"&+*/%|^\\- ]*?\\s*(?:<<|>>|\\*\\*|[-+*/%|&^])?=[^=]"
 
 	static func matches(pattern: String, text: String) -> bool:
 		var re := RegEx.create_from_string(pattern)

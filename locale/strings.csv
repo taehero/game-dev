@@ -10,7 +10,6 @@ ui.hud.load,Load,โหลด
 ui.default_studio_name,Garage Games,Garage Games
 error.company_not_found,Company not found.,ไม่พบบริษัท
 error.invalid_salary,Salary must be above zero.,เงินเดือนต้องมากกว่าศูนย์
-error.staff_limit,Your studio is full.,สตูดิโอเต็มแล้ว
 error.save_unreadable,The save file cannot be read.,อ่านไฟล์เซฟไม่ได้
 error.save_newer_version,This save is from a newer version of the game.,เซฟนี้มาจากเกมเวอร์ชันใหม่กว่า
 error.save_invalid,The save file is damaged.,ไฟล์เซฟเสียหาย

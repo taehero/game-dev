@@ -36,7 +36,7 @@ func test_thai_translation_loads() -> void:
 	assert_eq(tr("ui.hud.hire"), "จ้างคน")
 
 func test_every_error_key_has_en_and_th() -> void:
-	for key: String in ["error.company_not_found", "error.invalid_salary", "error.staff_limit",
+	for key: String in ["error.company_not_found", "error.invalid_salary",
 			"error.save_unreadable", "error.save_newer_version", "error.save_invalid"] + M2A_ERROR_KEYS:
 		TranslationServer.set_locale("en")
 		assert_ne(tr(key), key)

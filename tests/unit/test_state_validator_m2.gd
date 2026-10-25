@@ -202,3 +202,30 @@ func test_rejects_stage_index_out_of_range() -> void:
 	e[0]["projects"][e[1]]["kind"] = "ENGINE"
 	e[0]["projects"][e[1]]["stage_index"] = 1
 	assert_false(GameState.validate_dict(e[0]), "engine has one stage")
+
+
+func test_rejects_negative_contract_target_points() -> void:
+	var s := Fixtures.new_state(5)
+	var c := Contract.new()
+	c.id = s.alloc_id()
+	c.party_a = s.player_company_id
+	c.party_b = s.player_company_id
+	s.contracts[c.id] = c
+	var d: Dictionary = Fixtures.json_round_trip(s.to_dict())
+	d["contracts"][str(c.id)]["target_points"]["art"] = 0
+	assert_true(GameState.validate_dict(d))
+	d["contracts"][str(c.id)]["target_points"]["art"] = -1
+	assert_false(GameState.validate_dict(d))
+
+
+func test_rejects_bad_dlc_count_and_promo_until() -> void:
+	var x := _project_dict()
+	x[0]["projects"][x[1]]["dlc_count"] = -1
+	assert_false(GameState.validate_dict(x[0]))
+	var y := _project_dict()
+	y[0]["projects"][y[1]]["promo_until_week"] = -2
+	assert_false(GameState.validate_dict(y[0]))
+	var z := _project_dict()
+	z[0]["projects"][z[1]]["promo_until_week"] = -1
+	z[0]["projects"][z[1]]["dlc_count"] = 0
+	assert_true(GameState.validate_dict(z[0]))

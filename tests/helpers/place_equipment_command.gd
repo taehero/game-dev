@@ -13,6 +13,17 @@ func _init(p_company_id: int, p_def_id: StringName, p_seat: int) -> void:
 	seat = p_seat
 
 
+func validate(state: GameState, _tuning: TuningDef) -> CommandResult:
+	var content: ContentDB = ContentDB.active()
+	if not content.equipment.has(def_id):
+		return CommandResult.fail(&"error.research_not_found")
+	if seat < 0 or seat >= GameRules.office_seats(state, content, company_id):
+		return CommandResult.fail(&"error.no_free_seat")
+	if GameRules.equipment_at_seat(state, company_id, seat) != -1:
+		return CommandResult.fail(&"error.no_free_seat")
+	return CommandResult.success()
+
+
 func apply(ctx: TickContext) -> void:
 	var e := Equipment.new()
 	e.id = ctx.state.alloc_id()
@@ -20,6 +31,7 @@ func apply(ctx: TickContext) -> void:
 	e.def_id = def_id
 	e.ownership = Equipment.Ownership.BOUGHT
 	e.seat_index = seat
+	e.value = ctx.content.equipment[def_id].price
 	e.bought_week = ctx.state.week
 	ctx.state.equipment[e.id] = e
 	ctx.emit(&"equipment_changed", {"equipment_id": e.id})

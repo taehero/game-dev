@@ -58,3 +58,17 @@ func test_hire_rejected_for_zero_salary() -> void:
 	var s := Fixtures.new_state(3)
 	var r := HireStaffCommand.new(s.player_company_id, "X", 0).validate(s, Fixtures.tuning())
 	assert_eq(r.reason_key, &"error.invalid_salary")
+
+
+func test_place_equipment_validates_def_and_seat() -> void:
+	var s := Fixtures.new_state(1)
+	var t := Fixtures.tuning()
+	var owner_eq: Equipment = s.equipment[s.sorted_ids(s.equipment)[0]]
+	var def_id: StringName = owner_eq.def_id
+	assert_false(PlaceEquipmentCommand.new(1, &"nope", 1).validate(s, t).ok)
+	assert_false(PlaceEquipmentCommand.new(1, def_id, 0).validate(s, t).ok, "seat taken")
+	assert_false(PlaceEquipmentCommand.new(1, def_id, 99).validate(s, t).ok, "seat out of range")
+	var cmd := PlaceEquipmentCommand.new(1, def_id, 1)
+	assert_true(cmd.validate(s, t).ok)
+	cmd.apply(TickContext.new(s, t))
+	assert_eq(s.equipment[s.next_id - 1].value, Fixtures.content().equipment[def_id].price)

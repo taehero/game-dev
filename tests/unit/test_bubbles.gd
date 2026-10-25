@@ -34,3 +34,23 @@ func test_successive_spawns_shift_x_deterministically() -> void:
 	for i: int in 4:
 		xs.append(l.spawn(Vector2(10, 0), &"art").position.x)
 	assert_eq(xs, [7.0, 10.0, 13.0, 7.0] as Array[float])
+
+
+func test_bubble_rises_and_fades_midway() -> void:
+	var l := _layer()
+	var b := l.spawn(Vector2(0, 50), &"bug")
+	await wait_seconds(Bubble.LIFETIME_S - 0.1)
+	assert_lt(b.position.y, 50.0, "rose")
+	assert_lt(b.modulate.a, 1.0, "fading")
+
+
+func test_oldest_bubble_is_freed_first_at_cap() -> void:
+	var l := _layer()
+	var first := l.spawn(Vector2.ZERO, &"art")
+	var second := l.spawn(Vector2.ZERO, &"art")
+	for i: int in BubbleLayer.MAX_BUBBLES - 2:
+		l.spawn(Vector2.ZERO, &"art")
+	assert_false(first.is_queued_for_deletion())
+	l.spawn(Vector2.ZERO, &"art")
+	assert_true(first.is_queued_for_deletion(), "oldest freed")
+	assert_false(second.is_queued_for_deletion())

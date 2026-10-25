@@ -52,8 +52,8 @@ func test_state_queries_date_text() -> void:
 func test_rejected_command_shows_translated_reason() -> void:
 	GameRunner.start_new_game(1, "T")
 	var hud: Control = _make_hud()
-	EventBus.dispatch(&"command_rejected", {"reason_key": &"error.staff_limit"})
-	assert_eq(hud.get_node("%MessageLabel").text, tr("error.staff_limit"))
+	EventBus.dispatch(&"command_rejected", {"reason_key": &"error.invalid_salary"})
+	assert_eq(hud.get_node("%MessageLabel").text, tr("error.invalid_salary"))
 
 func test_load_missing_slot_shows_error() -> void:
 	GameRunner.start_new_game(1, "T")
