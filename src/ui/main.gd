@@ -73,6 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_tab_changed(tab: StringName) -> void:
 	var host: PanelHost = get_node("PanelHost") as PanelHost
+	(get_node("ProjectCard") as Control).visible = tab == &""
 	if tab == &"":
 		host.hide_panel()
 	else:

@@ -209,3 +209,14 @@ func test_screen_fits_worst_case_en() -> void:
 
 func test_screen_fits_worst_case_th() -> void:
 	await _worst_case("th")
+
+
+func test_project_card_hidden_while_panel_open() -> void:
+	var m := _main()
+	var card: Control = m.get_node("ProjectCard")
+	assert_true(card.visible)
+	var btn: Button = m.get_node("Dock/Row/Tab_finance")
+	btn.button_pressed = true
+	assert_false(card.visible)
+	btn.button_pressed = false
+	assert_true(card.visible)
