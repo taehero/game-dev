@@ -9,6 +9,7 @@ var save_dir: String = SaveService.DEFAULT_DIR
 func start_new_game(p_seed: int, studio_name: String) -> void:
 	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(GameState.new_game(p_seed, studio_name, tuning), tuning)
+	session.push_event(&"game_loaded", {})
 
 
 func submit(cmd: Command) -> CommandResult:

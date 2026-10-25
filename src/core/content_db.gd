@@ -158,6 +158,9 @@ func missing_refs(state: GameState) -> Array[String]:
 		for r: StringName in c.unlocked:
 			if not research.has(r):
 				out.append("company %d: unknown research %s" % [cid, r])
+		for a: StringName in c.awards:
+			if not awards.has(a):
+				out.append("company %d: unknown award %s" % [cid, a])
 		for p: StringName in c.dev_kits:
 			if not platforms.has(p):
 				out.append("company %d: unknown platform %s" % [cid, p])
@@ -173,7 +176,7 @@ func missing_refs(state: GameState) -> Array[String]:
 		var pr: Project = state.projects[pid]
 		if pr.size_id != &"" and not sizes.has(pr.size_id):
 			out.append("project %d: unknown size %s" % [pid, pr.size_id])
-		var lookups: Array = [[&"platform", platforms], [&"genre", genres], [&"topic", topics],
+		var lookups: Array[Array] = [[&"platform", platforms], [&"genre", genres], [&"topic", topics],
 			[&"engine", licensed_engines]]
 		for pair: Array in lookups:
 			var key: StringName = pair[0]
@@ -187,6 +190,17 @@ func missing_refs(state: GameState) -> Array[String]:
 		for rr: ReviewResult in pr.review_results:
 			if not outlets.has(rr.outlet_id):
 				out.append("project %d: unknown outlet %s" % [pid, rr.outlet_id])
+	for kid: int in state.sorted_ids(state.contracts):
+		var ct: Contract = state.contracts[kid]
+		if ct.locked_genre != &"" and not genres.has(ct.locked_genre):
+			out.append("contract %d: unknown genre %s" % [kid, ct.locked_genre])
+		if ct.locked_platform != &"" and not platforms.has(ct.locked_platform):
+			out.append("contract %d: unknown platform %s" % [kid, ct.locked_platform])
+		if ct.kind == Contract.Kind.ENGINE_LICENSE and not licensed_engines.has(ct.deliverable):
+			out.append("contract %d: unknown engine %s" % [kid, ct.deliverable])
+	for perk_id: StringName in GameState.sorted_names(state.owner.perks):
+		if not perks.has(perk_id):
+			out.append("owner: unknown perk %s" % perk_id)
 	for gid: int in state.sorted_ids(state.engines):
 		for f: StringName in state.engines[gid].features:
 			if not engine_features.has(f):

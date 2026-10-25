@@ -112,3 +112,10 @@ func test_successful_load_emits_game_loaded() -> void:
 	GameRunner.load_game("slot_1")
 	GameRunner._process(0.0)
 	assert_signal_emitted(EventBus, "game_loaded")
+
+
+func test_new_game_emits_game_loaded() -> void:
+	watch_signals(EventBus)
+	GameRunner.start_new_game(3, "T")
+	GameRunner._process(0.0)
+	assert_signal_emitted(EventBus, "game_loaded")
