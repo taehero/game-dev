@@ -42,17 +42,17 @@ func test_invalid_speed_ignored() -> void:
 func test_command_applies_immediately_when_paused() -> void:
 	var g := _session()
 	g.submit(HireStaffCommand.new(g.state.player_company_id, "Ada", 800))
-	assert_eq(g.state.staff.size(), 1)
+	assert_eq(g.state.staff.size(), 2)
 
 
 func test_command_waits_for_next_tick_when_running() -> void:
 	var g := _session()
 	g.set_speed(1)
 	g.submit(HireStaffCommand.new(g.state.player_company_id, "Ada", 800))
-	assert_eq(g.state.staff.size(), 0)
+	assert_eq(g.state.staff.size(), 1)
 	assert_false(g.can_save())
 	g.advance(8.0)
-	assert_eq(g.state.staff.size(), 1)
+	assert_eq(g.state.staff.size(), 2)
 	assert_true(g.can_save())
 
 

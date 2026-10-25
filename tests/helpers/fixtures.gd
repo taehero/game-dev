@@ -31,6 +31,48 @@ static func add_staff(state: GameState, overrides: Dictionary = {}) -> int:
 	return s.id
 
 
+static func add_equipment(state: GameState, overrides: Dictionary = {}) -> int:
+	var e := Equipment.new()
+	e.id = state.alloc_id()
+	e.company_id = state.player_company_id
+	e.def_id = &"equipment_micro_1980"
+	e.seat_index = -1
+	for k: Variant in overrides:
+		_apply(e, String(k), overrides[k])
+	state.equipment[e.id] = e
+	return e.id
+
+
+static func add_engine(state: GameState, overrides: Dictionary = {}) -> int:
+	var g := GameEngine.new()
+	g.id = state.alloc_id()
+	g.company_id = state.player_company_id
+	g.name = "Engine %d" % g.id
+	g.features = [&"feature_fx_save"]
+	g.tech_cap = 35
+	g.source = GameEngine.Source.BUILT
+	for k: Variant in overrides:
+		_apply(g, String(k), overrides[k])
+	state.engines[g.id] = g
+	return g.id
+
+
+## Staff in the lowest free player seat plus equipment at that seat, then overrides.
+## Does not check office seats; tests needing more than 2 workers set office_id = &"office_small".
+static func add_worker(state: GameState, overrides: Dictionary = {}) -> int:
+	var used: Dictionary = {}
+	for sid: int in state.staff_of(state.player_company_id):
+		used[state.staff[sid].seat_index] = true
+	var seat: int = 0
+	while used.has(seat):
+		seat += 1
+	var id: int = add_staff(state, {"seat_index": seat})
+	add_equipment(state, {"seat_index": seat})
+	for k: Variant in overrides:
+		_apply(state.staff[id], String(k), overrides[k])
+	return id
+
+
 static func add_project(state: GameState, overrides: Dictionary = {}) -> int:
 	var p := Project.new()
 	p.id = state.alloc_id()

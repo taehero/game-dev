@@ -23,7 +23,7 @@ func test_staff_of_returns_sorted_ids_for_company() -> void:
 	var s := Fixtures.new_state(1)
 	var a := Fixtures.add_staff(s)
 	var b := Fixtures.add_staff(s)
-	assert_eq(s.staff_of(s.player_company_id), [a, b] as Array[int])
+	assert_eq(s.staff_of(s.player_company_id), [s.owner_staff_id(), a, b] as Array[int])
 	assert_eq(s.staff_of(999), [] as Array[int])
 
 
@@ -199,8 +199,8 @@ func test_hired_staff_skill_order_survives_round_trip() -> void:
 	var t := Fixtures.tuning()
 	HireStaffCommand.new(s.player_company_id, "Ada", 800).apply(TickContext.new(s, t))
 	var back := GameState.from_dict(_rt(s))
-	var live: Staff = s.staff.values()[0]
-	var loaded: Staff = back.staff.values()[0]
+	var live: Staff = s.staff[s.next_id - 1]
+	var loaded: Staff = back.staff[s.next_id - 1]
 	assert_eq(loaded.skills.keys(), live.skills.keys())
 	assert_eq(live.skills.keys(), [&"art", &"audio", &"design", &"tech"])
 
@@ -375,3 +375,49 @@ func test_validate_rejects_staff_skills_with_wrong_keys() -> void:
 	d["staff"][str(sid)]["skills"].erase("audio")
 	d["staff"][str(sid)]["skills"]["magic"] = 5
 	assert_false(GameState.validate_dict(d), "swapped")
+
+
+func test_new_game_creates_owner_seated_with_equipment() -> void:
+	var s := Fixtures.new_state(1)
+	var owner: Staff = s.staff[s.owner_staff_id()]
+	assert_true(owner.is_owner)
+	assert_eq(owner.seat_index, 0)
+	assert_eq(owner.salary, 0)
+	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
+		assert_eq(owner.skills[k], 30)
+	var eq: Equipment = s.equipment[3]
+	assert_eq(eq.seat_index, 0)
+	assert_eq(eq.def_id, &"equipment_micro_1980")
+	assert_eq(s.companies[s.player_company_id].office_id, &"office_garage")
+
+
+func test_new_game_creates_ai_companies_in_fixed_order() -> void:
+	var s := Fixtures.new_state(1)
+	var kinds: Array = s.sorted_ids(s.companies).map(func(id: int) -> String: return Company.Kind.keys()[s.companies[id].kind])
+	assert_eq(kinds, ["PLAYER", "BANK", "LENDER", "VENDOR", "VENDOR", "AI_PUBLISHER", "AI_PUBLISHER", "AI_PUBLISHER"])
+	assert_eq(s.next_id, 11)
+
+
+func test_new_game_draws_no_rng() -> void:
+	var s := Fixtures.new_state(1)
+	var fresh := RandomNumberGenerator.new()
+	fresh.seed = 1
+	assert_eq(s.rng.state, fresh.state)
+
+
+func test_m2_state_round_trip_preserves_hash() -> void:
+	var s := Fixtures.new_state(5)
+	Fixtures.add_engine(s)
+	Fixtures.add_worker(s)
+	var l := Loan.new()
+	l.id = s.alloc_id()
+	l.company_id = s.player_company_id
+	l.lender_id = 4
+	s.loans[l.id] = l
+	var c := Candidate.new()
+	c.id = s.alloc_id()
+	c.skills = {&"art": 1, &"audio": 1, &"design": 1, &"tech": 1}
+	s.candidates.append(c)
+	var d := Fixtures.json_round_trip(s.to_dict())
+	assert_true(GameState.validate_dict(d))
+	assert_eq(StateHash.of(GameState.from_dict(d)), StateHash.of(s))

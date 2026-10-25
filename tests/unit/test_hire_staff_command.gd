@@ -8,8 +8,8 @@ func test_hire_adds_staff_with_skills_in_range() -> void:
 	assert_true(cmd.validate(s, t).ok)
 	var ctx := TickContext.new(s, t)
 	cmd.apply(ctx)
-	assert_eq(s.staff.size(), 1)
-	var st: Staff = s.staff.values()[0]
+	assert_eq(s.staff.size(), 2)
+	var st: Staff = s.staff[s.next_id - 1]
 	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
 		assert_between(st.skills[k], t.hire_skill_min, t.hire_skill_max)
 	assert_eq(st.salary, 800)

@@ -5,9 +5,6 @@ extends RefCounted
 ## week -> list of command specs.
 const SCRIPT_BASIC: Dictionary = {
 	0: [["hire", "Ada", 800]],
-	10: [["hire", "Bo", 700]],
-	30: [["hire", "Cy", 900]],
-	300: [["hire", "Di", 600]],
 }
 
 

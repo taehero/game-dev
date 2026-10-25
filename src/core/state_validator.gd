@@ -17,6 +17,12 @@ const STATE_SCHEMA: Dictionary = {
 	"staff": "dict",
 	"projects": "dict",
 	"contracts": "dict",
+	"owner": "dict",
+	"equipment": "dict",
+	"engines": "dict",
+	"loans": "dict",
+	"candidates": "array",
+	"game_over": "bool",
 	"market": "dict",
 	"active_events": "array",
 	"forum_posts": "array",
@@ -43,6 +49,19 @@ static func validate(d: Variant) -> bool:
 	var contract_ids: Dictionary[int, bool] = {}
 	if not _entities(s["contracts"], Contract.SCHEMA, used, contract_ids, _contract_ok):
 		return false
+	if not SaveSchema.check(s["owner"], OwnerProfile.SCHEMA):
+		return false
+	var equipment_ids: Dictionary[int, bool] = {}
+	if not _entities(s["equipment"], Equipment.SCHEMA, used, equipment_ids, _equipment_ok):
+		return false
+	var engine_ids: Dictionary[int, bool] = {}
+	if not _entities(s["engines"], GameEngine.SCHEMA, used, engine_ids, _engine_ok):
+		return false
+	var loan_ids: Dictionary[int, bool] = {}
+	if not _entities(s["loans"], Loan.SCHEMA, used, loan_ids, _always):
+		return false
+	if not _list(s["candidates"], Candidate.SCHEMA, used, true, _candidate_ok):
+		return false
 	if not _market_ok(s["market"]):
 		return false
 	if not _list(s["active_events"], ActiveWorldEvent.SCHEMA, used, false, _always):
@@ -67,6 +86,9 @@ static func validate(d: Variant) -> bool:
 		var pe: Dictionary = projects_d[k]
 		if not company_ids.has(int(pe["company_id"])):
 			return false
+		var eng_ref: int = int(pe["engine_id"])
+		if eng_ref != -1 and not engine_ids.has(eng_ref):
+			return false
 		var cid: int = int(pe["contract_id"])
 		if cid != -1 and not contract_ids.has(cid):
 			return false
@@ -78,6 +100,8 @@ static func validate(d: Variant) -> bool:
 		var pid: int = int(e["project_id"])
 		if pid != -1 and not project_ids.has(pid):
 			return false
+	if not _m2_refs_ok(s, company_ids, staff_ids):
+		return false
 	for post: Variant in s["forum_posts"]:
 		if not project_ids.has(int(post["project_id"])):
 			return false
@@ -91,6 +115,61 @@ static func validate(d: Variant) -> bool:
 		for r: Variant in dec["related_ids"]:
 			if not seen.has(int(r)):
 				return false
+	return true
+
+
+static func _m2_refs_ok(
+	s: Dictionary, company_ids: Dictionary[int, bool], staff_ids: Dictionary[int, bool]
+) -> bool:
+	var owner_id: int = int(s["owner"]["staff_id"])
+	if not staff_ids.has(owner_id):
+		return false
+	var staff_d: Dictionary = s["staff"]
+	var owner_count: int = 0
+	var seats: Dictionary = {}
+	for k: Variant in staff_d:
+		var e: Dictionary = staff_d[k]
+		if bool(e["is_owner"]):
+			owner_count += 1
+		var seat: int = int(e["seat_index"])
+		if seat >= 0:
+			var key: String = "s%d:%d" % [int(e["company_id"]), seat]
+			if seats.has(key):
+				return false
+			seats[key] = true
+	if owner_count != 1:
+		return false
+	var owner_e: Dictionary = staff_d[str(owner_id)]
+	if not bool(owner_e["is_owner"]) or int(owner_e["company_id"]) != int(s["player_company_id"]):
+		return false
+	var equip_seats: Dictionary = {}
+	var equipment_d: Dictionary = s["equipment"]
+	for k: Variant in equipment_d:
+		var e: Dictionary = equipment_d[k]
+		if not company_ids.has(int(e["company_id"])):
+			return false
+		var seat: int = int(e["seat_index"])
+		if seat >= 0:
+			var key: String = "e%d:%d" % [int(e["company_id"]), seat]
+			if equip_seats.has(key):
+				return false
+			equip_seats[key] = true
+	var engines_d: Dictionary = s["engines"]
+	for k: Variant in engines_d:
+		if not company_ids.has(int(engines_d[k]["company_id"])):
+			return false
+	var companies_d: Dictionary = s["companies"]
+	var loans_d: Dictionary = s["loans"]
+	for k: Variant in loans_d:
+		var e: Dictionary = loans_d[k]
+		if not company_ids.has(int(e["company_id"])):
+			return false
+		var lender_id: int = int(e["lender_id"])
+		if not company_ids.has(lender_id):
+			return false
+		var lk: String = String(companies_d[str(lender_id)]["kind"])
+		if lk != "BANK" and lk != "LENDER":
+			return false
 	return true
 
 
@@ -261,6 +340,29 @@ static func _project_ok(e: Dictionary) -> bool:
 	if eng != -1 and eng < 1:
 		return false
 	return _whole_values(e["points"])
+
+
+static func _equipment_ok(e: Dictionary) -> bool:
+	return _enum_ok(Equipment.Ownership.keys(), e["ownership"]) and int(e["seat_index"]) >= -1
+
+
+static func _engine_ok(e: Dictionary) -> bool:
+	if not _enum_ok(GameEngine.Source.keys(), e["source"]):
+		return false
+	if not _strings_ok(e["features"]):
+		return false
+	var cap: int = int(e["tech_cap"])
+	return cap >= 0 and cap <= 100
+
+
+static func _candidate_ok(e: Dictionary) -> bool:
+	var skills: Dictionary = e["skills"]
+	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
+		return false
+	for sk: String in SKILL_KEYS:
+		if not skills.has(sk):
+			return false
+	return _strings_ok(e["traits"])
 
 
 static func _decision_ok(e: Dictionary) -> bool:

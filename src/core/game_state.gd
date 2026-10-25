@@ -12,6 +12,12 @@ var companies: Dictionary[int, Company] = {}
 var staff: Dictionary[int, Staff] = {}
 var projects: Dictionary[int, Project] = {}
 var contracts: Dictionary[int, Contract] = {}
+var owner: OwnerProfile = OwnerProfile.new()
+var equipment: Dictionary[int, Equipment] = {}
+var engines: Dictionary[int, GameEngine] = {}
+var loans: Dictionary[int, Loan] = {}
+var candidates: Array[Candidate] = []
+var game_over: bool = false
 var market: Market = Market.new()
 var active_events: Array[ActiveWorldEvent] = []
 var forum_posts: Array[ForumPost] = []
@@ -28,9 +34,49 @@ static func new_game(p_seed: int, studio_name: String, t: TuningDef) -> GameStat
 	c.kind = Company.Kind.PLAYER
 	c.money = t.start_money
 	c.reputation = 0
+	c.office_id = t.start_office_id
 	s.companies[c.id] = c
 	s.player_company_id = c.id
+	var o := Staff.new()
+	o.id = s.alloc_id()
+	o.company_id = c.id
+	o.name = "ui.default_owner_name"
+	o.is_owner = true
+	o.seat_index = 0
+	o.salary = 0
+	for k: StringName in [&"design", &"tech", &"art", &"audio"]:
+		o.skills[k] = t.owner_start_skill
+	s.staff[o.id] = o
+	var eq := Equipment.new()
+	eq.id = s.alloc_id()
+	eq.company_id = c.id
+	eq.def_id = t.start_equipment_def
+	eq.ownership = Equipment.Ownership.BOUGHT
+	eq.seat_index = 0
+	eq.value = t.start_equipment_value
+	s.equipment[eq.id] = eq
+	s.owner.staff_id = o.id
+	var ai: Array = [
+		[Company.Kind.BANK, "company.bank.name"],
+		[Company.Kind.LENDER, "company.lender.name"],
+		[Company.Kind.VENDOR, "company.vendor_1.name"],
+		[Company.Kind.VENDOR, "company.vendor_2.name"],
+		[Company.Kind.AI_PUBLISHER, "company.publisher_1.name"],
+		[Company.Kind.AI_PUBLISHER, "company.publisher_2.name"],
+		[Company.Kind.AI_PUBLISHER, "company.publisher_3.name"],
+	]
+	for spec: Array in ai:
+		var a := Company.new()
+		a.id = s.alloc_id()
+		a.name = spec[1]
+		a.kind = spec[0]
+		a.office_id = &""
+		s.companies[a.id] = a
 	return s
+
+
+func owner_staff_id() -> int:
+	return owner.staff_id
 
 
 func alloc_id() -> int:
@@ -81,6 +127,18 @@ func to_dict() -> Dictionary:
 	var contracts_out: Dictionary = {}
 	for id: int in contracts:
 		contracts_out[str(id)] = contracts[id].to_dict()
+	var equipment_out: Dictionary = {}
+	for id: int in equipment:
+		equipment_out[str(id)] = equipment[id].to_dict()
+	var engines_out: Dictionary = {}
+	for id: int in engines:
+		engines_out[str(id)] = engines[id].to_dict()
+	var loans_out: Dictionary = {}
+	for id: int in loans:
+		loans_out[str(id)] = loans[id].to_dict()
+	var candidates_out: Array = []
+	for cand: Candidate in candidates:
+		candidates_out.append(cand.to_dict())
 	var events_out: Array = []
 	for e: ActiveWorldEvent in active_events:
 		events_out.append(e.to_dict())
@@ -101,6 +159,12 @@ func to_dict() -> Dictionary:
 		"staff": staff_out,
 		"projects": projects_out,
 		"contracts": contracts_out,
+		"owner": owner.to_dict(),
+		"equipment": equipment_out,
+		"engines": engines_out,
+		"loans": loans_out,
+		"candidates": candidates_out,
+		"game_over": game_over,
 		"market": market.to_dict(),
 		"active_events": events_out,
 		"forum_posts": posts_out,
@@ -134,6 +198,19 @@ static func from_dict(d: Dictionary) -> GameState:
 	var contracts_in: Dictionary = d["contracts"]
 	for id: int in _sorted_keys(contracts_in):
 		s.contracts[id] = Contract.from_dict(contracts_in[str(id)])
+	s.owner = OwnerProfile.from_dict(d["owner"])
+	var equipment_in: Dictionary = d["equipment"]
+	for id: int in _sorted_keys(equipment_in):
+		s.equipment[id] = Equipment.from_dict(equipment_in[str(id)])
+	var engines_in: Dictionary = d["engines"]
+	for id: int in _sorted_keys(engines_in):
+		s.engines[id] = GameEngine.from_dict(engines_in[str(id)])
+	var loans_in: Dictionary = d["loans"]
+	for id: int in _sorted_keys(loans_in):
+		s.loans[id] = Loan.from_dict(loans_in[str(id)])
+	for cand: Variant in d["candidates"]:
+		s.candidates.append(Candidate.from_dict(cand))
+	s.game_over = bool(d["game_over"])
 	s.market = Market.from_dict(d["market"])
 	for e: Variant in d["active_events"]:
 		s.active_events.append(ActiveWorldEvent.from_dict(e))

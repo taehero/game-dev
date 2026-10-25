@@ -122,3 +122,41 @@ func test_rejects_review_score_out_of_range() -> void:
 func test_rejects_unknown_project_kind() -> void:
 	var x := _project_dict(); x[0]["projects"][x[1]]["kind"] = "MOVIE"
 	assert_false(GameState.validate_dict(x[0]))
+
+
+func test_rejects_owner_pointing_at_non_owner_staff() -> void:
+	var s := Fixtures.new_state(5)
+	var sid := Fixtures.add_staff(s)
+	var d := Fixtures.json_round_trip(s.to_dict())
+	d["owner"]["staff_id"] = sid
+	assert_false(GameState.validate_dict(d))
+
+
+func test_rejects_two_staff_in_one_seat() -> void:
+	var s := Fixtures.new_state(5)
+	Fixtures.add_staff(s, {"seat_index": 0})
+	assert_false(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func test_rejects_loan_from_non_lender() -> void:
+	var s := Fixtures.new_state(5)
+	var l := Loan.new()
+	l.id = s.alloc_id()
+	l.company_id = s.player_company_id
+	l.lender_id = 8  # publisher
+	s.loans[l.id] = l
+	assert_false(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func test_rejects_dangling_engine_id() -> void:
+	var s := Fixtures.new_state(5)
+	Fixtures.add_project(s, {"engine_id": 999})
+	assert_false(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func test_rejects_equipment_of_unknown_company() -> void:
+	var s := Fixtures.new_state(5)
+	var eid := Fixtures.add_equipment(s)
+	var d := Fixtures.json_round_trip(s.to_dict())
+	d["equipment"][str(eid)]["company_id"] = 999
+	assert_false(GameState.validate_dict(d))
