@@ -14,3 +14,14 @@ error.staff_limit,Your studio is full.,สตูดิโอเต็มแล�
 error.save_unreadable,The save file cannot be read.,อ่านไฟล์เซฟไม่ได้
 error.save_newer_version,This save is from a newer version of the game.,เซฟนี้มาจากเกมเวอร์ชันใหม่กว่า
 error.save_invalid,The save file is damaged.,ไฟล์เซฟเสียหาย
+ui.tab.project,Project,โปรเจกต์
+ui.tab.team,Team,ทีม
+ui.tab.equipment,Equipment,อุปกรณ์
+ui.tab.finance,Finance,การเงิน
+ui.tab.market,Market,ตลาด
+ui.status.no_project,No game in development,ยังไม่มีเกมที่กำลังพัฒนา
+ui.status.stage,Stage {stage}/{count} · {progress}%,ขั้นที่ {stage}/{count} · {progress}%
+ui.status.points,D {design}  T {tech}  A {art}  S {audio},ออกแบบ {design}  เทค {tech}  ภาพ {art}  เสียง {audio}
+ui.status.bugs,Bugs {bugs},บั๊ก {bugs}
+ui.status.hype,Hype {hype},กระแส {hype}
+ui.debug.test_project,Test project,โปรเจกต์ทดสอบ
