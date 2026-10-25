@@ -11,6 +11,11 @@ func test_at_least_one_art_pack() -> void:
 
 func test_every_art_pack_has_cc0_license() -> void:
 	for dir: String in _pack_dirs():
+		if dir.get_file() == "studio":
+			var readme := dir.path_join("README.md")
+			assert_true(FileAccess.file_exists(readme), readme)
+			assert_string_contains(FileAccess.get_file_as_string(readme).to_lower(), "own work")
+			continue
 		var path := dir.path_join("License.txt")
 		assert_true(FileAccess.file_exists(path), path)
 		assert_string_contains(FileAccess.get_file_as_string(path).to_upper(), "CC0", false)
