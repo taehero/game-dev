@@ -72,3 +72,39 @@ static func project_status(state: GameState, project_id: int) -> Dictionary:
 		"bugs": project.bugs,
 		"hype": project.hype,
 	}
+
+
+## Id of the player company's office, or &"" if the company is missing.
+static func player_office_id(state: GameState) -> StringName:
+	if not state.companies.has(state.player_company_id):
+		return &""
+	return state.companies[state.player_company_id].office_id
+
+
+## One view per seat 0 .. seats-1 (never more than desk_positions.size()). Bad seat data is
+## ignored: out-of-range seats, storage (-1), other companies; the lowest id wins a shared seat.
+static func seat_views(state: GameState, office: OfficeDef, equipment_defs: Dictionary[StringName, EquipmentDef], t: TuningDef) -> Array[SeatView]:
+	var views: Array[SeatView] = []
+	var count: int = mini(office.seats, office.desk_positions.size())
+	var company_id: int = state.player_company_id
+	for seat: int in count:
+		var view := SeatView.new()
+		view.seat_index = seat
+		view.desk_cell = office.desk_positions[seat]
+		views.append(view)
+	for sid: int in state.sorted_ids(state.staff):
+		var member: Staff = state.staff[sid]
+		if member.company_id != company_id or member.seat_index < 0 or member.seat_index >= count:
+			continue
+		var seated: SeatView = views[member.seat_index]
+		if seated.staff_id == -1:
+			seated.staff_id = sid
+	for view: SeatView in views:
+		var eid: int = GameRules.equipment_at_seat(state, company_id, view.seat_index)
+		if eid != -1:
+			var def_id: StringName = state.equipment[eid].def_id
+			if equipment_defs.has(def_id):
+				view.computer_tier = equipment_defs[def_id].tier
+		if view.staff_id != -1 and view.computer_tier > 0:
+			view.pose = staff_pose(state, view.staff_id, t)
+	return views
