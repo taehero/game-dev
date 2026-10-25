@@ -21,9 +21,6 @@ func _ready() -> void:
 		seg.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(seg)
 		seg.pressed.connect(_choose.bind(s))
-		seg.toggled.connect(func(on: bool) -> void:
-			if on:
-				_choose(s))
 	_translate()
 
 

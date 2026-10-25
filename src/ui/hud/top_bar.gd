@@ -5,7 +5,7 @@ extends HBoxContainer
 const PILL_WIDTHS: Dictionary[StringName, int] = {&"date": 148, &"money": 108, &"fans": 104, &"hype": 76}
 const EVENT_SIGNALS: Array[StringName] = [
 	&"week_ticked", &"money_changed", &"project_changed", &"project_phase_changed",
-	&"sales_updated", &"review_published", &"game_loaded",
+	&"sales_updated", &"review_published", &"game_loaded", &"speed_changed",
 ]
 
 

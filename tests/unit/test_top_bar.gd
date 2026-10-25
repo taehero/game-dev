@@ -146,3 +146,40 @@ func test_pills_fit_worst_case_en() -> void:
 
 func test_pills_fit_worst_case_th() -> void:
 	await _worst_case("th")
+
+
+func test_set_speed_zero_updates_control_without_tick() -> void:
+	var bar: TopBar = _bar()
+	var speed: SpeedControl = bar.get_node("%Speed")
+	GameRunner.set_speed(4)
+	GameRunner._process(0.0)
+	assert_eq(speed.active_speed(), 4)
+	var week: int = _st().week
+	GameRunner.set_speed(0)
+	GameRunner._process(0.0)
+	assert_eq(speed.active_speed(), 0)
+	assert_eq(_st().week, week)
+
+
+func test_popup_pause_and_resume_sync_control() -> void:
+	var bar: TopBar = _bar()
+	var speed: SpeedControl = bar.get_node("%Speed")
+	GameRunner.set_speed(4)
+	GameRunner.pause_for_popup()
+	GameRunner._process(0.0)
+	assert_eq(speed.active_speed(), 0)
+	GameRunner.resume_after_popup()
+	GameRunner._process(0.0)
+	assert_eq(speed.active_speed(), 4)
+
+
+func test_one_click_sets_speed_once() -> void:
+	var bar: TopBar = _bar()
+	var speed: SpeedControl = bar.get_node("%Speed")
+	GameRunner.session.drain_events()
+	(speed.get_node("Row/Seg_2") as Button).pressed.emit()
+	var changes: int = 0
+	for e: Dictionary in GameRunner.session.drain_events():
+		if e["name"] == &"speed_changed":
+			changes += 1
+	assert_eq(changes, 1)

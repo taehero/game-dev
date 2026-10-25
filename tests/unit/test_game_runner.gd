@@ -119,3 +119,45 @@ func test_new_game_emits_game_loaded() -> void:
 	GameRunner.start_new_game(3, "T")
 	GameRunner._process(0.0)
 	assert_signal_emitted(EventBus, "game_loaded")
+
+
+func test_set_speed_pushes_speed_changed_event() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.session.drain_events()
+	GameRunner.set_speed(4)
+	var events: Array[Dictionary] = GameRunner.session.drain_events()
+	assert_eq(events.size(), 1)
+	assert_eq(events[0]["name"], &"speed_changed")
+	assert_eq(events[0]["payload"]["speed"], 4)
+
+
+func test_pause_and_resume_for_popup_restores_speed() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.set_speed(4)
+	GameRunner.pause_for_popup()
+	assert_eq(GameRunner.session.speed, 0)
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 4)
+
+
+func test_nested_pause_keeps_first_remembered_speed() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.set_speed(4)
+	GameRunner.pause_for_popup()
+	GameRunner.pause_for_popup()
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 4)
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 4)
+
+
+func test_resume_without_pause_does_nothing() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 0)
+	GameRunner.set_speed(2)
+	GameRunner.pause_for_popup()
+	GameRunner.set_speed(1)
+	GameRunner.resume_after_popup()
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 2)

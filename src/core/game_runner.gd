@@ -5,10 +5,14 @@ var session: GameSession
 ## Overridden by tests so they never touch the real user saves.
 var save_dir: String = SaveService.DEFAULT_DIR
 
+## Speed to restore after a popup pause; 0 means nothing remembered.
+var _popup_resume_speed: int = 0
+
 
 func start_new_game(p_seed: int, studio_name: String) -> void:
 	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(GameState.new_game(p_seed, studio_name, tuning), tuning)
+	_popup_resume_speed = 0
 	session.push_event(&"game_loaded", {})
 
 
@@ -18,6 +22,24 @@ func submit(cmd: Command) -> CommandResult:
 
 func set_speed(s: int) -> void:
 	session.set_speed(s)
+	session.push_event(&"speed_changed", {"speed": session.speed})
+
+
+## A popup freezes the clock. The first call remembers the running speed; nested calls keep it.
+func pause_for_popup() -> void:
+	if session == null:
+		return
+	if session.speed > 0:
+		_popup_resume_speed = session.speed
+		set_speed(0)
+
+
+func resume_after_popup() -> void:
+	if session == null or _popup_resume_speed == 0:
+		return
+	var s: int = _popup_resume_speed
+	_popup_resume_speed = 0
+	set_speed(s)
 
 
 func save_game(slot: String) -> Error:
@@ -34,6 +56,7 @@ func load_game(slot: String) -> LoadResult:
 		return LoadResult.failure(&"error.save_content_missing")
 	var tuning: TuningDef = TuningDef.load_default()
 	session = GameSession.new(r.state, tuning)
+	_popup_resume_speed = 0
 	session.set_speed(0)
 	session.push_event(&"game_loaded", {})
 	return r

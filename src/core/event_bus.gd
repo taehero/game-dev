@@ -32,6 +32,7 @@ signal award_result(payload: Dictionary)
 signal promotion_started(payload: Dictionary)
 signal game_over(payload: Dictionary)
 signal game_loaded(payload: Dictionary)
+signal speed_changed(payload: Dictionary)
 
 
 func dispatch(event_name: StringName, payload: Dictionary) -> bool:
