@@ -1,7 +1,7 @@
 class_name Contract
 extends RefCounted
 
-enum Kind { PUBLISHING }
+enum Kind { PUBLISHING, OUTSOURCE, CONTRACT_WORK, ENGINE_LICENSE }
 
 const SCHEMA: Dictionary = {
 	"id": "int",
@@ -15,6 +15,13 @@ const SCHEMA: Dictionary = {
 	"locked_genre": "string",
 	"locked_platform": "string",
 	"min_score": "int",
+	"price": "int",
+	"royalty_bp": "int",
+	"target_points": "dict",
+	"quality_roll": "int",
+	"delivery_week": "int",
+	"project_id": "int",
+	"deliverable": "string",
 }
 
 var id: int
@@ -28,9 +35,19 @@ var late_penalty_per_week: int = 0
 var locked_genre: StringName = &""
 var locked_platform: StringName = &""
 var min_score: int = 0
+var price: int = 0
+var royalty_bp: int = 0
+var target_points: Dictionary[StringName, int] = {}  # per point type
+var quality_roll: int = 0  # 0-100
+var delivery_week: int = -1
+var project_id: int = -1
+var deliverable: StringName = &""  # ENGINE_LICENSE: LicensedEngineDef id
 
 
 func to_dict() -> Dictionary:
+	var tp_out: Dictionary = {}
+	for k: StringName in target_points:
+		tp_out[String(k)] = target_points[k]
 	return {
 		"id": id,
 		"kind": Kind.keys()[kind],
@@ -43,6 +60,13 @@ func to_dict() -> Dictionary:
 		"locked_genre": String(locked_genre),
 		"locked_platform": String(locked_platform),
 		"min_score": min_score,
+		"price": price,
+		"royalty_bp": royalty_bp,
+		"target_points": tp_out,
+		"quality_roll": quality_roll,
+		"delivery_week": delivery_week,
+		"project_id": project_id,
+		"deliverable": String(deliverable),
 	}
 
 
@@ -59,4 +83,13 @@ static func from_dict(d: Dictionary) -> Contract:
 	c.locked_genre = StringName(String(d["locked_genre"]))
 	c.locked_platform = StringName(String(d["locked_platform"]))
 	c.min_score = int(d["min_score"])
+	c.price = int(d["price"])
+	c.royalty_bp = int(d["royalty_bp"])
+	var tp: Dictionary = d["target_points"]
+	for k: StringName in GameState.sorted_names(tp):
+		c.target_points[k] = int(tp[String(k)])
+	c.quality_roll = int(d["quality_roll"])
+	c.delivery_week = int(d["delivery_week"])
+	c.project_id = int(d["project_id"])
+	c.deliverable = StringName(String(d["deliverable"]))
 	return c

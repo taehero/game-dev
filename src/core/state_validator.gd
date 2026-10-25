@@ -75,6 +75,9 @@ static func validate(d: Variant) -> bool:
 		var e: Dictionary = contracts_d[k]
 		if not company_ids.has(int(e["party_a"])) or not company_ids.has(int(e["party_b"])):
 			return false
+		var pid: int = int(e["project_id"])
+		if pid != -1 and not project_ids.has(pid):
+			return false
 	for post: Variant in s["forum_posts"]:
 		if not project_ids.has(int(post["project_id"])):
 			return false
@@ -161,16 +164,48 @@ static func _whole_values(d: Dictionary) -> bool:
 	return true
 
 
+static func _strings_ok(a: Array) -> bool:
+	for v: Variant in a:
+		if typeof(v) != TYPE_STRING:
+			return false
+	return true
+
+
+## Keys are a subset of SKILL_KEYS and every value is a whole number >= min_value.
+static func _skill_map_ok(d: Dictionary, min_value: int) -> bool:
+	for k: Variant in d:
+		if typeof(k) != TYPE_STRING or not SKILL_KEYS.has(String(k)):
+			return false
+		if not SaveSchema.is_whole(d[k]) or int(d[k]) < min_value:
+			return false
+	return true
+
+
 static func _company_ok(e: Dictionary) -> bool:
-	return _enum_ok(Company.Kind.keys(), e["kind"])
+	if not _enum_ok(Company.Kind.keys(), e["kind"]):
+		return false
+	if not (_strings_ok(e["unlocked"]) and _strings_ok(e["dev_kits"]) and _strings_ok(e["awards"])):
+		return false
+	return int(e["research_points"]) >= 0 and int(e["months_negative"]) >= 0
 
 
 static func _contract_ok(e: Dictionary) -> bool:
-	return _enum_ok(Contract.Kind.keys(), e["kind"])
+	if not _enum_ok(Contract.Kind.keys(), e["kind"]):
+		return false
+	if not _skill_map_ok(e["target_points"], -9223372036854775807):
+		return false
+	var q: int = int(e["quality_roll"])
+	return q >= 0 and q <= 100
 
 
 static func _staff_ok(e: Dictionary) -> bool:
 	if not _enum_ok(Staff.Role.keys(), e["role"]):
+		return false
+	if not _enum_ok(Staff.Level.keys(), e["level"]):
+		return false
+	if not (_skill_map_ok(e["exp"], 0) and _skill_map_ok(e["week_points"], 0)):
+		return false
+	if int(e["seat_index"]) < -1:
 		return false
 	var skills: Dictionary = e["skills"]
 	if not _whole_values(skills) or skills.size() != SKILL_KEYS.size():
