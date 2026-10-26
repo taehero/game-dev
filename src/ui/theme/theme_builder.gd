@@ -114,6 +114,23 @@ static func build() -> Theme:
     _button_var(t, &"DockButton", regular, 12, 6, 2, 12)
     _button_var(t, &"SegmentButton", bold, 10, 4, 1, 10)
 
+    _panel_var(t, &"ChipPanel", UiPalette.SURFACE_ALT, UiPalette.RADIUS_PILL, 8, 8, 2, 2, false)
+    _panel_var(t, &"RowPanel", UiPalette.SURFACE_ALT, UiPalette.RADIUS_TILE, 8, 8, 5, 5, false)
+    _label_var(t, &"SectionLabel", bold, 11, UiPalette.TEXT_MUTED)
+    t.set_type_variation(&"PrimaryButton", &"Button")
+    t.set_font(&"font", &"PrimaryButton", bold)
+    t.set_stylebox(&"normal", &"PrimaryButton", _box(UiPalette.ACCENT, 6, 14, 14, 6, 6))
+    t.set_stylebox(&"hover", &"PrimaryButton",
+        _box(UiPalette.ACCENT.lightened(0.12), 6, 14, 14, 6, 6))
+    t.set_stylebox(&"pressed", &"PrimaryButton",
+        _box(UiPalette.ACCENT.darkened(0.15), 6, 14, 14, 6, 6))
+    t.set_stylebox(&"disabled", &"PrimaryButton", _box(UiPalette.TRACK, 6, 14, 14, 6, 6))
+    t.set_stylebox(&"focus", &"PrimaryButton", _focus())
+    t.set_color(&"font_color", &"PrimaryButton", Color.WHITE)
+    t.set_color(&"font_hover_color", &"PrimaryButton", Color.WHITE)
+    t.set_color(&"font_pressed_color", &"PrimaryButton", Color.WHITE)
+    t.set_color(&"font_disabled_color", &"PrimaryButton", UiPalette.TEXT_MUTED)
+
     t.set_type_variation(&"LabelSmall", &"Label")
     t.set_font_size(&"font_size", &"LabelSmall", 10)
     t.set_type_variation(&"ButtonSmall", &"Button")

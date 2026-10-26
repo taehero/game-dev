@@ -48,7 +48,8 @@ const TYPE_BASES: Dictionary[String, String] = {
     "TileLabel": "Label", "BubbleText": "Label", "DockButton": "Button",
     "SegmentButton": "Button", "PillPanel": "PanelContainer", "CardPanel": "PanelContainer",
     "TilePanel": "PanelContainer", "DockPanel": "PanelContainer", "TrackPanel": "PanelContainer",
-    "IconCircle": "PanelContainer",
+    "IconCircle": "PanelContainer", "PrimaryButton": "Button", "ChipPanel": "PanelContainer",
+    "RowPanel": "PanelContainer", "SectionLabel": "Label",
 }
 
 func _panel(theme: Theme, type: StringName) -> StyleBoxFlat:
