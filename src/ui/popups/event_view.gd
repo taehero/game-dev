@@ -9,18 +9,18 @@ var decision_id: int = -1
 
 var _popup: PopupCard
 var _info: Dictionary = {}
-var _status: Label
 
 
 static func popup(p_decision_id: int, content: ContentDB) -> PopupCard:
 	var card: PopupCard = CARD_SCENE.instantiate()
 	card.card_size = Vector2(380, 230)
-	card.closable = false
 	var dialog := EventView.new()
 	dialog.decision_id = p_decision_id
 	dialog._popup = card
 	if GameRunner.session != null:
 		dialog._info = StateQueries.event_view(GameRunner.session.state, content, p_decision_id)
+	# Modal while the decision is valid; an empty info (decision gone) has no buttons, so it needs a close.
+	card.closable = dialog._info.is_empty()
 	card.body().add_child(dialog)
 	card.open(TranslationServer.translate(String(dialog._info.get("title_key", &"ui.event.title"))))
 	return card
@@ -30,9 +30,8 @@ func choose(index: int) -> bool:
 	if GameRunner.session == null:
 		return false
 	var result: CommandResult = GameRunner.submit(ChooseEventOptionCommand.new(decision_id, index))
-	_status.text = "" if result.ok else tr(result.reason_key)
-	if result.ok:
-		_popup.close()
+	# Success or refusal both leave the popup: a refused decision is gone and cannot be answered.
+	_popup.close()
 	return result.ok
 
 
@@ -71,12 +70,6 @@ func _ready() -> void:
 		button.pressed.connect(choose.bind(i))
 		button.name = "Option_%d" % i
 		add_child(button)
-	_status = Label.new()
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size.x = 120.0
-	_status.add_theme_font_size_override(&"font_size", 10)
-	_status.add_theme_color_override(&"font_color", UiPalette.DANGER)
-	_add_unique(_status, "Status")
 
 
 func _effect_text(fx: Dictionary) -> String:
@@ -85,6 +78,7 @@ func _effect_text(fx: Dictionary) -> String:
 		var v: int = int(fx.get(k, 0))
 		if v == 0:
 			continue
+		@warning_ignore("integer_division")
 		var shown: int = v / 100 if k == &"progress_bp" else v
 		parts.append(tr("ui.effect." + String(k)).format({"n": UiFormat.signed(shown)}))
 	return ", ".join(parts) if not parts.is_empty() else tr("ui.effect.none")

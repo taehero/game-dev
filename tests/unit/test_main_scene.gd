@@ -266,3 +266,26 @@ func test_show_popup_goes_through_queue() -> void:
 	assert_true(b.is_inside_tree())
 	b.close()
 	assert_eq(GameRunner.session.speed, 1)
+
+
+func test_event_auto_pause_resumes_chosen_speed_through_real_chain() -> void:
+	var m := _main()
+	var st: GameState = GameRunner.session.state
+	var t: TuningDef = GameRunner.session.tuning.duplicate() as TuningDef
+	t.production_event_chance_bp = 10000
+	var pid: int = Fixtures.add_project(st, {})
+	Fixtures.add_worker(st, {"assigned_project_id": pid})
+	GameRunner.session = GameSession.new(st, t)
+	GameRunner.set_speed(4)
+	GameRunner.session.step_once()
+	assert_eq(GameRunner.session.speed, 0, "the new event auto-paused the clock")
+	assert_eq(GameRunner.session.auto_paused_speed, 4)
+	for e: Dictionary in GameRunner.session.drain_events():
+		EventBus.dispatch(e["name"], e["payload"])
+	var popups: Node = m.get_node("Popups")
+	assert_eq(popups.get_child_count(), 1)
+	var view: EventView = (popups.get_child(0) as PopupCard).body().get_child(0) as EventView
+	assert_not_null(view)
+	assert_eq(GameRunner.session.speed, 0)
+	assert_true(view.choose(0))
+	assert_eq(GameRunner.session.speed, 4)

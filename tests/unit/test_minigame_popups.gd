@@ -76,6 +76,30 @@ func test_event_popup_not_closable() -> void:
 	assert_false((popup.get_node("%Close") as Button).visible)
 
 
+func test_refused_choose_closes_and_queue_resumes() -> void:
+	var host := Control.new()
+	host.size = Vector2(640, 360)
+	add_child_autofree(host)
+	var counts: Array[int] = [0, 0]
+	var queue := PopupQueue.new(host, func() -> void: counts[0] += 1, func() -> void: counts[1] += 1)
+	var popup: PopupCard = EventView.popup(_did, ContentDB.active())
+	queue.push(popup)
+	var v: EventView = popup.body().get_child(0) as EventView
+	assert_false(popup.closable, "valid decision stays modal")
+	Removal.remove_decision(GameRunner.session.state, _did)
+	assert_false(v.choose(0))
+	assert_true(popup.is_queued_for_deletion(), "refusal leaves a way out")
+	assert_null(queue.current())
+	assert_eq(counts, [1, 1], "queue paused once and resumed")
+
+
+func test_event_popup_without_info_is_closable() -> void:
+	var popup: PopupCard = EventView.popup(987654, ContentDB.active())
+	_mount(popup)
+	assert_true(popup.closable)
+	assert_true((popup.get_node("%Close") as Button).visible)
+
+
 func test_offer_start_emits_and_closes() -> void:
 	var popup: PopupCard = BugHuntOffer.popup(_pid, _tuning)
 	var o: BugHuntOffer = _mount(popup)
