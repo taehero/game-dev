@@ -47,11 +47,8 @@ func _build(card: PopupCard, project_id: int) -> void:
 		none.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_own(none, "NoData")
 	else:
-		var total: int = 0
-		for u: int in shown:
-			total += u
 		var average := Label.new()
-		average.text = "~ %s" % UiFormat.thousands(total / shown.size())
+		average.text = tr("ui.sales.average").format({"units": UiFormat.thousands(units_sold / series.size())})
 		_own(average, "Average")
 		var graph := SalesGraph.new()
 		_own(graph, "Graph")

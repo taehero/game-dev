@@ -16,6 +16,10 @@ static func ring_color(score_x10: int) -> Color:
 	return UiPalette.DANGER
 
 
+static func fraction(score_x10: int) -> float:
+	return clampf(float(score_x10) / 100.0, 0.0, 1.0)
+
+
 func _init() -> void:
 	custom_minimum_size = Vector2(40, 40)
 	_number = Label.new()
@@ -42,6 +46,6 @@ func _draw() -> void:
 	var centre: Vector2 = size / 2.0
 	var radius: float = minf(size.x, size.y) / 2.0 - RING_WIDTH / 2.0
 	draw_arc(centre, radius, 0.0, TAU, 48, UiPalette.TRACK, RING_WIDTH, true)
-	var frac: float = clampf(float(_score_x10) / 100.0, 0.0, 1.0)
+	var frac: float = fraction(_score_x10)
 	if frac > 0.0:
 		draw_arc(centre, radius, -PI / 2.0, -PI / 2.0 + TAU * frac, 48, ring_color(_score_x10), RING_WIDTH, true)

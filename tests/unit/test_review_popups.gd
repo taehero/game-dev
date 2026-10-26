@@ -72,6 +72,8 @@ func test_ring_colour_thresholds() -> void:
 	assert_eq(ScoreRing.ring_color(70), UiPalette.SUCCESS)
 	assert_eq(ScoreRing.ring_color(55), UiPalette.WARNING)
 	assert_eq(ScoreRing.ring_color(30), UiPalette.DANGER)
+	assert_eq(ScoreRing.fraction(75), 0.75)
+	assert_eq(ScoreRing.fraction(150), 1.0)
 	var ring := ScoreRing.new()
 	add_child_autofree(ring)
 	ring.set_score(75)
@@ -107,6 +109,7 @@ func test_sales_popup_no_data_label() -> void:
 	assert_null(full.get_node_or_null("%NoData"))
 	assert_eq((full.get_node("%Graph") as SalesGraph).bar_rects().size(), 3)
 	assert_eq((full.get_node("%Weeks") as Label).text, tr("ui.sales.weeks").format({"n": 3}))
+	assert_eq((full.get_node("%Average") as Label).text, tr("ui.sales.average").format({"units": "300"}))
 	assert_true((full.get_node("%Totals") as Label).text.contains("45,000"))
 
 
