@@ -24,7 +24,7 @@ func _init() -> void:
 	_body.add_child(_owned)
 	_owned.owner = self
 	_desks = _section("Desks")
-	var soon: PanelContainer = _chip(tr("ui.equipment.buy_soon"))
+	var soon: PanelContainer = UiBuild.chip(tr("ui.equipment.buy_soon"), &"ChipPanel")
 	soon.name = "BuySoon"
 	soon.unique_name_in_owner = true
 	_body.add_child(soon)
@@ -34,6 +34,9 @@ func _init() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
 		_dirty = true
+		var soon: Node = get_node_or_null("%BuySoon")
+		if soon != null:
+			(soon.get_child(0) as Label).text = tr("ui.equipment.buy_soon")
 		_refresh_now()
 
 
@@ -73,23 +76,6 @@ func refresh(view: GameState, t: TuningDef) -> void:
 			gate(buy, BuyDevKitCommand.new(view.player_company_id, p["id"]))
 
 
-func _chip(text: String) -> PanelContainer:
-	var chip := PanelContainer.new()
-	chip.theme_type_variation = &"ChipPanel"
-	var l := Label.new()
-	l.text = text
-	chip.add_child(l)
-	return chip
-
-
-func _label(text: String, variation: StringName = &"") -> Label:
-	var l := Label.new()
-	l.text = text
-	if variation != &"":
-		l.theme_type_variation = variation
-	return l
-
-
 func _clear(box: Control) -> void:
 	for c: Node in box.get_children():
 		box.remove_child(c)
@@ -100,14 +86,14 @@ func _rebuild(view: GameState, platforms: Array[Dictionary], seats: Array[SeatVi
 	_clear(_kits)
 	_clear(_owned)
 	_clear(_desks)
-	_kits.add_child(_label(tr("ui.equipment.dev_kits"), &"SectionLabel"))
-	_owned.add_child(_label(tr("ui.equipment.platforms_owned"), &"SectionLabel"))
-	_desks.add_child(_label(tr("ui.equipment.desks"), &"SectionLabel"))
+	_kits.add_child(UiBuild.label(tr("ui.equipment.dev_kits"), &"SectionLabel"))
+	_owned.add_child(UiBuild.label(tr("ui.equipment.platforms_owned"), &"SectionLabel"))
+	_desks.add_child(UiBuild.label(tr("ui.equipment.desks"), &"SectionLabel"))
 	for p: Dictionary in platforms:
 		var status: int = p["status"]
 		if p["owned"]:
 			if status == GameRules.PlatformStatus.ON_SALE:
-				var chip: PanelContainer = _chip(tr(p["name_key"]))
+				var chip: PanelContainer = UiBuild.chip(tr(p["name_key"]))
 				chip.name = "Owned_%s" % p["id"]
 				_owned.add_child(chip)
 		elif p["dev_kit_cost"] > 0 and STATUS_KEYS.has(status):
@@ -125,12 +111,12 @@ func _kit_row(p: Dictionary) -> Control:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override(&"separation", 8)
 	col.add_child(head)
-	var name_label: Label = _label(tr(p["name_key"]))
+	var name_label: Label = UiBuild.label(tr(p["name_key"]))
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name_label.clip_text = true
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
-	head.add_child(_label(tr(STATUS_KEYS[p["status"]]), &"SectionLabel"))
+	head.add_child(UiBuild.label(tr(STATUS_KEYS[p["status"]]), &"SectionLabel"))
 	var buy := Button.new()
 	buy.name = "Buy"
 	buy.text = tr("ui.equipment.buy_kit").format({"money": UiFormat.money(p["dev_kit_cost"])})
@@ -152,19 +138,19 @@ func _desk_row(view: GameState, s: SeatView) -> Control:
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override(&"separation", 8)
 	row.add_child(line)
-	line.add_child(_label(tr("ui.equipment.desk").format({"n": s.seat_index + 1}), &"SectionLabel"))
+	line.add_child(UiBuild.label(tr("ui.equipment.desk").format({"n": s.seat_index + 1}), &"SectionLabel"))
 	var who: String = tr("ui.equipment.empty")
 	if s.staff_id != -1 and view.staff.has(s.staff_id):
 		who = tr(view.staff[s.staff_id].name)
-	var who_label: Label = _label(who)
+	var who_label: Label = UiBuild.label(who)
 	who_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	who_label.clip_text = true
 	who_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(who_label)
 	if s.computer_tier > 0:
-		line.add_child(_label(tr("ui.equipment.computer").format({"tier": s.computer_tier})))
+		line.add_child(UiBuild.label(tr("ui.equipment.computer").format({"tier": s.computer_tier})))
 	else:
-		var nc: PanelContainer = _chip(tr("ui.team.no_computer"))
+		var nc: PanelContainer = UiBuild.chip(tr("ui.team.no_computer"), &"TagWarnPanel")
 		nc.name = "NoComputer"
 		line.add_child(nc)
 	return row

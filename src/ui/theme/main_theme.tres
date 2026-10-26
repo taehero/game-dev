@@ -291,6 +291,38 @@ corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d6tvl"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.9764706, 0.4509804, 0.08627451, 0.18)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9764706, 0.4509804, 0.08627451, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3704t"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.9490196, 0.70980394, 0.23137255, 0.18)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.9490196, 0.70980394, 0.23137255, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a6qh5"]
 content_margin_left = 0.0
 content_margin_top = 1.0
 content_margin_right = 0.0
@@ -301,7 +333,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3704t"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_avhae"]
 content_margin_left = 2.0
 content_margin_top = 2.0
 content_margin_right = 2.0
@@ -398,6 +430,10 @@ SegmentButton/styles/focus = SubResource("StyleBoxFlat_0elbl")
 SegmentButton/styles/hover = SubResource("StyleBoxFlat_ar5xq")
 SegmentButton/styles/normal = SubResource("StyleBoxFlat_gx1p3")
 SegmentButton/styles/pressed = SubResource("StyleBoxFlat_kisfc")
+TagPanel/base_type = &"PanelContainer"
+TagPanel/styles/panel = SubResource("StyleBoxFlat_d6tvl")
+TagWarnPanel/base_type = &"PanelContainer"
+TagWarnPanel/styles/panel = SubResource("StyleBoxFlat_3704t")
 TileLabel/base_type = &"Label"
 TileLabel/colors/font_color = Color(0.41960785, 0.44705883, 0.5019608, 1)
 TileLabel/font_sizes/font_size = 10
@@ -406,6 +442,6 @@ TileNumber/base_type = &"Label"
 TileNumber/font_sizes/font_size = 14
 TileNumber/fonts/font = SubResource("FontVariation_wea0q")
 TilePanel/base_type = &"PanelContainer"
-TilePanel/styles/panel = SubResource("StyleBoxFlat_d6tvl")
+TilePanel/styles/panel = SubResource("StyleBoxFlat_a6qh5")
 TrackPanel/base_type = &"PanelContainer"
-TrackPanel/styles/panel = SubResource("StyleBoxFlat_3704t")
+TrackPanel/styles/panel = SubResource("StyleBoxFlat_avhae")

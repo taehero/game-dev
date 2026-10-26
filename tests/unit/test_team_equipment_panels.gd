@@ -162,3 +162,10 @@ func test_equipment_fits_th() -> void:
 	_equipment()
 	await wait_process_frames(2)
 	_assert_fits()
+
+
+func test_buy_soon_retranslates() -> void:
+	_equipment()
+	TranslationServer.set_locale("th")
+	assert_eq((_node("%BuySoon").get_child(0) as Label).text, tr("ui.equipment.buy_soon"))
+	assert_ne(tr("ui.equipment.buy_soon"), "ui.equipment.buy_soon")

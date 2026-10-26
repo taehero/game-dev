@@ -12,15 +12,15 @@ var _rows_dirty: bool = true
 func _init() -> void:
 	super()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var soon: PanelContainer = _chip(tr("ui.team.skill_tree_soon"))
+	var soon: PanelContainer = UiBuild.chip(tr("ui.team.skill_tree_soon"), &"ChipPanel")
 	soon.name = "SkillTree"
 	soon.unique_name_in_owner = true
 	_body.add_child(soon)
 	soon.owner = self
+	_build_hire_row()
 	_rows_box = VBoxContainer.new()
 	_rows_box.name = "Staff"
 	_body.add_child(_rows_box)
-	_build_hire_row()
 
 
 func _notification(what: int) -> void:
@@ -58,23 +58,6 @@ func _retranslate_static() -> void:
 		(get_node("%Hire") as Button).text = tr("ui.team.hire")
 
 
-func _chip(text: String) -> PanelContainer:
-	var chip := PanelContainer.new()
-	chip.theme_type_variation = &"ChipPanel"
-	var l := Label.new()
-	l.text = text
-	chip.add_child(l)
-	return chip
-
-
-func _label(text: String, variation: StringName = &"") -> Label:
-	var l := Label.new()
-	l.text = text
-	if variation != &"":
-		l.theme_type_variation = variation
-	return l
-
-
 func _build_hire_row() -> void:
 	var row := PanelContainer.new()
 	row.name = "HireRow"
@@ -92,7 +75,7 @@ func _build_hire_row() -> void:
 	var line := HBoxContainer.new()
 	line.add_theme_constant_override(&"separation", 10)
 	col.add_child(line)
-	var salary: Label = _label("")
+	var salary: Label = UiBuild.label("")
 	salary.name = "HireSalary"
 	salary.unique_name_in_owner = true
 	salary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -100,7 +83,7 @@ func _build_hire_row() -> void:
 	salary.clip_text = true
 	line.add_child(salary)
 	salary.owner = self
-	var free: Label = _label("")
+	var free: Label = UiBuild.label("")
 	free.name = "FreeSeats"
 	free.unique_name_in_owner = true
 	line.add_child(free)
@@ -156,28 +139,28 @@ func _staff_row(r: Dictionary) -> Control:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override(&"separation", 8)
 	col.add_child(head)
-	var name_label: Label = _label(tr(String(r["name"])))
+	var name_label: Label = UiBuild.label(tr(String(r["name"])))
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name_label.clip_text = true
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_label)
 	if r["is_owner"]:
-		var owner_chip: PanelContainer = _chip(tr("ui.team.owner"))
+		var owner_chip: PanelContainer = UiBuild.chip(tr("ui.team.owner"))
 		owner_chip.name = "Owner"
 		head.add_child(owner_chip)
 	if not r["has_computer"]:
-		var nc: PanelContainer = _chip(tr("ui.team.no_computer"))
+		var nc: PanelContainer = UiBuild.chip(tr("ui.team.no_computer"), &"TagWarnPanel")
 		nc.name = "NoComputer"
 		head.add_child(nc)
 	var money_line := HBoxContainer.new()
 	money_line.add_theme_constant_override(&"separation", 10)
 	col.add_child(money_line)
-	money_line.add_child(_label(tr("ui.team.salary").format({"money": UiFormat.money(r["salary"])})))
-	money_line.add_child(_label(tr("ui.team.morale").format({"n": r["morale"]})))
+	money_line.add_child(UiBuild.label(tr("ui.team.salary").format({"money": UiFormat.money(r["salary"])})))
+	money_line.add_child(UiBuild.label(tr("ui.team.morale").format({"n": r["morale"]})))
 	var skills := HBoxContainer.new()
 	skills.add_theme_constant_override(&"separation", 10)
 	col.add_child(skills)
 	var skill_values: Dictionary = r["skills"]
 	for s: StringName in SKILLS:
-		skills.add_child(_label("%s %d" % [tr("ui.point.%s" % s), skill_values.get(s, 0)], &"SectionLabel"))
+		skills.add_child(UiBuild.label("%s %d" % [tr("ui.point.%s" % s), skill_values.get(s, 0)], &"SectionLabel"))
 	return row

@@ -52,6 +52,14 @@ static func _panel_var(t: Theme, name: StringName, bg: Color, radius: int, ml: f
     t.set_stylebox(&"panel", name, _box(bg, radius, ml, mr, mt, mb, shadow))
 
 
+static func _tag_var(t: Theme, name: StringName, tint: Color) -> void:
+    t.set_type_variation(name, &"PanelContainer")
+    var s: StyleBoxFlat = _box(Color(tint.r, tint.g, tint.b, 0.18), UiPalette.RADIUS_PILL, 8, 8, 2, 2, false)
+    s.set_border_width_all(1)
+    s.border_color = tint
+    t.set_stylebox(&"panel", name, s)
+
+
 static func _label_var(t: Theme, name: StringName, font: Font, size: int, color: Variant) -> void:
     t.set_type_variation(name, &"Label")
     t.set_font(&"font", name, font)
@@ -115,6 +123,8 @@ static func build() -> Theme:
     _button_var(t, &"SegmentButton", bold, 10, 4, 1, 10)
 
     _panel_var(t, &"ChipPanel", UiPalette.SURFACE_ALT, UiPalette.RADIUS_PILL, 8, 8, 2, 2, false)
+    _tag_var(t, &"TagPanel", UiPalette.ACCENT)
+    _tag_var(t, &"TagWarnPanel", UiPalette.WARNING)
     _panel_var(t, &"RowPanel", UiPalette.SURFACE_ALT, UiPalette.RADIUS_TILE, 8, 8, 5, 5, false)
     _label_var(t, &"SectionLabel", bold, 11, UiPalette.TEXT_MUTED)
     t.set_type_variation(&"PrimaryButton", &"Button")
