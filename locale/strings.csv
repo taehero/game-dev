@@ -180,3 +180,144 @@ ui.bubble.points,+{amount} {type},+{amount} {type}
 ui.bubble.bug,Bug!,บั๊ก!
 ui.card.subtitle,{topic} · {genre},{topic} · {genre}
 ui.popup.close,Close,ปิด
+# M2d panels,,
+ui.project.none,No game in development.,ยังไม่มีเกมที่กำลังพัฒนา
+ui.project.new_game,New game,เกมใหม่
+ui.project.new_engine,New engine,เอนจินใหม่
+ui.project.release,Release,วางขาย
+ui.project.bug_hunt,Bug hunt,ไล่ล่า Bug
+ui.project.focus,Focus,เน้นงาน
+ui.project.stage_name,Stage {n},ขั้นที่ {n}
+ui.project.past_games,Past games,เกมที่ผ่านมา
+ui.project.no_past_games,No released games yet.,ยังไม่มีเกมที่วางขาย
+ui.project.details,Details,รายละเอียด
+ui.project.units,{units} sold,ขายได้ {units} ชุด
+ui.project.engine_building,Building engine,กำลังสร้างเอนจิน
+ui.phase.production,In development,กำลังพัฒนา
+ui.phase.polish,Polishing,ขัดเกลา
+ui.phase.released,Released,วางขายแล้ว
+ui.phase.live,On sale,กำลังขาย
+ui.phase.retired,Off sale,หยุดขายแล้ว
+ui.slider.code,Code,โค้ด
+ui.slider.design,Design,ออกแบบ
+ui.slider.story,Story,เนื้อเรื่อง
+ui.slider.levels,Levels,ด่าน
+ui.slider.characters,Characters,ตัวละคร
+ui.slider.ai,AI,AI
+ui.slider.graphics,Graphics,กราฟิก
+ui.slider.audio,Audio,เสียง
+ui.slider.balance,Balance,ความสมดุล
+ui.team.owner,Owner,เจ้าของ
+ui.team.no_computer,No computer,ไม่มีคอมพิวเตอร์
+ui.team.skill_tree_soon,Skill tree coming soon,สกิลทรีจะมาเร็ว ๆ นี้
+ui.team.hire,Hire,จ้าง
+ui.team.hire_name,New hire's name,ชื่อพนักงานใหม่
+ui.team.salary,{money} / month,{money} / เดือน
+ui.team.morale,Morale {n},ขวัญกำลังใจ {n}
+ui.team.free_seats,Free desks: {n},โต๊ะว่าง: {n}
+ui.equipment.dev_kits,Dev kits,ชุดพัฒนา
+ui.equipment.buy_kit,Buy kit {money},ซื้อชุดพัฒนา {money}
+ui.equipment.owned,Owned,มีแล้ว
+ui.equipment.platforms_owned,Platforms you can develop for,แพลตฟอร์มที่พัฒนาได้
+ui.equipment.desks,Desks,โต๊ะทำงาน
+ui.equipment.desk,Desk {n},โต๊ะที่ {n}
+ui.equipment.computer,Computer tier {tier},คอมพิวเตอร์ระดับ {tier}
+ui.equipment.empty,Empty,ว่าง
+ui.equipment.buy_soon,Buying computers comes later,การซื้อคอมพิวเตอร์จะมาทีหลัง
+ui.finance.cash,Cash,เงินสด
+ui.finance.salaries,Salaries per month,เงินเดือนต่อเดือน
+ui.finance.total_revenue,"Sales revenue, all games",รายได้จากยอดขายทุกเกม
+ui.finance.by_game,Revenue by game,รายได้แยกตามเกม
+ui.finance.none,No sales yet.,ยังไม่มียอดขาย
+ui.market.platforms,Platforms,แพลตฟอร์ม
+ui.market.status.unannounced,Unannounced,ยังไม่ประกาศ
+ui.market.status.rumored,Rumoured,มีข่าวลือ
+ui.market.status.on_sale,On sale,วางขายอยู่
+ui.market.status.retired,Discontinued,ยกเลิกการผลิต
+ui.market.install_base,{units} owners,เครื่องที่ใช้งานอยู่ {units} เครื่อง
+ui.market.research,Research,วิจัย
+ui.market.rp,{rp} RP available,มี RP {rp} ให้ใช้
+ui.market.research_cost,{cost} RP,{cost} RP
+ui.market.research_buy,Research,วิจัย
+ui.market.done,Done,เสร็จแล้ว
+ui.market.needs,Needs: {names},ต้องใช้: {names}
+ui.wizard.title,New game,เกมใหม่
+ui.wizard.step,Step {n} of {count},ขั้นที่ {n} จาก {count}
+ui.wizard.name,Title,ชื่อเกม
+ui.wizard.default_title,Untitled Game,เกมที่ยังไม่มีชื่อ
+ui.wizard.size,Size,ขนาด
+ui.wizard.platform,Platform,แพลตฟอร์ม
+ui.wizard.topic,Topic,หัวข้อ
+ui.wizard.genre,Genre,แนวเกม
+ui.wizard.engine,Engine,เอนจิน
+ui.wizard.features,Features,ฟีเจอร์
+ui.wizard.combo,Combo: {label},ชุดรวม: {label}
+ui.wizard.more_platforms,Buy dev kits in Equipment for more platforms.,ซื้อชุดพัฒนาในหน้าอุปกรณ์เพื่อเพิ่มแพลตฟอร์ม
+ui.wizard.no_features,This engine has no features you have researched.,เอนจินนี้ยังไม่มีฟีเจอร์ที่วิจัยแล้ว
+ui.wizard.tech_cap,Tech cap {cap},เพดานเทค {cap}
+ui.wizard.back,Back,ย้อนกลับ
+ui.wizard.next,Next,ถัดไป
+ui.wizard.create,Start development,เริ่มพัฒนา
+ui.engine.title,New engine,เอนจินใหม่
+ui.engine.default_title,New Engine,เอนจินใหม่
+ui.engine.features,Researched features,ฟีเจอร์ที่วิจัยแล้ว
+ui.engine.weeks,{weeks} weeks,{weeks} สัปดาห์
+ui.engine.create,Build engine,สร้างเอนจิน
+ui.review.title,Reviews,รีวิว
+ui.review.average,Average {score},คะแนนเฉลี่ย {score}
+ui.review.strength,Liked,จุดเด่น
+ui.review.weakness,Disliked,จุดด้อย
+ui.sales.title,Sales,ยอดขาย
+ui.sales.total,{units} sold · {money} revenue,ขายได้ {units} ชุด · รายได้ {money}
+ui.sales.no_data,No sales yet.,ยังไม่มียอดขาย
+ui.sales.weeks,Last {n} weeks,{n} สัปดาห์ล่าสุด
+ui.event.project,{title},{title}
+ui.effect.design,Design {n},ออกแบบ {n}
+ui.effect.tech,Tech {n},เทค {n}
+ui.effect.art,Art {n},ภาพ {n}
+ui.effect.audio,Audio {n},เสียง {n}
+ui.effect.bugs,Bugs {n},Bug {n}
+ui.effect.hype,Hype {n},Hype {n}
+ui.effect.morale,Morale {n},ขวัญกำลังใจ {n}
+ui.effect.progress_bp,Progress {n}%,ความคืบหน้า {n}%
+ui.effect.none,No effect,ไม่มีผล
+ui.bughunt.offer_title,Polish time!,ถึงเวลาขัดเกลา!
+ui.bughunt.offer_body,"Hunt bugs for {seconds} seconds? Each bug you catch is fixed, up to {cap}.",จะไล่ล่า Bug เป็นเวลา {seconds} วินาทีไหม Bug ที่จับได้จะถูกแก้ทันที สูงสุด {cap} ตัว
+ui.bughunt.start,Hunt bugs,ไล่ล่า Bug
+ui.bughunt.skip,Skip,ข้าม
+ui.bughunt.title,Bug hunt,ไล่ล่า Bug
+ui.bughunt.time,{seconds}s left,เหลือ {seconds} วินาที
+ui.bughunt.caught,Caught {n},จับได้ {n}
+ui.bughunt.result,Fixed {n} bugs!,แก้ Bug ได้ {n} ตัว!
+ui.popup.ok,OK,ตกลง
+error.decision_not_found,That decision is no longer open.,การตัดสินใจนั้นปิดไปแล้ว
+error.decision_not_event,That decision is not a production event.,การตัดสินใจนั้นไม่ใช่อีเวนต์การผลิต
+error.invalid_option,Pick one of the offered options.,เลือกได้เฉพาะตัวเลือกที่มีให้เท่านั้น
+error.project_not_polishing,The game must be in polish for that.,เกมต้องอยู่ในขั้นขัดเกลาก่อน
+error.bug_hunt_done,You already hunted bugs in this game.,คุณไล่ล่า Bug ในเกมนี้ไปแล้ว
+error.invalid_amount,That amount is not valid.,จำนวนนั้นไม่ถูกต้อง
+event.big_bug.title,A nasty bug,Bug ร้ายแรง
+event.big_bug.body,A crash bug turns up in the save code.,มี Bug ที่ทำให้เกมแครชโผล่ขึ้นมาในโค้ดบันทึกเกม
+event.big_bug.option.1,Fix it properly,แก้ให้ถูกต้อง
+event.big_bug.option.2,Patch around it,แปะแก้ชั่วคราวไปก่อน
+event.bold_idea.title,A bold idea,ไอเดียสุดแรง
+event.bold_idea.body,You wake up with a bold idea for the game.,ตื่นขึ้นมาพร้อมไอเดียสุดแรงสำหรับเกม
+event.bold_idea.option.1,Build it in,ใส่ลงไปในเกมเลย
+event.bold_idea.option.2,Tell the press,ปล่อยข่าวให้สื่อรู้
+event.bold_idea.option.3,Save it for later,เก็บไว้ทำทีหลัง
+event.magazine_preview.title,Magazine call,สายจากนิตยสาร
+event.magazine_preview.body,A games magazine wants an early preview.,นิตยสารเกมอยากได้พรีวิวก่อนใคร
+event.magazine_preview.option.1,Send a demo,ส่งเดโมไปให้
+event.magazine_preview.option.2,Not yet,ยังไม่ใช่ตอนนี้
+event.power_cut.title,Power cut,ไฟดับ
+event.power_cut.body,The garage loses power and some work is gone.,ไฟในโรงรถดับ งานบางส่วนหายไป
+event.power_cut.option.1,Work late to catch up,ทำงานดึกเพื่อตามให้ทัน
+event.power_cut.option.2,Accept the loss,ยอมรับความเสียหาย
+event.sound_trick.title,Sound trick,ลูกเล่นเสียง
+event.sound_trick.body,A friend shows you a clever sound-chip trick.,เพื่อนโชว์เทคนิคเจ๋ง ๆ ของชิปเสียง
+event.sound_trick.option.1,Use it,ใช้เทคนิคนี้
+event.sound_trick.option.2,Keep it simple,เก็บให้เรียบง่ายไว้ก่อน
+event.late_night.title,On a roll,ลื่นไหลสุด ๆ
+event.late_night.body,Everything clicks tonight.,ทุกอย่างลงตัวในคืนนี้
+event.late_night.option.1,Keep going,ทำต่อเลย
+event.late_night.option.2,Go home and rest,กลับบ้านไปพักผ่อน

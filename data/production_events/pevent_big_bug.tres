@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_big_bug"
+title_key = &"event.big_bug.title"
+body_key = &"event.big_bug.body"
+option_keys = Array[StringName]([&"event.big_bug.option.1", &"event.big_bug.option.2"])
+option_a = Dictionary[StringName, int]({&"progress_bp": -2000})
+option_b = Dictionary[StringName, int]({&"bugs": 6})
+option_c = Dictionary[StringName, int]({})

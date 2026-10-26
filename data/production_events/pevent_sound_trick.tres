@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_sound_trick"
+title_key = &"event.sound_trick.title"
+body_key = &"event.sound_trick.body"
+option_keys = Array[StringName]([&"event.sound_trick.option.1", &"event.sound_trick.option.2"])
+option_a = Dictionary[StringName, int]({&"audio": 120, &"bugs": 2})
+option_b = Dictionary[StringName, int]({})
+option_c = Dictionary[StringName, int]({})

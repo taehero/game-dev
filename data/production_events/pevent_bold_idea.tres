@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_bold_idea"
+title_key = &"event.bold_idea.title"
+body_key = &"event.bold_idea.body"
+option_keys = Array[StringName]([&"event.bold_idea.option.1", &"event.bold_idea.option.2", &"event.bold_idea.option.3"])
+option_a = Dictionary[StringName, int]({&"design": 150, &"progress_bp": -1500})
+option_b = Dictionary[StringName, int]({&"hype": 8})
+option_c = Dictionary[StringName, int]({})

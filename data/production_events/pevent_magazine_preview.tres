@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_magazine_preview"
+title_key = &"event.magazine_preview.title"
+body_key = &"event.magazine_preview.body"
+option_keys = Array[StringName]([&"event.magazine_preview.option.1", &"event.magazine_preview.option.2"])
+option_a = Dictionary[StringName, int]({&"hype": 10, &"bugs": 2})
+option_b = Dictionary[StringName, int]({})
+option_c = Dictionary[StringName, int]({})

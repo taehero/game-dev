@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_late_night"
+title_key = &"event.late_night.title"
+body_key = &"event.late_night.body"
+option_keys = Array[StringName]([&"event.late_night.option.1", &"event.late_night.option.2"])
+option_a = Dictionary[StringName, int]({&"tech": 100, &"design": 50, &"morale": -5})
+option_b = Dictionary[StringName, int]({&"morale": 5})
+option_c = Dictionary[StringName, int]({})

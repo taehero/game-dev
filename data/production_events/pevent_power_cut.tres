@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ProductionEventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/production_event_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pevent_power_cut"
+title_key = &"event.power_cut.title"
+body_key = &"event.power_cut.body"
+option_keys = Array[StringName]([&"event.power_cut.option.1", &"event.power_cut.option.2"])
+option_a = Dictionary[StringName, int]({&"morale": -8})
+option_b = Dictionary[StringName, int]({&"progress_bp": -1500})
+option_c = Dictionary[StringName, int]({})
