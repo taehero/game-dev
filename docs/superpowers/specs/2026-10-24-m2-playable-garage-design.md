@@ -40,6 +40,8 @@ M2 is one spec and four implementation plans:
 
 **Order:** M2a and the M2d scene run in parallel. Then M2b and M2c run in parallel. M2d panels finish last. All entity shapes, signal names and the tick order in §4–§5 are fixed by this spec, so parallel plans agree.
 
+**Amended (M2d-panels ruling P1):** the M2d panels plan (`docs/superpowers/plans/2026-10-25-m2d-panels.md`) runs now, before M2b and M2c, on the M2a commands, so the player gets a playable loop first. A later panels plan adds the M2b and M2c screens: skill tree, candidates, raises, equipment, office move, loans, contract work, marketing, promotions, patches, DLC, forum and awards. The two plans share `tuning_def.gd`, `tuning.tres`, `fixtures.gd`, `state_validator.gd`, `content_db.gd`, `project.gd`, `strings.csv`, `state_queries.gd` and `game_session.gd`; whichever merges second rebases onto them.
+
 ## 3. Numbers rule (applies to every new value)
 
 All state stays `int` (CLAUDE.md rule 9). New conventions:
@@ -110,6 +112,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 - `review_results: Array[ReviewResult]` (deferred from M1): each `outlet_id: StringName`, `score_x10: int`, `strength_key: StringName`, `weakness_key: StringName`.
 - `weekly_units: Array[int]` (sales history for the graph, capped at 104 entries).
 - `promo_until_week: int`, `promo_discount_bp: int`, `mod_tools: bool`, `dlc_count: int`.
+- `event_ids: Array[StringName]`: production events rolled for this project, in roll order. A repeat is never rolled, and the count is capped by `production_event_max_per_project`. `bug_hunt_done: bool`: the once-per-project bug hunt (§11.5). Added by the M2d-panels plan (P9).
 
 ### 4.6 Contract changes
 
@@ -129,6 +132,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 | `PerkDef` | id, path (DEV/BUSINESS), max_rank, effects per rank (Dictionary of effect id → bp) |
 | `MarketingChannelDef` | id, era years, cost, hype_gain, audience segment |
 | `AwardDef` | id, fictional name key, week_in_year, entry_fee, prize, fans |
+| `ProductionEventDef` | id (prefix `pevent_`), `title_key`, `body_key`, `option_keys: Array[StringName]` (2–3 keys), `option_a`, `option_b`, `option_c` (each `Dictionary[StringName, int]`; an unused slot is `{}`). No default option. The effect keys are the closed set in §11.5 (P7). Added by the M2d-panels plan (P8). |
 
 Existing `PlatformDef` gains: `dev_kit_cost`, `install_curve: Array[int]` (install base per quarter since launch), `rumor_weeks: int`, `genre_fit_bp: Dictionary[genre_id, int]` (platform-fit review dimension). Existing `TopicDef` gains `genre_fit_bp` (§6.2). `GenreDef` gains `ideal_sliders` (§6.3). All content values are ints, never floats.
 
@@ -147,10 +151,12 @@ Every removal type has a test that runs `GameState.validate_dict(state.to_dict()
 
 `GameSession` detects new decisions by snapshotting `state.next_id` before a step and treating any decision with `id >= snapshot` as new (the newest is the highest id). The paused command path also emits `decision_required` when a command adds a decision.
 
+Production events are decisions too (M2d-panels P4). `kind` is the `ProductionEventDef.id` (prefix `pevent_`), `related_ids = [project_id]`, `option_keys` is copied from the def, and `deadline_week = week + production_event_answer_weeks`. `Decision` gets no new field.
+
 ## 5. Tick order (replaces foundation §4.2)
 
 1. Calendar
-2. WorldEvent (stub in M2; award and platform-rumour events are scheduled by their own systems)
+2. WorldEvent (stub in M2; award and platform-rumour events are scheduled by their own systems). The M2d-panels plan adds one call here: `WorldEventSystem.tick(ctx)` calls `ProductionEventSystem.tick(ctx)` (P3). `Simulation.SYSTEMS` is unchanged.
 3. Market (stub in M2)
 4. **Platform**: lifecycle phase, install base from curve, rumours, death
 5. Staff: morale, burnout, exp gain, skill growth, yearly raise demands, resignation
@@ -281,7 +287,7 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 
 ## 9. Commands added in M2
 
-`StartProject`, `SetSliders`, `ReleaseProject`, `BuyResearch`, `BuyDevKit`, `HireCandidate`, `FireStaff`, `AnswerRaise`, `AssignSeat`, `BuyEquipment`, `LeaseEquipment`, `SellEquipment`, `MoveOffice`, `SignEngineLicense`, `SignOutsource`, `AcceptContractWork`, `TakeLoan`, `RepayLoan`, `SpendSkillPoint`, `SetOwnerFocus`, `RunMarketing`, `StartPromotion`, `StartPatch`, `StartDLC`, `BuildModTools`, `ReplyForum`, `EnterAward`. Each validates and returns a `tr()` reason key on failure.
+`StartProject`, `SetSliders`, `ReleaseProject`, `BuyResearch`, `BuyDevKit`, `HireCandidate`, `FireStaff`, `AnswerRaise`, `AssignSeat`, `BuyEquipment`, `LeaseEquipment`, `SellEquipment`, `MoveOffice`, `SignEngineLicense`, `SignOutsource`, `AcceptContractWork`, `TakeLoan`, `RepayLoan`, `SpendSkillPoint`, `SetOwnerFocus`, `RunMarketing`, `StartPromotion`, `StartPatch`, `StartDLC`, `BuildModTools`, `ReplyForum`, `EnterAward`, `ChooseEventOption` and `SubmitBugHunt` (M2d-panels). Each validates and returns a `tr()` reason key on failure.
 
 ## 10. Events added in M2
 
@@ -327,9 +333,21 @@ Three small interactive moments, each a popup that pauses the game. All outcomes
 - **Publisher pitch.** When signing a publishing deal, the player answers 2–3 multiple-choice questions about the game. Good answers improve the deal terms within tuning limits.
 - The real-time part of bug hunt lives in UI only. The simulation sees only the submitted result, validated by the command (never more bugs removed than exist, never more than the tuning cap).
 
+**Eligibility and draws (P5).** Each tick, for each project in `state.sorted_ids(state.projects)`, the project is eligible only if the player company owns it, it is a GAME in PRODUCTION, `GameRules.working_staff` is not empty, `event_ids.size() < production_event_max_per_project`, no pending `pevent_` decision lists it in `related_ids`, and at least one content event id is not in `event_ids`. An eligible project draws one `Fixed.roll_bp(ctx.rng, production_event_chance_bp)`. On a hit it draws one `ctx.rng.randi_range(0, n - 1)` over the sorted eligible ids. An ineligible project draws nothing.
+
+**Expiry (P6).** Before rolling, every pending production-event decision whose `deadline_week <= state.week` is removed through `Removal.remove_decision`, sorted by id, with no effect. Expiry only happens in headless runs, because the popup is modal in play.
+
+**Effects (P7).** Effects are a closed set, applied in `ProductionEventDef.EFFECTS` order: `design`, `tech`, `art`, `audio` (added to points, clamped at 0); `bugs` (clamped at 0); `hype` (clamped 0–100); `morale` (added to every staff member assigned to the project, owner included, in sorted id order, clamped 0–100); `progress_bp` (only while the project is in PRODUCTION; `stage_progress` is clamped to 0..9999, so an event never completes or rewinds a stage). An answer is valid in any phase. The "weeks" effect above is `progress_bp`.
+
+**Bug hunt limits (P10).** At most once per project (`bug_hunt_done`), in POLISH, for player GAME projects. Bugs removed = `min(caught, min(bug_hunt_max_bugs, bugs))`. The real-time game is UI-only: its length is `TuningDef.bug_hunt_seconds` (pacing). Its spawn count (cap + 4) and bug lifetime (1.6 s) are UI constants. It is offered by a popup when a player GAME enters POLISH, and by a Project-panel button until release. Skipping sends nothing.
+
+**Publisher pitch (P2): deferred, no owner.** The M2d-panels plan does not build it, and no plan owns it yet. Building it needs M3-sized design first. M2b's Negotiator `publisher_share_bp` stays unused until then. The spec gap is flagged for the manager.
+
 ## 12. Save compatibility
 
 `schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new runtime int id field. Content-id references are not checked by the validator (it stays content-free). `ContentDB.missing_refs(state)` checks them at load time: company office, research, awards and dev kits; equipment defs; project size, platform, genre, topic, engine, feature and outlet ids; contract `locked_genre`, `locked_platform` and the `ENGINE_LICENSE` deliverable; owner perk keys; engine features. `GameRunner.load_game` refuses a save with missing refs using `error.save_content_missing` and leaves the current game untouched.
+
+The M2d-panels plan adds two checks to `ContentDB.missing_refs` (P8, P9): `project %d: unknown event %s` for each `Project.event_ids` entry not in `production_events`, and `decision %d: unknown event %s` for a pending decision whose `kind` begins with `pevent_` and is not in `production_events`. Other decision kinds are not checked.
 
 ## 13. Testing
 
