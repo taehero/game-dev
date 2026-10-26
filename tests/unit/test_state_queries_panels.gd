@@ -212,7 +212,7 @@ func test_concept_options_engines() -> void:
 	var o: Dictionary = StateQueries.concept_options(s, c, _t)
 	var engines: Array = o["engines"]
 	assert_eq(engines.size(), 2)
-	assert_eq(engines[0]["choice_id"], StringName("engine_%d" % built))
+	assert_eq(engines[0]["choice_id"], StringName("built_%d" % built))
 	assert_eq(engines[0]["engine_id"], built)
 	assert_eq(engines[0]["licensed_id"], &"")
 	assert_eq(engines[0]["name"], "Mine")

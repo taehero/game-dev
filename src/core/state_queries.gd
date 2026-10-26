@@ -317,7 +317,7 @@ static func _unlocked_ids(state: GameState, content: ContentDB, ids: Dictionary)
 	return out
 
 
-## Choices for the concept dialog. Built engines use choice_id "engine_<id>"; licensed use their def id.
+## Choices for the concept dialog. Built engines use choice_id "built_<id>"; licensed use their def id.
 static func concept_options(state: GameState, content: ContentDB, t: TuningDef) -> Dictionary:
 	var platforms: Array[StringName] = []
 	var kitless: int = 0
@@ -334,7 +334,7 @@ static func concept_options(state: GameState, content: ContentDB, t: TuningDef) 
 		if e.company_id != state.player_company_id:
 			continue
 		engines.append({
-			"choice_id": StringName("engine_%d" % eid),
+			"choice_id": StringName("built_%d" % eid),
 			"engine_id": eid,
 			"licensed_id": &"",
 			"name": e.name,
