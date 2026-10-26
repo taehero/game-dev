@@ -70,6 +70,10 @@ func test_past_stage_sliders_disabled() -> void:
 	var past: HSlider = _node("%Stage_0").get_node("Row_0/Slider") as HSlider
 	var current: HSlider = _node("%Stage_1").get_node("Row_0/Slider") as HSlider
 	assert_false(past.editable)
+	assert_eq((_node("%Stage_0") as SliderTriple).modulate.a, 0.5)
+	assert_ne(past.tooltip_text, "")
+	assert_eq((_node("%Stage_1") as SliderTriple).modulate.a, 1.0)
+	assert_eq(current.tooltip_text, "")
 	assert_true(current.editable)
 
 
