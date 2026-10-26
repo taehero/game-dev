@@ -113,3 +113,12 @@ func test_validate_does_not_mutate() -> void:
 	var before: String = StateHash.of(f["s"])
 	ChooseEventOptionCommand.new(f["did"], 0).validate(f["s"], TuningDef.new())
 	assert_eq(StateHash.of(f["s"]), before)
+
+
+func test_missing_zero_point_key_not_inserted_and_def_unchanged() -> void:
+	var f: Dictionary = _setup({&"art": -10})
+	var def: ProductionEventDef = ContentDB.active().production_events[KIND]
+	var before: Dictionary = def.option_a.duplicate()
+	_run(f)
+	assert_false(f["p"].points.has(&"art"))
+	assert_eq(def.option_a, before)

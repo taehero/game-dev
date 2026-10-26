@@ -198,3 +198,85 @@ func test_pending_event_survives_save_load() -> void:
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(r.state.to_dict())))
 	assert_eq(ContentDB.active().missing_refs(r.state), [] as Array[String])
 	assert_eq(_event_decisions(r.state).size(), 1)
+
+
+func test_multi_project_draw_order() -> void:
+	var s := Fixtures.new_state(7)
+	ContentDB.use(Fixtures.content_plus(_events()))
+	var low: int = Fixtures.add_project(s)
+	var high: int = Fixtures.add_project(s)
+	var bad: int = Fixtures.add_project(s, {"phase": Project.Phase.POLISH})
+	# Workers added with the higher id first; iteration must still go by sorted id.
+	Fixtures.add_worker(s, {"assigned_project_id": high})
+	Fixtures.add_worker(s, {"assigned_project_id": low})
+	Fixtures.add_worker(s, {"assigned_project_id": bad})
+	var copy: RandomNumberGenerator = _copy_rng(s.rng)
+	var expected: Dictionary = {}
+	for pid: int in [low, high]:
+		assert_true(Fixed.roll_bp(copy, 10000))
+		expected[pid] = [KIND_A, KIND_B][copy.randi_range(0, 1)]
+	WorldEventSystem.tick(TickContext.new(s, _tuning(10000)))
+	assert_eq(s.rng.state, copy.state)
+	assert_eq(s.projects[low].event_ids, [expected[low]] as Array[StringName])
+	assert_eq(s.projects[high].event_ids, [expected[high]] as Array[StringName])
+	assert_true(s.projects[bad].event_ids.is_empty())
+
+
+func test_expiry_keeps_non_events_and_future_deadlines() -> void:
+	var f: Dictionary = _setup()
+	var s: GameState = f["s"]
+	var pid: int = f["pid"]
+	s.projects[pid].event_ids.assign([KIND_A])
+	var other := Decision.new()
+	other.id = s.alloc_id()
+	other.kind = &"hire_offer"
+	other.deadline_week = s.week - 5
+	s.pending_decisions.append(other)
+	var ev := Decision.new()
+	ev.id = s.alloc_id()
+	ev.kind = KIND_A
+	ev.related_ids.assign([pid])
+	ev.deadline_week = s.week + 1
+	ev.option_keys.assign(ContentDB.active().production_events[KIND_A].option_keys)
+	s.pending_decisions.append(ev)
+	WorldEventSystem.tick(TickContext.new(s, _tuning(10000, 1)))
+	assert_eq(s.pending_decisions.size(), 2)
+
+
+func _mk_pair(seed_value: int) -> GameState:
+	var s := Fixtures.new_state(seed_value)
+	ContentDB.use(Fixtures.content_plus(_events()))
+	for i: int in 2:
+		var pid: int = Fixtures.add_project(s)
+		Fixtures.add_worker(s, {"assigned_project_id": pid})
+	return s
+
+
+func _run_weeks(s: GameState, t: TuningDef, n: int) -> void:
+	for i: int in n:
+		Simulation.step(TickContext.new(s, t))
+
+
+func _pending_events(s: GameState) -> int:
+	return _event_decisions(s).size()
+
+
+func test_save_load_mid_event_matches_uninterrupted_run() -> void:
+	var t: TuningDef = Fixtures.tuning().duplicate()
+	t.production_event_chance_bp = 3000
+	t.production_event_max_per_project = 2
+	var total: int = 30
+	var full: GameState = _mk_pair(11)
+	_run_weeks(full, t, total)
+	var want: String = StateHash.of(full)
+	var hits: int = 0
+	for w: int in range(1, total):
+		var s: GameState = _mk_pair(11)
+		_run_weeks(s, t, w)
+		if _pending_events(s) > 0:
+			hits += 1
+		var r: LoadResult = SaveService.deserialize(SaveService.serialize(s))
+		assert_true(r.ok)
+		_run_weeks(r.state, t, total - w)
+		assert_eq(StateHash.of(r.state), want, "save at week %d" % w)
+	assert_gt(hits, 0, "at least one save point had a pending event")

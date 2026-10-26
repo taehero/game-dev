@@ -95,4 +95,16 @@ static func apply_effects(ctx: TickContext, def: ProductionEventDef, option_inde
 			_:
 				var total: int = maxi(0, int(p.points.get(key, 0)) + amount)
 				if p.points.has(key) or total > 0:
-					ProductionSystem._add_points(p, key, total - int(p.points.get(key, 0)))
+					_set_point(p, key, total)
+
+
+## Inserts keys in sorted order so live and loaded dictionaries share one order.
+static func _set_point(p: Project, type: StringName, value: int) -> void:
+	if p.points.has(type):
+		p.points[type] = value
+		return
+	var copy: Dictionary[StringName, int] = p.points.duplicate()
+	copy[type] = value
+	p.points.clear()
+	for k: StringName in GameState.sorted_names(copy):
+		p.points[k] = copy[k]
