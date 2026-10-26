@@ -120,10 +120,10 @@ content.research.topics_scifi.name,Research: Sci-Fi Topics,วิจัย: ธ�
 content.research.topics_action.name,Research: Action Hero Topics,วิจัย: ธีมสงครามและซูเปอร์ฮีโร่
 content.engine.vector_kit.name,Vector Kit,เวกเตอร์คิต (Vector Kit)
 content.engine.sprite_works.name,Sprite Works,สไปรต์เวิร์กส์ (Sprite Works)
-content.outlet.pixel_press.name,Pixel Press,พิกเซลเพรส (Pixel Press)
-content.outlet.joystick_weekly.name,Paddle Weekly,แพดเดิลวีคลี่ (Paddle Weekly)
-content.outlet.byte_review.name,Circuit Review,เซอร์กิตรีวิว (Circuit Review)
-content.outlet.arcade_ace.name,Arcade Ace,อาร์เคดเอซ (Arcade Ace)
+content.outlet.pixel_press.name,Pixel Press,พิกเซลเพรส
+content.outlet.joystick_weekly.name,Paddle Weekly,แพดเดิลวีคลี่
+content.outlet.byte_review.name,Circuit Review,เซอร์กิตรีวิว
+content.outlet.arcade_ace.name,Arcade Ace,อาร์เคดเอซ
 review.strong.gameplay.1,Hooked from the first minute. Hard to put down.,ติดมือตั้งแต่นาทีแรก วางไม่ลงเลย
 review.strong.gameplay.2,A true classic of play. Every second is fun.,เกมเพลย์ระดับตำนาน สนุกทุกวินาที
 review.weak.gameplay.1,The {genre} gameplay is a bit dull and repetitive.,เกมเพลย์แนว {genre} ค่อนข้างจืดและซ้ำซาก
@@ -271,6 +271,7 @@ ui.sales.title,Sales,ยอดขาย
 ui.sales.total,{units} sold · {money} revenue,ขายได้ {units} ชุด · รายได้ {money}
 ui.sales.no_data,No sales yet.,ยังไม่มียอดขาย
 ui.sales.weeks,Last {n} weeks,{n} สัปดาห์ล่าสุด
+ui.sales.average,Avg. {units} per week,เฉลี่ย {units} ชุด/สัปดาห์
 ui.event.project,{title},{title}
 ui.effect.design,Design {n},ออกแบบ {n}
 ui.effect.tech,Tech {n},เทค {n}
