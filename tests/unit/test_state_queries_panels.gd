@@ -309,3 +309,21 @@ func test_queries_do_not_mutate() -> void:
 	StateQueries.pending_event_ids(s, c)
 	StateQueries.event_view(s, c, d.id)
 	assert_eq(StateHash.of(s), before)
+
+
+func test_is_player_game_staff_name_and_project_title() -> void:
+	var s := Fixtures.new_state(1)
+	var pid: int = Fixtures.add_project(s, {})
+	assert_true(StateQueries.is_player_game(s, pid))
+	assert_false(StateQueries.is_player_game(s, 9999))
+	s.projects[pid].kind = Project.Kind.ENGINE
+	assert_false(StateQueries.is_player_game(s, pid), "engines are not games")
+	s.projects[pid].kind = Project.Kind.GAME
+	s.projects[pid].company_id = s.player_company_id + 1
+	assert_false(StateQueries.is_player_game(s, pid), "rival game")
+	assert_eq(StateQueries.project_title(s, pid), s.projects[pid].title)
+	assert_eq(StateQueries.project_title(s, 9999), "")
+	var sid: int = s.staff_of(s.player_company_id)[0]
+	assert_eq(StateQueries.staff_name(s, sid), s.staff[sid].name)
+	assert_eq(StateQueries.staff_name(s, 9999), "")
+	assert_eq(StateQueries.player_company_id(s), s.player_company_id)

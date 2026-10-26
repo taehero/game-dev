@@ -100,7 +100,7 @@ func _build_hire_row() -> void:
 
 func _hire_command(t: TuningDef) -> HireStaffCommand:
 	var edit: LineEdit = get_node("%HireName") as LineEdit
-	return HireStaffCommand.new(GameRunner.session.state.player_company_id, edit.text.strip_edges(), t.hire_offer_salary)
+	return HireStaffCommand.new(StateQueries.player_company_id(GameRunner.session.state), edit.text.strip_edges(), t.hire_offer_salary)
 
 
 func _update_hire(view: GameState, t: TuningDef) -> void:

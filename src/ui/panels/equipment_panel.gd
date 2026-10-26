@@ -63,8 +63,8 @@ func refresh(view: GameState, t: TuningDef) -> void:
 	for s: SeatView in seats:
 		key.append([s.seat_index, s.staff_id, s.computer_tier])
 	for s: SeatView in seats:
-		if s.staff_id != -1 and view.staff.has(s.staff_id):
-			key.append(view.staff[s.staff_id].name)
+		if s.staff_id != -1:
+			key.append(StateQueries.staff_name(view, s.staff_id))
 	if _dirty or key != _built:
 		_dirty = false
 		_built = key
@@ -73,7 +73,7 @@ func refresh(view: GameState, t: TuningDef) -> void:
 		var row: Node = _kits.get_node_or_null("Kit_%s" % p["id"])
 		if row != null:
 			var buy: Button = row.find_child("Buy", true, false) as Button
-			gate(buy, BuyDevKitCommand.new(view.player_company_id, p["id"]))
+			gate(buy, BuyDevKitCommand.new(StateQueries.player_company_id(view), p["id"]))
 
 
 func _clear(box: Control) -> void:
@@ -127,7 +127,7 @@ func _kit_row(p: Dictionary) -> Control:
 
 
 func _buy(platform_id: StringName) -> void:
-	if submit(BuyDevKitCommand.new(GameRunner.session.state.player_company_id, platform_id)):
+	if submit(BuyDevKitCommand.new(StateQueries.player_company_id(GameRunner.session.state), platform_id)):
 		_refresh_now()
 
 
@@ -140,8 +140,8 @@ func _desk_row(view: GameState, s: SeatView) -> Control:
 	row.add_child(line)
 	line.add_child(UiBuild.label(tr("ui.equipment.desk").format({"n": s.seat_index + 1}), &"SectionLabel"))
 	var who: String = tr("ui.equipment.empty")
-	if s.staff_id != -1 and view.staff.has(s.staff_id):
-		who = tr(view.staff[s.staff_id].name)
+	if s.staff_id != -1 and StateQueries.staff_name(view, s.staff_id) != "":
+		who = tr(StateQueries.staff_name(view, s.staff_id))
 	var who_label: Label = UiBuild.label(who)
 	who_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	who_label.clip_text = true

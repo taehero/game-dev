@@ -58,11 +58,7 @@ func show_bug_hunt(project_id: int) -> void:
 func _is_player_game(project_id: int) -> bool:
 	if GameRunner.session == null:
 		return false
-	var view: GameState = GameRunner.session.state
-	if not view.projects.has(project_id):
-		return false
-	var p: Project = view.projects[project_id]
-	return p.company_id == StateQueries.player_company_id(view) and p.kind == Project.Kind.GAME
+	return StateQueries.is_player_game(GameRunner.session.state, project_id)
 
 
 func _on_review_published(payload: Dictionary) -> void:

@@ -67,7 +67,7 @@ func refresh(view: GameState, t: TuningDef) -> void:
 	if _dirty or research != _built_research:
 		_build_research(research)
 	_dirty = false
-	var company_id: int = view.player_company_id
+	var company_id: int = StateQueries.player_company_id(view)
 	for id: StringName in _buy_buttons:
 		gate(_buy_buttons[id], BuyResearchCommand.new(company_id, id))
 
@@ -159,5 +159,5 @@ func _build_research(rows: Array[Dictionary]) -> void:
 
 
 func _on_buy(id: StringName) -> void:
-	submit(BuyResearchCommand.new(GameRunner.session.state.player_company_id, id))
+	submit(BuyResearchCommand.new(StateQueries.player_company_id(GameRunner.session.state), id))
 	_refresh_now()

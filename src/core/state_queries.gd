@@ -154,6 +154,25 @@ static func _is_player_game(state: GameState, p: Project) -> bool:
 	return p.company_id == state.player_company_id and p.kind == Project.Kind.GAME
 
 
+## True when the project exists, belongs to the player and is a game (not an engine).
+static func is_player_game(state: GameState, project_id: int) -> bool:
+	return state.projects.has(project_id) and _is_player_game(state, state.projects[project_id])
+
+
+## The staff member's name, or "" when the id is unknown.
+static func staff_name(state: GameState, staff_id: int) -> String:
+	if not state.staff.has(staff_id):
+		return ""
+	return state.staff[staff_id].name
+
+
+## The project's title, or "" when the id is unknown.
+static func project_title(state: GameState, project_id: int) -> String:
+	if not state.projects.has(project_id):
+		return ""
+	return state.projects[project_id].title
+
+
 static func _player_company(state: GameState) -> Company:
 	return state.companies.get(state.player_company_id, null)
 

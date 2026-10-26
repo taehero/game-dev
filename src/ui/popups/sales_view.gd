@@ -30,8 +30,8 @@ func _build(card: PopupCard, project_id: int) -> void:
 				title = g["title"]
 				units_sold = g["units_sold"]
 				revenue = g["revenue"]
-		if title == "" and view.projects.has(project_id):
-			title = view.projects[project_id].title
+		if title == "":
+			title = StateQueries.project_title(view, project_id)
 	card.open(tr("ui.sales.title") + ": " + title)
 	var shown: Array[int] = series.slice(maxi(series.size() - MAX_WEEKS, 0))
 	var totals := Label.new()
