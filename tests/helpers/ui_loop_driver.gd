@@ -75,10 +75,17 @@ static func _start_next(session: GameSession, content: ContentDB) -> void:
 		_start_game(session, content, GAME_TWO, &"platform_arcadia", &"topic_sports", built_engine, &"", scrolling)
 
 
-## Starts a game with the engine taken from the concept options entry, then sets the genre's ideal sliders.
+## Starts a game (the engine pair must be one the concept options offer), then sets the genre's ideal sliders.
 static func _start_game(session: GameSession, content: ContentDB, title: String, platform_id: StringName, topic_id: StringName, engine_id: int, licensed_id: StringName, features: Array[StringName]) -> void:
 	var state: GameState = session.state
 	var genre_id: StringName = &"genre_action"
+	var offered: bool = false
+	for entry: Dictionary in StateQueries.concept_options(state, content, session.tuning)["engines"]:
+		if entry["engine_id"] == engine_id and entry["licensed_id"] == licensed_id:
+			offered = true
+	if not offered:
+		push_error("UiLoopDriver: engine (%d, %s) not offered by concept_options" % [engine_id, licensed_id])
+		assert(false, "UiLoopDriver engine not offered")
 	var cmd := StartProjectCommand.game(state.player_company_id, title, &"size_small", platform_id, topic_id, genre_id, engine_id, licensed_id, features)
 	_send(session, cmd)
 	var pid: int = StateQueries.active_project_id(state)
