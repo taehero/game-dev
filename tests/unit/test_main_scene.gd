@@ -220,3 +220,49 @@ func test_project_card_hidden_while_panel_open() -> void:
 	assert_false(card.visible)
 	btn.button_pressed = false
 	assert_true(card.visible)
+
+
+func test_dock_tabs_show_real_panels() -> void:
+	var m := _main()
+	var host: PanelHost = m.get_node("PanelHost") as PanelHost
+	var classes: Dictionary = {&"project": ProjectPanel, &"team": TeamPanel, &"equipment": EquipmentPanel,
+		&"finance": FinancePanel, &"market": MarketPanel}
+	for tab: StringName in Dock.TABS:
+		(m.get_node("Dock") as Dock).select(tab)
+		assert_eq(host.current_tab(), tab)
+		var found: Control = null
+		for c: Node in host.get_node("%Content").get_children():
+			if is_instance_of(c, classes[tab]) and (c as Control).visible:
+				found = c as Control
+		assert_not_null(found, String(tab))
+
+
+func test_new_game_button_opens_wizard_and_pauses() -> void:
+	var m := _main()
+	GameRunner.set_speed(1)
+	(m.get_node("Dock") as Dock).select(&"project")
+	var btn: Button = m.get_node("PanelHost").find_child("NewGame", true, false) as Button
+	assert_not_null(btn)
+	btn.pressed.emit()
+	var popups: Node = m.get_node("Popups")
+	assert_eq(popups.get_child_count(), 1)
+	assert_true((popups.get_child(0) as PopupCard).body().get_child(0) is ConceptWizard)
+	assert_eq(GameRunner.session.speed, 0)
+	(popups.get_child(0) as PopupCard).close()
+	assert_eq(GameRunner.session.speed, 1)
+
+
+func test_show_popup_goes_through_queue() -> void:
+	var m := _main()
+	GameRunner.set_speed(1)
+	var a: PopupCard = load("res://src/ui/panels/popup_card.tscn").instantiate() as PopupCard
+	var b: PopupCard = load("res://src/ui/panels/popup_card.tscn").instantiate() as PopupCard
+	m.show_popup(a)
+	m.show_popup(b)
+	assert_eq(GameRunner.session.speed, 0)
+	assert_true(a.is_inside_tree())
+	assert_false(b.is_inside_tree())
+	a.close()
+	assert_true(b.is_inside_tree())
+	b.close()
+	assert_eq(GameRunner.session.speed, 1)

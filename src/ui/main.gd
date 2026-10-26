@@ -14,6 +14,8 @@ func _enter_tree() -> void:
 
 
 var _office: OfficeScene
+var _queue: PopupQueue
+var _director: PopupDirector
 
 
 func _ready() -> void:
@@ -31,6 +33,30 @@ func _ready() -> void:
 	if GameRunner.session != null:
 		_office.refresh(GameRunner.session.state, GameRunner.session.tuning)
 	_centre_office()
+	_build_popups_and_panels()
+
+
+func _build_popups_and_panels() -> void:
+	_queue = PopupQueue.new(get_node("Popups") as Control, GameRunner.pause_for_popup, GameRunner.resume_after_popup)
+	var db: ContentDB = ContentDB.active()
+	_director = PopupDirector.new()
+	_director.name = "PopupDirector"
+	add_child(_director)
+	_director.setup(_queue, db, Rect2(OFFICE_AREA))
+	var host: PanelHost = get_node("PanelHost") as PanelHost
+	var project := ProjectPanel.new()
+	project.configure(db)
+	project.new_game_requested.connect(_director.show_new_game)
+	project.new_engine_requested.connect(_director.show_new_engine)
+	project.bug_hunt_requested.connect(_director.show_bug_hunt_offer)
+	project.details_requested.connect(_director.show_sales)
+	host.set_panel(&"project", project)
+	var panels: Dictionary[StringName, PanelBase] = {
+		&"team": TeamPanel.new(), &"equipment": EquipmentPanel.new(),
+		&"finance": FinancePanel.new(), &"market": MarketPanel.new()}
+	for tab: StringName in panels:
+		panels[tab].configure(db)
+		host.set_panel(tab, panels[tab])
 
 
 ## Ruling 5: Main is the only place the UI reads ContentDB.active(), here and in _content_names().
@@ -51,7 +77,7 @@ func _content_names() -> Dictionary[StringName, StringName]:
 
 
 func show_popup(popup: PopupCard) -> void:
-	get_node("Popups").add_child(popup)
+	_queue.push(popup)
 
 
 func _centre_office() -> void:

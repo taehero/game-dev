@@ -272,6 +272,7 @@ ui.sales.total,{units} sold · {money} revenue,ขายได้ {units} ชุ
 ui.sales.no_data,No sales yet.,ยังไม่มียอดขาย
 ui.sales.weeks,Last {n} weeks,{n} สัปดาห์ล่าสุด
 ui.sales.average,Avg. {units} per week,เฉลี่ย {units} ชุด/สัปดาห์
+ui.event.title,Event,เหตุการณ์
 ui.event.project,{title},{title}
 ui.effect.design,Design {n},ออกแบบ {n}
 ui.effect.tech,Tech {n},เทค {n}
