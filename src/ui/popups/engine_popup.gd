@@ -28,13 +28,16 @@ func create() -> bool:
 	var session: GameSession = GameRunner.session
 	if session == null:
 		return false
-	var cmd: StartProjectCommand = StartProjectCommand.engine(
-		StateQueries.player_company_id(session.state), _title_edit.text, _features.selected_many())
-	var result: CommandResult = GameRunner.submit(cmd)
+	var result: CommandResult = GameRunner.submit(_command())
 	_status.text = "" if result.ok else tr(result.reason_key)
 	if result.ok:
 		_popup.close()
 	return result.ok
+
+
+func _command() -> StartProjectCommand:
+	return StartProjectCommand.engine(
+		StateQueries.player_company_id(GameRunner.session.state), _title_edit.text, _features.selected_many())
 
 
 func _ready() -> void:
@@ -53,6 +56,12 @@ func _ready() -> void:
 	heading.text = tr("ui.engine.features")
 	heading.theme_type_variation = &"SectionLabel"
 	add_child(heading)
+	if ids.is_empty():
+		var hint := Label.new()
+		hint.text = tr("ui.engine.no_features")
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.custom_minimum_size.x = 120.0
+		_add_unique(hint, "NoFeatures")
 	_features = ChoiceRow.new()
 	_features.setup(ids, labels, true)
 	_add_unique(_features, "Features")
@@ -76,7 +85,14 @@ func _update_text(_text: String) -> void:
 
 
 func _update() -> void:
-	_create.disabled = _features.selected_many().is_empty() or _title_edit.text.strip_edges().is_empty()
+	var blocked: bool = _features.selected_many().is_empty() or _title_edit.text.strip_edges().is_empty()
+	_create.tooltip_text = ""
+	if not blocked and GameRunner.session != null:
+		var session: GameSession = GameRunner.session
+		var result: CommandResult = _command().validate(session.state, session.tuning)
+		blocked = not result.ok
+		_create.tooltip_text = "" if result.ok else tr(result.reason_key)
+	_create.disabled = blocked
 
 
 func _add_unique(node: Node, node_name: String) -> void:

@@ -219,6 +219,34 @@ func test_engine_popup_builds_engine() -> void:
 	assert_true(popup.is_queued_for_deletion())
 
 
+func test_engine_popup_hint_when_no_features_researched() -> void:
+	var parts: Array = _mount(true)
+	assert_null(parts[1].get_node_or_null("%NoFeatures"), "free feature present: no hint")
+	var screen := Control.new()
+	screen.size = Vector2(640, 360)
+	add_child_autofree(screen)
+	var popup: PopupCard = EnginePopup.popup(ContentDB.new())
+	screen.add_child(popup)
+	await wait_frames(1)
+	var bare: Node = popup.body().get_child(0)
+	assert_eq((bare.get_node("%NoFeatures") as Label).text, tr("ui.engine.no_features"))
+	assert_true((bare.get_node("%Create") as Button).disabled)
+
+
+func test_engine_create_is_gated_by_command_validation() -> void:
+	var w: EnginePopup = _mount(true)[1]
+	await wait_frames(1)
+	(w.get_node("%Features") as ChoiceRow).select(&"feature_fx_save")
+	var create_btn: Button = w.get_node("%Create")
+	assert_false(create_btn.disabled)
+	assert_eq(create_btn.tooltip_text, "")
+	for sid: int in GameRunner.session.state.staff_of(GameRunner.session.state.player_company_id):
+		GameRunner.session.state.staff[sid].assigned_project_id = 999
+	_set_title(w, "Core")
+	assert_true(create_btn.disabled, "validate refuses without free staff")
+	assert_eq(create_btn.tooltip_text, tr("error.not_enough_staff"))
+
+
 func test_engine_popup_feature_label_has_weeks() -> void:
 	var w: EnginePopup = _mount(true)[1]
 	await wait_frames(1)

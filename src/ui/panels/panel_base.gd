@@ -67,6 +67,8 @@ func refresh(_view: GameState, _t: TuningDef) -> void:
 func submit(cmd: Command) -> bool:
 	var result: CommandResult = GameRunner.submit(cmd)
 	_status.text = "" if result.ok else tr(result.reason_key)
+	if result.ok:
+		_refresh_now()
 	return result.ok
 
 

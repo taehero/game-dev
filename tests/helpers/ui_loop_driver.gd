@@ -6,6 +6,9 @@ const GAME_ONE: String = "Star Run"
 const GAME_TWO: String = "Kick Arena"
 const ENGINE_NAME: String = "Scroll Engine"
 
+## Messages for every rejected command or unoffered engine; the scenario asserts it stays empty.
+static var failures: Array[String] = []
+
 
 ## Shipped tuning with a production event every eligible week (P22).
 static func tuning() -> TuningDef:
@@ -84,8 +87,9 @@ static func _start_game(session: GameSession, content: ContentDB, title: String,
 		if entry["engine_id"] == engine_id and entry["licensed_id"] == licensed_id:
 			offered = true
 	if not offered:
-		push_error("UiLoopDriver: engine (%d, %s) not offered by concept_options" % [engine_id, licensed_id])
-		assert(false, "UiLoopDriver engine not offered")
+		var msg: String = "engine (%d, %s) not offered by concept_options" % [engine_id, licensed_id]
+		push_error("UiLoopDriver: " + msg)
+		failures.append(msg)
 	var cmd := StartProjectCommand.game(state.player_company_id, title, &"size_small", platform_id, topic_id, genre_id, engine_id, licensed_id, features)
 	_send(session, cmd)
 	var pid: int = StateQueries.active_project_id(state)
@@ -97,5 +101,6 @@ static func _start_game(session: GameSession, content: ContentDB, title: String,
 static func _send(session: GameSession, cmd: Command) -> void:
 	var result: CommandResult = session.submit(cmd)
 	if not result.ok:
-		push_error("UiLoopDriver: %s rejected at week %d: %s" % [cmd.get_class(), session.state.week, result.reason_key])
-		assert(false, "UiLoopDriver command rejected")
+		var msg: String = "%s rejected at week %d: %s" % [cmd.get_class(), session.state.week, result.reason_key]
+		push_error("UiLoopDriver: " + msg)
+		failures.append(msg)

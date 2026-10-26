@@ -7,6 +7,14 @@ func before_all() -> void:
 	Fixtures.use_real_content()
 
 
+func before_each() -> void:
+	UiLoopDriver.failures.clear()
+
+
+func after_each() -> void:
+	assert_eq(UiLoopDriver.failures, [] as Array[String], "the driver had no rejected commands")
+
+
 func after_all() -> void:
 	ContentDB.use(Fixtures.content())
 

@@ -180,7 +180,6 @@ ui.bubble.points,+{amount} {type},+{amount} {type}
 ui.bubble.bug,Bug!,บั๊ก!
 ui.card.subtitle,{topic} · {genre},{topic} · {genre}
 ui.popup.close,Close,ปิด
-# M2d panels,,
 ui.project.none,No game in development.,ยังไม่มีเกมที่กำลังพัฒนา
 ui.project.new_game,New game,เกมใหม่
 ui.project.new_engine,New engine,เอนจินใหม่
@@ -263,6 +262,7 @@ ui.engine.default_title,New Engine,เอนจินใหม่
 ui.engine.features,Researched features,ฟีเจอร์ที่วิจัยแล้ว
 ui.engine.weeks,{weeks} weeks,{weeks} สัปดาห์
 ui.engine.create,Build engine,สร้างเอนจิน
+ui.engine.no_features,Research an engine feature first.,วิจัยฟีเจอร์เอนจินก่อน
 ui.review.title,Reviews,รีวิว
 ui.review.average,Average {score},คะแนนเฉลี่ย {score}
 ui.review.strength,Liked,จุดเด่น

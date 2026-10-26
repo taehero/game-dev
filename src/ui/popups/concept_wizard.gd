@@ -59,18 +59,26 @@ func create() -> bool:
 	var session: GameSession = GameRunner.session
 	if session == null:
 		return false
-	var entry: Dictionary = _engine_entry()
-	if entry.is_empty():
+	var cmd: StartProjectCommand = _command()
+	if cmd == null:
 		return false
-	var cmd: StartProjectCommand = StartProjectCommand.game(
-		StateQueries.player_company_id(session.state), _title_edit.text,
-		_sizes.selected(), _platforms.selected(), _topics.selected(), _genres.selected(),
-		int(entry["engine_id"]), StringName(entry["licensed_id"]), _features.selected_many())
 	var result: CommandResult = GameRunner.submit(cmd)
 	_status.text = "" if result.ok else tr(result.reason_key)
 	if result.ok:
 		_popup.close()
 	return result.ok
+
+
+## The command the current selections describe, or null while no engine entry is chosen.
+func _command() -> StartProjectCommand:
+	var session: GameSession = GameRunner.session
+	var entry: Dictionary = _engine_entry()
+	if session == null or entry.is_empty():
+		return null
+	return StartProjectCommand.game(
+		StateQueries.player_company_id(session.state), _title_edit.text,
+		_sizes.selected(), _platforms.selected(), _topics.selected(), _genres.selected(),
+		int(entry["engine_id"]), StringName(entry["licensed_id"]), _features.selected_many())
 
 
 func _ready() -> void:
@@ -174,6 +182,13 @@ func _update_nav() -> void:
 	var done: bool = _step_complete()
 	_next.disabled = not done
 	_create.disabled = not done
+	_create.tooltip_text = ""
+	var cmd: StartProjectCommand = _command() if done else null
+	if cmd != null:
+		var session: GameSession = GameRunner.session
+		var result: CommandResult = cmd.validate(session.state, session.tuning)
+		_create.disabled = not result.ok
+		_create.tooltip_text = "" if result.ok else tr(result.reason_key)
 
 
 func _update_combo() -> void:
