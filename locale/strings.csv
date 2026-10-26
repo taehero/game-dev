@@ -209,7 +209,7 @@ ui.slider.audio,Audio,เสียง
 ui.slider.balance,Balance,ความสมดุล
 ui.team.owner,Owner,เจ้าของ
 ui.team.no_computer,No computer,ไม่มีคอมพิวเตอร์
-ui.team.skill_tree_soon,Skill tree coming soon,สกิลทรีจะมาเร็ว ๆ นี้
+ui.team.skill_tree_soon,Skill tree coming soon,ระบบอัปสกิลเปิดเร็ว ๆ นี้
 ui.team.hire,Hire,จ้าง
 ui.team.hire_name,New hire's name,ชื่อพนักงานใหม่
 ui.team.salary,{money} / month,{money} / เดือน
@@ -225,7 +225,7 @@ ui.equipment.computer,Computer tier {tier},คอมพิวเตอร์ร�
 ui.equipment.empty,Empty,ว่าง
 ui.equipment.buy_soon,Buying computers comes later,การซื้อคอมพิวเตอร์จะมาทีหลัง
 ui.finance.cash,Cash,เงินสด
-ui.finance.salaries,Salaries per month,เงินเดือนต่อเดือน
+ui.finance.salaries,Salaries per month,ค่าจ้างรายเดือน
 ui.finance.total_revenue,"Sales revenue, all games",รายได้จากยอดขายทุกเกม
 ui.finance.by_game,Revenue by game,รายได้แยกตามเกม
 ui.finance.none,No sales yet.,ยังไม่มียอดขาย
