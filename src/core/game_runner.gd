@@ -32,6 +32,9 @@ func pause_for_popup() -> void:
 	if session.speed > 0:
 		_popup_resume_speed = session.speed
 		set_speed(0)
+	elif session.auto_paused_speed > 0 and _popup_resume_speed == 0:
+		_popup_resume_speed = session.auto_paused_speed
+	session.auto_paused_speed = 0
 
 
 func resume_after_popup() -> void:

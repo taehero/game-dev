@@ -161,3 +161,19 @@ func test_resume_without_pause_does_nothing() -> void:
 	GameRunner.resume_after_popup()
 	GameRunner.resume_after_popup()
 	assert_eq(GameRunner.session.speed, 2)
+
+
+func test_popup_after_auto_pause_resumes_previous_speed() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.session.auto_paused_speed = 4
+	GameRunner.pause_for_popup()
+	assert_eq(GameRunner.session.auto_paused_speed, 0)
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 4)
+
+
+func test_manual_pause_then_popup_stays_paused() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.pause_for_popup()
+	GameRunner.resume_after_popup()
+	assert_eq(GameRunner.session.speed, 0)

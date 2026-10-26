@@ -116,3 +116,24 @@ func test_paused_command_adding_decision_emits_decision_required() -> void:
 	g.submit(AddDecisionCommand.new())
 	var names: Array = g.drain_events().map(func(e: Dictionary) -> StringName: return e["name"])
 	assert_has(names, &"decision_required")
+
+
+func test_auto_pause_remembers_speed_and_emits_speed_changed() -> void:
+	var g := _session()
+	g.set_speed(2)
+	g.submit(AddDecisionCommand.new())
+	g.step_once()
+	assert_eq(g.speed, 0)
+	assert_eq(g.auto_paused_speed, 2)
+	var found: bool = false
+	for e: Dictionary in g.drain_events():
+		if e["name"] == &"speed_changed" and e["payload"]["speed"] == 0:
+			found = true
+	assert_true(found)
+
+
+func test_set_speed_clears_auto_paused_speed() -> void:
+	var g := _session()
+	g.auto_paused_speed = 4
+	g.set_speed(1)
+	assert_eq(g.auto_paused_speed, 0)

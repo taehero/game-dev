@@ -7,6 +7,8 @@ const VALID_SPEEDS: Array[int] = [0, 1, 2, 4]
 var state: GameState
 var tuning: TuningDef
 var speed: int = 0
+## Speed a decision auto-pause interrupted; 0 when none. Cleared by any set_speed.
+var auto_paused_speed: int = 0
 var autosave_due: bool = false
 
 var _accumulator: float = 0.0
@@ -24,6 +26,7 @@ func set_speed(s: int) -> void:
 		push_warning("GameSession: invalid speed %d" % s)
 		return
 	speed = s
+	auto_paused_speed = 0
 
 
 func submit(cmd: Command) -> CommandResult:
@@ -73,8 +76,10 @@ func step_once() -> void:
 		else:
 			ctx.emit(&"command_rejected", {"reason_key": result.reason_key})
 	Simulation.step(ctx)
-	if _emit_if_new_decision(ctx, snapshot):
+	if _emit_if_new_decision(ctx, snapshot) and speed > 0:
+		auto_paused_speed = speed
 		speed = 0
+		ctx.emit(&"speed_changed", {"speed": 0})
 	if Calendar.is_quarter_start(state.week, tuning):
 		autosave_due = true
 	_events.append_array(ctx.events)
