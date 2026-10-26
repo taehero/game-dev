@@ -40,6 +40,8 @@ const SCHEMA: Dictionary = {
 	"promo_discount_bp": "int",
 	"mod_tools": "bool",
 	"dlc_count": "int",
+	"event_ids": "array",
+	"bug_hunt_done": "bool",
 }
 
 var id: int
@@ -72,6 +74,8 @@ var promo_until_week: int = -1
 var promo_discount_bp: int = 0
 var mod_tools: bool = false
 var dlc_count: int = 0
+var event_ids: Array[StringName] = []
+var bug_hunt_done: bool = false
 
 
 func to_dict() -> Dictionary:
@@ -93,6 +97,9 @@ func to_dict() -> Dictionary:
 	var units_out: Array = []
 	for u: int in weekly_units:
 		units_out.append(u)
+	var events_out: Array = []
+	for e: StringName in event_ids:
+		events_out.append(String(e))
 	return {
 		"id": id,
 		"company_id": company_id,
@@ -124,6 +131,8 @@ func to_dict() -> Dictionary:
 		"promo_discount_bp": promo_discount_bp,
 		"mod_tools": mod_tools,
 		"dlc_count": dlc_count,
+		"event_ids": events_out,
+		"bug_hunt_done": bug_hunt_done,
 	}
 
 
@@ -168,4 +177,7 @@ static func from_dict(d: Dictionary) -> Project:
 	p.promo_discount_bp = int(d["promo_discount_bp"])
 	p.mod_tools = bool(d["mod_tools"])
 	p.dlc_count = int(d["dlc_count"])
+	for e: Variant in d["event_ids"]:
+		p.event_ids.append(StringName(String(e)))
+	p.bug_hunt_done = bool(d["bug_hunt_done"])
 	return p

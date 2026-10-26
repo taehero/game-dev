@@ -29,3 +29,13 @@ func test_shipped_tuning_matches_script_defaults() -> void:
 			continue
 		var n: String = String(prop["name"])
 		assert_eq(shipped.get(n), defaults.get(n), "tuning field %s" % n)
+
+
+func test_m2d_tuning_values() -> void:
+	var t: TuningDef = TuningDef.load_default()
+	assert_eq(t.production_event_chance_bp, 1200)
+	assert_eq(t.production_event_max_per_project, 2)
+	assert_eq(t.production_event_answer_weeks, 4)
+	assert_eq(t.bug_hunt_max_bugs, 10)
+	assert_eq(t.bug_hunt_seconds, 15.0)
+	assert_eq(t.hire_offer_salary, 800)

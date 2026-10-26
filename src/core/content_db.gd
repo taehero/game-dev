@@ -21,6 +21,7 @@ var levels: Dictionary[StringName, LevelDef] = {}
 var perks: Dictionary[StringName, PerkDef] = {}
 var channels: Dictionary[StringName, MarketingChannelDef] = {}
 var awards: Dictionary[StringName, AwardDef] = {}
+var production_events: Dictionary[StringName, ProductionEventDef] = {}
 var errors: Array[String] = []
 
 var _ids: Dictionary[StringName, bool] = {}
@@ -76,7 +77,7 @@ func _is_known(def: Resource) -> bool:
 		or def is ReviewTemplateDef or def is OfficeDef or def is EquipmentDef
 		or def is EngineFeatureDef or def is LicensedEngineDef or def is ResearchDef
 		or def is ProjectSizeDef or def is LevelDef or def is PerkDef
-		or def is MarketingChannelDef or def is AwardDef)
+		or def is MarketingChannelDef or def is AwardDef or def is ProductionEventDef)
 
 
 func add(def: Resource) -> bool:
@@ -117,6 +118,8 @@ func add(def: Resource) -> bool:
 		perks[id] = def
 	elif def is MarketingChannelDef:
 		channels[id] = def
+	elif def is ProductionEventDef:
+		production_events[id] = def
 	else:
 		awards[id] = def
 	return true
@@ -187,6 +190,9 @@ func missing_refs(state: GameState) -> Array[String]:
 		for f: StringName in pr.features:
 			if not engine_features.has(f):
 				out.append("project %d: unknown feature %s" % [pid, f])
+		for ev: StringName in pr.event_ids:
+			if not production_events.has(ev):
+				out.append("project %d: unknown event %s" % [pid, ev])
 		for rr: ReviewResult in pr.review_results:
 			if not outlets.has(rr.outlet_id):
 				out.append("project %d: unknown outlet %s" % [pid, rr.outlet_id])
@@ -205,6 +211,9 @@ func missing_refs(state: GameState) -> Array[String]:
 		for f: StringName in state.engines[gid].features:
 			if not engine_features.has(f):
 				out.append("engine %d: unknown feature %s" % [gid, f])
+	for dec: Decision in state.pending_decisions:
+		if String(dec.kind).begins_with("pevent_") and not production_events.has(dec.kind):
+			out.append("decision %d: unknown event %s" % [dec.id, dec.kind])
 	return out
 
 
@@ -269,7 +278,28 @@ func validate() -> Array[String]:
 			errs.append("%s: base_weeks below 3" % id)
 		if sizes[id].min_staff < 1:
 			errs.append("%s: min_staff below 1" % id)
+	for id: StringName in GameState.sorted_names(production_events):
+		_check_event(errs, id, production_events[id])
 	return errs
+
+
+func _check_event(errs: Array[String], id: StringName, ev: ProductionEventDef) -> void:
+	if not String(id).begins_with("pevent_"):
+		errs.append("%s: id must start with pevent_" % id)
+	if ev.title_key == &"" or ev.body_key == &"":
+		errs.append("%s: empty title_key or body_key" % id)
+	var n: int = ev.option_keys.size()
+	if n < 2 or n > 3:
+		errs.append("%s: option_keys size %d, expected 2 or 3" % [id, n])
+	for i: int in 3:
+		var fx: Dictionary[StringName, int] = ev.option_effects(i)
+		if i >= n and not fx.is_empty():
+			errs.append("%s: option %d has effects but no option key" % [id, i + 1])
+		for k: StringName in GameState.sorted_names(fx):
+			if not ProductionEventDef.EFFECTS.has(k):
+				errs.append("%s: unknown effect %s" % [id, k])
+			elif absi(fx[k]) > ProductionEventDef.LIMITS[k]:
+				errs.append("%s: effect %s out of range" % [id, k])
 
 
 func _check_fit(errs: Array[String], id: StringName, fit: Dictionary[StringName, int]) -> void:

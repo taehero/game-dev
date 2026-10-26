@@ -118,6 +118,37 @@ static func content() -> ContentDB:
 	if _content != null:
 		return _content
 	var db := ContentDB.new()
+	for d: Resource in _fixture_defs():
+		db.add(d)
+	_content = db
+	return db
+
+
+## A new DB with every fixture def plus `extra` (e.g. production events). Not cached.
+static func content_plus(extra: Array[Resource]) -> ContentDB:
+	var db := ContentDB.new()
+	for d: Resource in _fixture_defs():
+		db.add(d)
+	for d: Resource in extra:
+		db.add(d)
+	return db
+
+
+static func pevent(id: StringName, a: Dictionary, b: Dictionary, c: Dictionary = {}) -> ProductionEventDef:
+	var ev := ProductionEventDef.new()
+	ev.id = id
+	ev.title_key = &"event.fx.title"
+	ev.body_key = &"event.fx.body"
+	ev.option_keys = [&"event.fx.option.1", &"event.fx.option.2"] as Array[StringName]
+	if not c.is_empty():
+		ev.option_keys.append(&"event.fx.option.3")
+	ev.option_a.assign(a)
+	ev.option_b.assign(b)
+	ev.option_c.assign(c)
+	return ev
+
+
+static func _fixture_defs() -> Array[Resource]:
 	var defs: Array[Resource] = [
 		_office(&"office_garage", 2, 0, 20, 0, [Vector2i(2, 2), Vector2i(5, 2)] as Array[Vector2i]),
 		_office(&"office_small", 5, 400, 40, 1500, [] as Array[Vector2i]),
@@ -152,10 +183,7 @@ static func content() -> ContentDB:
 		defs.append(_template(StringName("review_tpl_fx_%s_weak" % dim), dim, false, 40, StringName("review.weak.%s" % dim)))
 	defs.append(_template(&"review_tpl_fx_generic_strong", &"generic", true, 0, &"review.strong.generic"))
 	defs.append(_template(&"review_tpl_fx_generic_weak", &"generic", false, 100, &"review.weak.generic"))
-	for d: Resource in defs:
-		db.add(d)
-	_content = db
-	return db
+	return defs
 
 
 ## Real data/ content, loaded once and installed. Tests using it restore content() in after_all.

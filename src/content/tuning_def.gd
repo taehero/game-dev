@@ -44,6 +44,14 @@ extends Resource
 @export var sales_decay_table_bp: Array[int] = [5000, 5000, 6000, 7000, 7600, 8200, 8600, 8900, 9100, 9300, 9400]
 @export var sales_floor_units: int = 10
 
+## --- M2d panels ---
+@export var production_event_chance_bp: int = 1200
+@export var production_event_max_per_project: int = 2
+@export var production_event_answer_weeks: int = 4
+@export var bug_hunt_max_bugs: int = 10
+@export var bug_hunt_seconds: float = 15.0
+@export var hire_offer_salary: int = 800
+
 
 static func load_default() -> TuningDef:
 	return load("res://data/tuning.tres") as TuningDef

@@ -330,6 +330,8 @@ static func _project_ok(e: Dictionary) -> bool:
 	var progress: int = int(e["stage_progress"])
 	if progress < 0 or progress > 10000:
 		return false
+	if not _strings_ok(e["event_ids"]):
+		return false
 	if not _strings_ok(e["features"]):
 		return false
 	for r: Variant in e["review_results"]:
