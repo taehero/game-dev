@@ -108,6 +108,8 @@ static func add_forum_post(ctx: TickContext, project_id: int, topic_key: StringN
 	change_sentiment(state.projects[project_id], sentiment)
 	while state.forum_posts.size() > ctx.tuning.forum_posts_cap:
 		Removal.remove_forum_post(state, state.forum_posts[0].id)
+	if not state.forum_posts.has(f):
+		return -1
 	ctx.emit(&"forum_post_created", {"post_id": f.id, "project_id": project_id, "topic_key": topic_key})
 	return f.id
 

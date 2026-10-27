@@ -68,6 +68,12 @@ func test_out_of_era_channel_rejected() -> void:
 	assert_eq(_run(s, pid, &"channel_fx_old").reason_key, &"error.channel_unavailable")
 
 
+func test_not_yet_available_channel_rejected() -> void:
+	var s := Fixtures.new_state(1)
+	var pid := Fixtures.add_project(s)
+	assert_eq(_run(s, pid, &"channel_fx_future").reason_key, &"error.channel_unavailable")
+
+
 func test_trade_show_only_on_its_weeks() -> void:
 	var s := Fixtures.new_state(1)
 	var pid := Fixtures.add_project(s)
@@ -94,6 +100,9 @@ func test_tick_decays_hype_in_development_only() -> void:
 	MarketingSystem.tick(TickContext.new(s, _t))
 	assert_eq(s.projects[a].hype, 47)
 	assert_eq(s.projects[b].hype, 50)
+	var c := Fixtures.add_project(s, {"hype": 50, "phase": Project.Phase.LIVE})
+	MarketingSystem.tick(TickContext.new(s, _t))
+	assert_eq(s.projects[c].hype, 50)
 
 
 func test_month_start_recovers_fatigue() -> void:
@@ -116,6 +125,9 @@ func test_last_promo_end() -> void:
 	assert_eq(MarketingSystem.last_promo_end(s, 1), -1)
 	Fixtures.add_project(s, {"promo_until_week": 7})
 	Fixtures.add_project(s, {"promo_until_week": 12})
+	assert_eq(MarketingSystem.last_promo_end(s, 1), 12)
+	var other: int = Fixtures.add_project(s, {"promo_until_week": 99})
+	s.projects[other].company_id = 8
 	assert_eq(MarketingSystem.last_promo_end(s, 1), 12)
 
 

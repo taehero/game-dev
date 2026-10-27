@@ -16,38 +16,38 @@ func _ok(edit: Callable) -> bool:
 
 
 func test_new_game_state_is_valid() -> void:
-	assert_true(_ok(func(_d, _a, _b, _c) -> void: pass))
+	assert_true(_ok(func(_d: Dictionary, _a: int, _b: int, _c: int) -> void: pass))
 
 
 func test_rejects_unknown_parent_id() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["parent_id"] = 9999))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["parent_id"] = 9999))
 
 
 func test_rejects_self_parent() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["parent_id"] = a))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["parent_id"] = a))
 
 
 func test_rejects_bad_live_task() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["live_task"] = "REFUND"))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["live_task"] = "REFUND"))
 
 
 func test_rejects_negative_live_task_left() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["live_task_left"] = -1))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["live_task_left"] = -1))
 
 
 func test_rejects_negative_sales_base_units() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["sales_base_units"] = -1))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["sales_base_units"] = -1))
 
 
 func test_rejects_sentiment_out_of_range() -> void:
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["sentiment"] = 101))
-	assert_false(_ok(func(d, a, _b, _c) -> void: d["projects"][str(a)]["sentiment"] = -101))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["sentiment"] = 101))
+	assert_false(_ok(func(d: Dictionary, a: int, _b: int, _c: int) -> void: d["projects"][str(a)]["sentiment"] = -101))
 
 
 func test_rejects_promo_fatigue_out_of_range() -> void:
-	assert_false(_ok(func(d, _a, _b, c) -> void: d["companies"][str(c)]["promo_fatigue"] = 101))
-	assert_false(_ok(func(d, _a, _b, c) -> void: d["companies"][str(c)]["promo_fatigue"] = -1))
+	assert_false(_ok(func(d: Dictionary, _a: int, _b: int, c: int) -> void: d["companies"][str(c)]["promo_fatigue"] = 101))
+	assert_false(_ok(func(d: Dictionary, _a: int, _b: int, c: int) -> void: d["companies"][str(c)]["promo_fatigue"] = -1))
 
 
 func test_accepts_dlc_with_valid_parent() -> void:
-	assert_true(_ok(func(d, a, b, _c) -> void: d["projects"][str(a)]["parent_id"] = b))
+	assert_true(_ok(func(d: Dictionary, a: int, b: int, _c: int) -> void: d["projects"][str(a)]["parent_id"] = b))

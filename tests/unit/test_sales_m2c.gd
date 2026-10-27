@@ -82,6 +82,14 @@ func test_decay_clamped_at_max() -> void:
 	assert_eq(SalesSystem.decay_bp(Fixtures.content(), t, p, 0), 9800)
 
 
+func test_decay_clamp_applies_before_retired_doubling() -> void:
+	var p: Project = s.projects[_released({"user_score": 100})]
+	p.mod_tools = true
+	p.sentiment = 100
+	# 9400 + 300 + 500 clamps to 9800, then 2 * 9800 - 10000 = 9600 (swapped order would give 9800)
+	assert_eq(SalesSystem.decay_bp(Fixtures.content(), t, p, 400), 9600)
+
+
 func test_floor_uses_base_units() -> void:
 	var pid: int = _released()
 	_tick()

@@ -51,6 +51,6 @@ func test_missing_refs_flags_unknown_award_entry() -> void:
 
 func test_fixture_m2c_content() -> void:
 	var db := Fixtures.content()
-	assert_eq(db.channels.size(), 4)
+	assert_eq(db.channels.size(), 5)
 	assert_true(db.awards.has(&"award_fx"))
 	assert_true(db.sizes[&"size_dlc"].dlc)

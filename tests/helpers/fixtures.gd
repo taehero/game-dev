@@ -400,6 +400,7 @@ static func _m2c_defs() -> Array[Resource]:
 	defs.append(_channel(&"channel_fx_show", 1975, 1999, 2000, 30, [10, 11] as Array[int]))
 	defs.append(_channel(&"channel_fx_tv", 1975, 1999, 4000, 40, [] as Array[int]))
 	defs.append(_channel(&"channel_fx_old", 1970, 1975, 100, 5, [] as Array[int]))
+	defs.append(_channel(&"channel_fx_future", 1995, 1999, 100, 5, [] as Array[int]))
 	defs.append(_research(&"research_fx_tv", 30, [] as Array[StringName], [&"channel_fx_tv"] as Array[StringName]))
 	var a := AwardDef.new()
 	a.id = &"award_fx"

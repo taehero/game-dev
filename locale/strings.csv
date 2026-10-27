@@ -404,7 +404,7 @@ error.perk_maxed,This perk is at max rank.,สกิลนี้เต็มร�
 error.invalid_focus,That focus value is not valid.,ค่าโฟกัสไม่ถูกต้อง
 # M2c,,
 content.channel.magazine_ad.name,Magazine ad,โฆษณานิตยสาร
-content.channel.mail_order.name,Mail-order catalogue,แคตตาล็อกสั่งซื้อทางไปรษณีย์
+content.channel.mail_order.name,Mail-order catalogue,สั่งซื้อทางไปรษณีย์
 content.channel.trade_show.name,Trade show,งานแสดงสินค้า
 content.channel.tv_spot.name,TV spot,โฆษณาทีวี
 content.research.tv_advertising.name,TV advertising,การโฆษณาทางทีวี
@@ -417,10 +417,10 @@ forum.reply.apologise,Apologise,ขอโทษผู้เล่น
 forum.reply.promise_patch,Promise a patch,สัญญาว่าจะออก Patch
 forum.reply.ignore,Ignore,เมินไป
 error.channel_not_found,Marketing channel not found.,ไม่พบช่องทางโฆษณานี้
-error.channel_unavailable,That channel is not available now.,ช่องทางนี้ยังใช้ไม่ได้ตอนนี้
+error.channel_unavailable,That channel is not available now.,ตอนนี้ใช้ช่องทางนี้ไม่ได้
 error.project_not_marketable,This project cannot be marketed.,โปรเจกต์นี้โปรโมตไม่ได้
 error.project_not_live,The game must be on sale first.,เกมต้องวางขายก่อน
-error.promo_active,A promotion is already running.,มีโปรโมชันที่กำลังรันอยู่แล้ว
+error.promo_active,A promotion is already running.,มีโปรโมชันอยู่แล้ว
 error.invalid_discount,That discount is not valid.,ส่วนลดไม่ถูกต้อง
 error.invalid_promo_weeks,That promotion length is not valid.,ระยะเวลาโปรโมชันไม่ถูกต้อง
 error.live_task_running,The team is already busy with this game.,ทีมกำลังทำงานกับเกมนี้อยู่แล้ว

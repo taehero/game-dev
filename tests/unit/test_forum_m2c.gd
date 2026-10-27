@@ -84,13 +84,26 @@ func test_forum_cap_drops_oldest() -> void:
 	var t: TuningDef = _tuning()
 	t.forum_posts_cap = 2
 	_tick(s, t)
-	var first: int = s.forum_posts[0].id
+	var ids: Array[int] = [s.forum_posts[0].id]
 	_tick(s, t)
+	ids.append(s.forum_posts[s.forum_posts.size() - 1].id)
 	_tick(s, t)
+	ids.append(s.forum_posts[s.forum_posts.size() - 1].id)
 	assert_eq(s.forum_posts.size(), 2)
-	for f: ForumPost in s.forum_posts:
-		assert_ne(f.id, first)
+	assert_eq(s.forum_posts[0].id, ids[1])
+	assert_eq(s.forum_posts[1].id, ids[2])
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func test_cap_zero_emits_no_forum_post_event() -> void:
+	var s := Fixtures.new_state(1)
+	_live(s, {"bugs": 5})
+	var t: TuningDef = _tuning()
+	t.forum_posts_cap = 0
+	var ctx := _tick(s, t)
+	assert_eq(s.forum_posts.size(), 0)
+	for e: Dictionary in ctx.events:
+		assert_ne(e["name"], &"forum_post_created")
 
 
 func test_same_seed_same_posts() -> void:

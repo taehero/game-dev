@@ -42,6 +42,9 @@ func test_start_dlc_creates_linked_project() -> void:
 	assert_eq(d.features, parent.features)
 	assert_eq(s.staff[r[2]].assigned_project_id, d.id)
 	assert_eq(parent.dlc_count, 1)
+	assert_eq(d.focus, Project.DEFAULT_FOCUS)
+	assert_eq(d.deadline_week, s.week + GameRules.stage_count(d) * GameRules.stage_weeks(d, Fixtures.content(), Fixtures.tuning()))
+	assert_gt(d.deadline_week, s.week)
 
 
 func test_rejects_parent_not_live() -> void:

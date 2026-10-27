@@ -56,6 +56,7 @@ static func promo_active(p: Project, week: int) -> bool:
 	return p.promo_discount_bp > 0 and week <= p.promo_until_week
 
 
+@warning_ignore("integer_division")
 static func promo_uplift_bp(t: TuningDef, discount_bp: int) -> int:
 	return t.promo_uplift_table_bp[clampi(discount_bp / t.promo_discount_step_bp - 1, 0, t.promo_uplift_table_bp.size() - 1)]
 

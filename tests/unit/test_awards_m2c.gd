@@ -9,7 +9,7 @@ func before_each() -> void:
 
 func _reviewed(s: GameState, score: int, overrides: Dictionary = {}) -> int:
 	var rs: Array[ReviewResult] = []
-	for i in 4:
+	for _i: int in 4:
 		var r := ReviewResult.new()
 		r.score_x10 = score
 		rs.append(r)

@@ -78,7 +78,7 @@ func test_build_mod_tools_completes() -> void:
 	var s: GameState = r[0]
 	BuildModToolsCommand.new(r[1]).apply(_ctx(s))
 	assert_eq(s.projects[r[1]].live_task_left, 8)
-	for i in 4:
+	for _i: int in 4:
 		LiveOpsSystem.tick(_ctx(s))
 	assert_true(s.projects[r[1]].mod_tools)
 	assert_eq(s.projects[r[1]].live_task, Project.LiveTask.NONE)

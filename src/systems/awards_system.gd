@@ -56,7 +56,7 @@ static func tick(ctx: TickContext) -> void:
 			ctx.emit(&"award_result", {"award_id": award_id, "project_id": -1, "score_x10": 0, "ai_best_x10": 0, "won": false})
 			continue
 		var ai_best: int = 0
-		for i in t.award_ai_entries:
+		for _i: int in t.award_ai_entries:
 			ai_best = maxi(ai_best, ctx.rng.randi_range(t.award_ai_score_min_x10, t.award_ai_score_max_x10))
 		var won: bool = best > ai_best
 		if won:

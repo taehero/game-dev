@@ -62,8 +62,17 @@ func test_promotion_within_window_adds_fatigue() -> void:
 	_go(pid, 1000, 1)
 	assert_eq(s.companies[1].promo_fatigue, 5)
 	s.companies[1].promo_fatigue = 0
-	s.week = 26
+	s.week = 26  # latest end is 11 (the promo just started), 15 weeks ago
+	_go(pid, 1000, 1)
+	assert_eq(s.companies[1].promo_fatigue, 5)
+	s.companies[1].promo_fatigue = 0
 	s.projects[pid].promo_until_week = -1
+	s.week = 25  # other ended at 0: 25 < window of 26
+	_go(pid, 1000, 1)
+	assert_eq(s.companies[1].promo_fatigue, 5)
+	s.companies[1].promo_fatigue = 0
+	s.projects[pid].promo_until_week = -1
+	s.week = 26
 	_go(pid, 1000, 1)
 	assert_eq(s.companies[1].promo_fatigue, 0)
 	assert_true(s.projects.has(other))
