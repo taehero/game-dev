@@ -35,6 +35,11 @@ func test_repossession_takes_oldest_until_covered() -> void:
 	var id: int = _shark()
 	var starter: int = s.equipment.keys()[0]
 	var other: int = Fixtures.add_equipment(s, {"bought_week": 2, "value": 1500})
+	var owner_id: int = s.staff_of(s.player_company_id)[0]
+	var pid: int = Fixtures.add_project(s)
+	s.staff[owner_id].assigned_project_id = pid
+	s.equipment[starter].seat_index = s.staff[owner_id].seat_index
+	assert_eq(GameRules.working_staff(s, pid).size(), 1)
 	var p: Company = s.companies[1]
 	p.money = -500
 	p.reputation = 10
@@ -42,11 +47,26 @@ func test_repossession_takes_oldest_until_covered() -> void:
 	var ctx := _tick()
 	assert_false(s.equipment.has(starter))
 	assert_true(s.equipment.has(other))
+	assert_eq(GameRules.working_staff(s, pid).size(), 0)
+	assert_true(GameState.validate_dict(s.to_dict()))
 	assert_eq(s.loans[id].balance, 958)
 	assert_eq(s.loans[id].missed_payments, 1)
 	assert_eq(p.reputation, 5)
 	assert_eq(s.staff[staff_id].morale, 60)
 	assert_eq(_count(ctx, &"repossessed"), 1)
+
+
+func test_repossession_order_is_bought_week_then_id() -> void:
+	_shark()
+	var starter: int = s.equipment.keys()[0]
+	s.equipment[starter].value = 1
+	var late: int = Fixtures.add_equipment(s, {"bought_week": 3, "value": 1500})
+	var early: int = Fixtures.add_equipment(s, {"bought_week": 2, "value": 1500})
+	s.companies[1].money = -500
+	_tick()
+	assert_false(s.equipment.has(starter))
+	assert_false(s.equipment.has(early))
+	assert_true(s.equipment.has(late))
 
 
 func test_leased_never_repossessed() -> void:
@@ -59,6 +79,15 @@ func test_leased_never_repossessed() -> void:
 	assert_eq(s.equipment.size(), 1)
 	assert_eq(_count(ctx, &"repossessed"), 0)
 	assert_eq(s.companies[1].reputation, 5)
+
+
+func test_missed_bank_payment_does_not_repossess() -> void:
+	var id: int = Fixtures.add_loan(s, {})
+	s.companies[1].money = -500
+	var ctx := _tick()
+	assert_eq(s.loans[id].missed_payments, 1)
+	assert_eq(s.equipment.size(), 1)
+	assert_eq(_count(ctx, &"repossessed"), 0)
 
 
 func test_seizure_after_three_misses() -> void:

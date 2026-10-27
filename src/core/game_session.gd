@@ -25,7 +25,7 @@ func set_speed(s: int) -> void:
 	if not VALID_SPEEDS.has(s):
 		push_warning("GameSession: invalid speed %d" % s)
 		return
-	speed = s
+	speed = 0 if state.game_over else s
 	auto_paused_speed = 0
 
 
