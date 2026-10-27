@@ -463,3 +463,160 @@ static func pending_ask(state: GameState, staff_id: int) -> Dictionary:
 		"promotion": d.kind == &"promotion_request",
 		"deadline_week": d.deadline_week,
 	}
+
+
+# --- M2bc money views ---
+
+
+## Game-over popup view. credit_left = sum of MoneyRules.available_credit over every BANK and LENDER company (sorted ids).
+static func game_over_view(state: GameState, t: TuningDef) -> Dictionary:
+	var company: Company = _player_company(state)
+	if company == null:
+		return {
+			"over": state.game_over,
+			"months_negative": 0,
+			"money": 0,
+			"credit_left": 0,
+			"games_released": 0,
+		}
+	var credit_left: int = 0
+	for cid: int in state.sorted_ids(state.companies):
+		var kind: Company.Kind = state.companies[cid].kind
+		if kind == Company.Kind.BANK or kind == Company.Kind.LENDER:
+			credit_left += MoneyRules.available_credit(state, state.player_company_id, cid, t)
+	return {
+		"over": state.game_over,
+		"months_negative": company.months_negative,
+		"money": company.money,
+		"credit_left": credit_left,
+		"games_released": past_games(state).size(),
+	}
+
+
+## One row per BANK or LENDER company, in state.sorted_ids(state.companies) order.
+static func lender_rows(state: GameState, content: ContentDB, t: TuningDef) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not state.companies.has(state.player_company_id):
+		return out
+	var player: int = state.player_company_id
+	for cid: int in state.sorted_ids(state.companies):
+		var company: Company = state.companies[cid]
+		if company.kind != Company.Kind.BANK and company.kind != Company.Kind.LENDER:
+			continue
+		var is_shark: bool = company.kind == Company.Kind.LENDER
+		out.append({
+			"id": cid,
+			"name": company.name,
+			"is_shark": is_shark,
+			"limit": MoneyRules.credit_limit(state, player, cid, t),
+			"available": MoneyRules.available_credit(state, player, cid, t),
+			"rate_bp": MoneyRules.loan_rate_bp(state, content, cid, t),
+			"refuses": (not is_shark) and MoneyRules.bank_refuses(state, player, t),
+		})
+	return out
+
+
+## The player's loans, sorted by id.
+static func loan_rows(state: GameState) -> Array[Dictionary]:
+	var player: int = state.player_company_id
+	var out: Array[Dictionary] = []
+	for lid: int in state.sorted_ids(state.loans):
+		var l: Loan = state.loans[lid]
+		if l.company_id != player:
+			continue
+		var lender: Company = null
+		if state.companies.has(l.lender_id):
+			lender = state.companies[l.lender_id]
+		out.append({
+			"id": lid,
+			"lender_id": l.lender_id,
+			"lender_name": lender.name if lender != null else "",
+			"is_shark": lender != null and lender.kind == Company.Kind.LENDER,
+			"principal": l.principal,
+			"balance": l.balance,
+			"rate_bp": l.rate_bp_per_month,
+			"payment": l.payment_per_month,
+			"missed": l.missed_payments,
+			"taken_week": l.taken_week,
+		})
+	return out
+
+
+## Open CONTRACT_WORK offers: party_a == player, project_id == -1, state.week < delivery_week and state.week < deadline_week.
+static func contract_offers(state: GameState) -> Array[Dictionary]:
+	var player: int = state.player_company_id
+	var out: Array[Dictionary] = []
+	for cid: int in state.sorted_ids(state.contracts):
+		var c: Contract = state.contracts[cid]
+		if c.kind != Contract.Kind.CONTRACT_WORK:
+			continue
+		if c.party_a != player or c.project_id != -1:
+			continue
+		if state.week >= c.delivery_week or state.week >= c.deadline_week:
+			continue
+		var publisher: Company = null
+		if state.companies.has(c.party_b):
+			publisher = state.companies[c.party_b]
+		out.append({
+			"id": cid,
+			"publisher_name": publisher.name if publisher != null else "",
+			"pay": c.price,
+			"targets": c.target_points.duplicate(),
+			"deadline_week": c.deadline_week,
+			"expires_week": c.delivery_week,
+		})
+	return out
+
+
+## Running contract jobs: player projects with kind CONTRACT_WORK and phase PRODUCTION, sorted by id.
+static func contract_jobs(state: GameState) -> Array[Dictionary]:
+	var player: int = state.player_company_id
+	var out: Array[Dictionary] = []
+	for pid: int in state.sorted_ids(state.projects):
+		var p: Project = state.projects[pid]
+		if p.company_id != player or p.kind != Project.Kind.CONTRACT_WORK:
+			continue
+		if p.phase != Project.Phase.PRODUCTION:
+			continue
+		var contract: Contract = null
+		if state.contracts.has(p.contract_id):
+			contract = state.contracts[p.contract_id]
+		out.append({
+			"project_id": pid,
+			"contract_id": p.contract_id,
+			"points": p.points.duplicate(),
+			"targets": contract.target_points.duplicate() if contract != null else {},
+			"deadline_week": p.deadline_week,
+			"pay": contract.price if contract != null else 0,
+		})
+	return out
+
+
+## One row per office in GameState.sorted_names(content.offices) (Ruling Q18 for monthly_total).
+static func office_rows(state: GameState, content: ContentDB) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not state.companies.has(state.player_company_id):
+		return out
+	var player: int = state.player_company_id
+	var player_office: StringName = player_office_id(state)
+	var cur: int = int(MoneyRules.monthly_costs(state, content, player)["total"])
+	var current_rent: int = 0
+	var current_electricity: int = 0
+	if content.offices.has(player_office):
+		current_rent = content.offices[player_office].rent_per_month
+		current_electricity = content.offices[player_office].electricity_base
+	for oid: StringName in GameState.sorted_names(content.offices):
+		var def: OfficeDef = content.offices[oid]
+		var is_current: bool = oid == player_office
+		var monthly_total: int = cur if is_current else cur - current_rent - current_electricity + def.rent_per_month + def.electricity_base
+		out.append({
+			"id": oid,
+			"name_key": def.name_key,
+			"seats": def.seats,
+			"rent": def.rent_per_month,
+			"electricity_base": def.electricity_base,
+			"moving_cost": def.moving_cost,
+			"current": is_current,
+			"monthly_total": monthly_total,
+		})
+	return out
