@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PerkDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/perk_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"perk_composer"
+name_key = &"content.perk.composer.name"
+path = &"DEV"
+max_rank = 3
+effects_bp_per_rank = Dictionary[StringName, int]({&"skill_audio": 500})

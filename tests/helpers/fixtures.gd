@@ -78,6 +78,41 @@ static func add_worker(state: GameState, overrides: Dictionary = {}) -> int:
 	return id
 
 
+static func company_of_kind(state: GameState, kind: Company.Kind) -> int:
+	for cid: int in state.sorted_ids(state.companies):
+		if state.companies[cid].kind == kind:
+			return cid
+	return -1
+
+
+static func add_loan(state: GameState, overrides: Dictionary = {}) -> int:
+	var l := Loan.new()
+	l.id = state.alloc_id()
+	l.company_id = state.player_company_id
+	l.lender_id = company_of_kind(state, Company.Kind.BANK)
+	l.principal = 5000
+	l.balance = 5000
+	l.rate_bp_per_month = 100
+	l.payment_per_month = 209
+	l.taken_week = state.week
+	for k: Variant in overrides:
+		_apply(l, String(k), overrides[k])
+	state.loans[l.id] = l
+	return l.id
+
+
+static func add_contract(state: GameState, overrides: Dictionary = {}) -> int:
+	var c := Contract.new()
+	c.id = state.alloc_id()
+	c.kind = Contract.Kind.CONTRACT_WORK
+	c.party_a = state.player_company_id
+	c.party_b = company_of_kind(state, Company.Kind.AI_PUBLISHER)
+	for k: Variant in overrides:
+		_apply(c, String(k), overrides[k])
+	state.contracts[c.id] = c
+	return c.id
+
+
 static func add_project(state: GameState, overrides: Dictionary = {}) -> int:
 	var p := Project.new()
 	p.id = state.alloc_id()
@@ -154,6 +189,7 @@ static func _fixture_defs() -> Array[Resource]:
 		_office(&"office_small", 5, 400, 40, 1500, [] as Array[Vector2i]),
 		_equip(&"equipment_micro_1980", 1, 1500, 60, 10, 10000, 10000, 1985),
 		_equip(&"equipment_fx_fast", 2, 3000, 0, 0, 15000, 5000, 1990),
+		_equip_from(&"equipment_fx_future", 3, 5000, 200, 20, 20000, 7000, 1995, 1990),
 		_level(&"level_junior", 0, 0, 0, 10000, 10000),
 		_level(&"level_mid", 1, 40, 2000, 13000, 11500),
 		_level(&"level_senior", 2, 60, 6000, 17000, 13000),
@@ -173,6 +209,13 @@ static func _fixture_defs() -> Array[Resource]:
 		_research(&"research_fx_medium", 100, [] as Array[StringName], [&"size_medium"] as Array[StringName]),
 		_lic_engine(&"lic_engine_homebrew", 1975, 1999, 0, 0, 40, [&"feature_fx_save"] as Array[StringName]),
 		_lic_engine(&"lic_engine_fx_pro", 1980, 1989, 5000, 1000, 60, [&"feature_fx_save", &"feature_fx_scroll"] as Array[StringName]),
+		_perk(&"perk_coder", &"DEV", {&"skill_tech": 500}),
+		_perk(&"perk_engine_architect", &"DEV", {&"engine_speed_bp": 1500}),
+		_perk(&"perk_crunch_veteran", &"DEV", {&"owner_burnout_bp": -2500}),
+		_perk(&"perk_negotiator", &"BUSINESS", {&"contract_pay_bp": 1000, &"publisher_share_bp": -500}),
+		_perk(&"perk_recruiter", &"BUSINESS", {&"candidate_skill_bp": 1000, &"asking_salary_bp": -500}),
+		_perk(&"perk_accountant", &"BUSINESS", {&"loan_rate_bp": -1500}),
+		_perk(&"perk_leader", &"BUSINESS", {&"chemistry_bp": 500, &"morale_baseline_bp": 500}),
 		_outlet(&"outlet_fx_a", _all_dims(1000), 0),
 		_outlet(&"outlet_fx_b", {&"gameplay": 3000, &"tech": 1000, &"graphics": 1000, &"bugs": 1000}, 2),
 		_outlet(&"outlet_fx_c", {&"graphics": 3000, &"audio": 2000, &"story": 1000}, -2),
@@ -223,6 +266,22 @@ static func _equip(id: StringName, tier: int, price: int, lease: int, power: int
 	d.speed_bp = speed
 	d.bug_bp = bug
 	d.recommended_until_year = until
+	return d
+
+
+static func _equip_from(id: StringName, tier: int, price: int, lease: int, power: int, speed: int, bug: int, until: int, from: int) -> EquipmentDef:
+	var d := _equip(id, tier, price, lease, power, speed, bug, until)
+	d.year_from = from
+	return d
+
+
+static func _perk(id: StringName, path: StringName, effects: Dictionary) -> PerkDef:
+	var d := PerkDef.new()
+	d.id = id
+	d.name_key = StringName("fx.%s" % id)
+	d.path = path
+	d.max_rank = 3
+	d.effects_bp_per_rank.assign(effects)
 	return d
 
 

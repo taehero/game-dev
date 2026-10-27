@@ -75,7 +75,7 @@ Every tuning number named in this spec (UPPER_SNAKE names such as `WAGE_PER_SKIL
 
 ### 4.2 Company additions
 
-`office_id: StringName` (content `OfficeDef`), `research_points: int`, `unlocked: Array[StringName]` (research ids done), `dev_kits: Array[StringName]` (platform ids), `months_negative: int`, `awards: Array[StringName]`.
+`office_id: StringName` (content `OfficeDef`), `research_points: int`, `unlocked: Array[StringName]` (research ids done), `dev_kits: Array[StringName]` (platform ids), `months_negative: int`, `awards: Array[StringName]`, `last_missed_week: int = -1` (the bank's 12-month memory of a missed payment; it outlives a repaid loan).
 
 New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing studio). The game creates one bank, one lender, two vendors and three AI publishers at new game.
 
@@ -84,7 +84,7 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 - `exp: Dictionary[StringName, int]` (same keys as `skills`); every 100 exp in a skill raises it by 1 (cap 100).
 - `seat_index: int` (-1 = none); a staff member without a seat produces 0 points. Seats are derived: a seat is taken when a staff member of that company has that `seat_index`, and the seat count comes from `OfficeDef.seats`.
 - A **worker** is a staff member who is seated, has equipment at the same seat index, and is assigned to the project. Only workers produce.
-- `last_raise_week: int`, `asking_raise: int` (0 = none pending).
+- `last_raise_week: int` (set at hire and on every answer), `asking_raise: int` (the salary asked for; 0 = none pending), `raise_refusals: int = 0` ("refused twice").
 - `hired_week: int`, set by hiring. M2b uses it for the hire anniversary.
 - `week_points: Dictionary[StringName, int]`: the points this staff member produced in the most recent Production step. Production clears it at the start of every tick, so Staff, Owner and Research (steps 5–7) read the previous tick's work.
 - `is_owner: bool`. The owner is a Staff with `is_owner = true`: sits at a desk, produces points, cannot be fired, never resigns.
@@ -116,14 +116,14 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 
 ### 4.6 Contract changes
 
-`Contract.Kind` adds `OUTSOURCE` (we pay a vendor), `CONTRACT_WORK` (a publisher pays us), `ENGINE_LICENSE` (we pay a licensor). New typed fields: `price: int`, `royalty_bp: int`, `target_points: Dictionary[StringName, int]` (target per point type), `quality_roll: int` (0–100, fixed at signing from rng, hidden), `delivery_week: int`, `project_id: int` (-1 = none), `deliverable: StringName` (e.g. `art`, `audio`, `engine`). For `ENGINE_LICENSE`, `deliverable` holds the `LicensedEngineDef` id.
+`Contract.Kind` adds `OUTSOURCE` (we pay a vendor), `CONTRACT_WORK` (a publisher pays us), `ENGINE_LICENSE` (we pay a licensor). New typed fields: `price: int`, `royalty_bp: int`, `target_points: Dictionary[StringName, int]` (target per point type), `quality_roll: int` (0–100, fixed at signing from rng, hidden), `delivery_week: int`, `project_id: int` (-1 = none), `deliverable: StringName` (e.g. `art`, `audio`, `engine`), `features: Array[StringName]` (an outsourced engine's features). For `ENGINE_LICENSE`, `deliverable` holds the `LicensedEngineDef` id.
 
 ### 4.7 New content resources
 
 | Class | Key fields |
 |---|---|
 | `OfficeDef` | id, name_key, seats, rent_per_month, electricity_base, moving_cost, `scene_path`, `desk_positions` (Array of Vector2i). `scene_path` and `desk_positions` of `office_garage` and `office_small` are owned by the M2d room layouts. |
-| `EquipmentDef` | id, era tier, price, lease_per_month, power_per_month, speed_bp, bug_bp, recommended_until_year |
+| `EquipmentDef` | id, era tier, price, lease_per_month, power_per_month, speed_bp, bug_bp, recommended_until_year, `year_from: int = 0` (availability; 0 = always) |
 | `EngineFeatureDef` | id, research id required, tech_cap_add, dev_weeks |
 | `LicensedEngineDef` | id, year_from, year_to, fee, royalty_bp, tech_cap, features |
 | `ResearchDef` | id, cost_rp, prerequisites, unlocks (topic, genre, feature, size, channel ids) |
@@ -228,13 +228,17 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 - Gains xp from points produced and from releases; every `OWNER_XP_PER_POINT` xp gives one skill point.
 - **Dev path** perks (rank 1–3 each): Coder, Designer, Artist, Composer (skill +), Engine Architect (engine dev weeks −), Crunch Veteran (owner burnout −).
 - **Business path** perks: Negotiator (contract pay +, publisher share −), Recruiter (candidate skill +, asking salary −), Promoter (hype gain +), Accountant (loan rate −), Leader (team morale and chemistry +).
-- **Focus slider** (`focus_dev_bp`): the owner's point output × focus; Business perk effects × (10000 − focus). With more than `OWNER_SOLO_LIMIT` staff and focus above 7000, team morale drops by `OWNER_NEGLECT_MORALE` per month.
+- Perk effects are bp per rank (ids in `PeopleRules.EFFECTS`). Dev `skill_<type>` raises the owner's skill once, on purchase, by the 0–100 rule; dev effects are unscaled. Engine Architect speeds ENGINE stage progress. Negotiator's `publisher_share_bp` is unused: M2 has no publisher-deal command. Accountant lowers the loan rate for bank and shark loans: `base × (ONE_BP + effect)`, min 0, base set per lender kind.
+- **Focus slider** (`focus_dev_bp`): the owner's point output × focus; Business perk effects × (10000 − focus); owner point output × `focus_dev_bp`. With more than `OWNER_SOLO_LIMIT` staff and focus above 7000, team morale drops by `OWNER_NEGLECT_MORALE` per month.
 
 ### 7.2 Staff economy
 
-- Market salary = `era_wage_base + sum(skills) × WAGE_PER_SKILL_POINT`.
-- Each year on their hire anniversary, staff paid below 90% of market salary ask for a raise to market. Accept: salary rises. Refuse: morale −15; refused twice → resignation chance doubles.
+- `exp` is cumulative (LevelDef thresholds reach 12000). A skill gains 1 per multiple of 100 its exp crosses, up to 100; levels compare Σexp. Owner `xp` works the same way: 1 skill point per multiple of `owner_xp_per_point` crossed.
+- Market salary = `mul_bp(era_wage_base + Σskills × wage_per_skill_point, LevelDef.salary_bp)`. There is no EraDef, so `era_wage_base` is tuning.
+- **Raise ask:** on a hire anniversary (`week > hired_week` and `(week − hired_week) % weeks_per_year == 0`) when salary < `mul_bp(market, raise_threshold_bp)`. **Promotion ask:** when `promotion_eligible` and `week − last_raise_week >= promotion_ask_cooldown_weeks`; it takes precedence. Both ask for the market salary at the target level. The owner never asks and self-promotes when eligible.
+- An ask is a `Decision` (kind `&"raise_request"` or `&"promotion_request"`, `related_ids [staff_id]`, `deadline_week = week + raise_answer_weeks`, `option_keys [&"ui.decision.accept", &"ui.decision.refuse"]`), so it auto-pauses. One ask per staff at a time. When the deadline passes, the ask counts as refused. `AnswerRaise` answers both kinds. Accept: salary rises. Refuse: morale −15 (−10 for a promotion); refused twice → resignation chance doubles.
 - The M1 `max_staff_default` limit is removed from `TuningDef`. Hiring is limited by free seats: `HireStaffCommand` (and `HireCandidate`) require a free seat in the current office and fail with `error.no_free_seat`.
+  - **Open follow-up (M2d):** the team panel still hires through the older `HireStaffCommand` (hire-by-name). M2b's `HireCandidateCommand` and the monthly candidate pool have no panel UI yet.
 - Hiring pool: on each month start, `CANDIDATES_PER_MONTH` candidates appear with skills drawn by era, asking salary = market ± `randi_range(-10, 15)`%; each expires after 8 weeks. Hiring needs a free seat.
 - Firing pays `SEVERANCE_MONTHS` of salary and lowers everyone's morale by 5.
 
@@ -242,8 +246,9 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 
 - `Staff.level: {JUNIOR, MID, SENIOR, LEAD}` (new field). Level sets the salary multiplier (`LEVEL_SALARY_BP`), output multiplier (`LEVEL_OUTPUT_BP`) and the chemistry effect of leading others.
 - A staff member becomes eligible for promotion when their best skill and total exp pass the next level's thresholds (`LevelDef` content). Eligible staff ask for a promotion; the player accepts (salary rises to the new level's market rate) or refuses (morale −10, raise-demand rules apply).
-- `LEAD` replaces the M1 `Role.LEAD_*` meaning: only a `LEAD` can take a lead role on a project; a project without a lead in a discipline gets that discipline's bug penalty.
-- Candidates in the hiring pool come with a level; seniors ask more.
+- Chemistry = `ONE_BP` + `lead_chemistry_bp` if another worker on the project is LEAD level + Leader `chemistry_bp` (non-owner only). Good chemistry lowers bugs: the bug factor is `maxi(0, 2 × ONE_BP − chem)`.
+- **Deferred to M3 (no role command):** `LEAD` replacing the M1 `Role.LEAD_*` meaning (only a `LEAD` can take a lead role; a project without a lead in a discipline gets that discipline's bug penalty).
+- Candidates in the hiring pool come with a level; seniors ask more. M2b candidates have no traits (no TraitDef in M2). Candidate names are `tr()` keys `staff_name.01`–`.24`.
 - **Managers and C-level (CTO, Creative Director, CFO, CMO, COO) are M3**, because they need offices bigger than the 1980s allow. M2 only reserves the enum values `MANAGER` and `EXECUTIVE` and the `Staff.title: StringName` field so M3 adds them without a schema change.
 
 ### 7.3 Seats and equipment
@@ -251,29 +256,34 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 - Seats come from the office (`OfficeDef.seats`). The 1980s offices: Garage (2 seats, no rent, electricity only) and Small Office (5 seats, rent). Moving office is a command with a one-time moving cost.
 - A seat needs an `Equipment` to produce points. Buy (price now, resale value depreciates `DEPRECIATION_BP_PER_MONTH`) or lease (monthly fee, upgraded free when a newer tier exists).
 - Equipment older than its `recommended_until_year` applies `OUTDATED_SPEED_BP` and `OUTDATED_BUG_BP` penalties.
+- Buy and Lease need a seat in `0..seats−1` with no equipment (no storage placement). `MoveOffice` is refused (`error.office_too_small`) if any company staff or equipment sits at a seat ≥ the new office's seats; it emits `equipment_changed {company_id, office_id}`.
 - Dev kits: buy once per platform (`dev_kit_cost`).
 - Electricity per month = office base + sum of `power_per_month` of seated equipment.
 
 ### 7.4 Engines from others
 
-- **Licence:** sign an `ENGINE_LICENSE` contract: `price` now, `royalty_bp` of every sale of games built on it.
+- **Licence:** sign an `ENGINE_LICENSE` contract: `price` now, `royalty_bp` of every sale of games built on it. `party_a` is the player in every M2b contract; the licence `party_b` is the lowest-id VENDOR, and signing is refused with `error.company_not_found` if no vendor exists. M2b changes no AI company's money.
 - **Outsource build:** sign an `OUTSOURCE` contract with deliverable `engine` and a feature list; price scales with features; delivered on `delivery_week` (late by up to 4 weeks on a bad roll); `quality_roll` below 40 gives a `tech_cap` penalty.
 
 ### 7.5 Outsourcing parts of a game
 
-`OUTSOURCE` contract with deliverable `art` or `audio` for a project: adds points of that type over the remaining weeks according to `quality_roll`; costs `price`.
+`OUTSOURCE` contract with deliverable `art` or `audio` for a project: adds points of that type over the remaining weeks according to `quality_roll`; costs `price`. The part stores the *remaining* points in `target_points[deliverable]`; each week it adds `ceil(remaining / max(1, delivery_week − week))` while the project is in PRODUCTION or POLISH. Anything left at release is lost. An outsourced engine is named by the `tr()` key `ui.engine.outsourced_name`.
 
 ### 7.6 Contract work
 
-Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadline, pay. The player assigns staff to a `kind = CONTRACT_WORK` project. Meeting the target by the deadline pays in full; missing it pays 50% and costs reputation. Owner Negotiator perk raises pay.
+Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadline, pay. The player assigns staff to a `kind = CONTRACT_WORK` project. Meeting the target by the deadline pays in full; missing it pays 50% and costs reputation. Owner Negotiator perk raises pay when the offer is made.
+
+- Offers are CONTRACT_WORK contracts with `project_id == -1`; `delivery_week` is the offer expiry, `deadline_week` the absolute work deadline. Targets cover all four types. `AcceptContractWork` creates the project (name key `ui.contract_work.title`) and assigns every free worker.
+- Production splits each worker's output evenly over the target types: no bugs, no RNG, no stage progress; the project stays at stage 0 in PRODUCTION until settled. A settled job keeps its contract; the project is RETIRED with `revenue` = amount paid.
+- `StateQueries.active_project_id` returns a CONTRACT_WORK project in PRODUCTION; M2d panels present it.
 
 ### 7.7 Loans and bankruptcy
 
 - **Bank:** limit = `BANK_LIMIT_BASE + reputation × BANK_LIMIT_PER_REP`; rate `BANK_RATE_BP_PER_MONTH`; refuses new loans when the player has missed any payment in the last 12 months.
 - **Loan shark (fictional lender):** always lends up to `SHARK_LIMIT`; rate `SHARK_RATE_BP_PER_MONTH` (several times the bank's). A missed payment triggers repossession: the lender takes owned equipment (oldest first) until its value covers 150% of the missed payment, reputation −5, all staff morale −10. Three missed payments in a row: the lender also takes `SHARK_SEIZE_BP` of current cash each month until repaid.
-- Payments are taken on the first week of each month. Money below 0 counts as a missed payment for every loan due.
+- `payment_per_month = ceil(principal / loan_term_months)`. Each month start: `interest = mul_bp(balance, rate)`, `balance += interest`, `due = min(balance, payment_per_month + interest)`. If player money is below 0 after operating costs, every loan due is missed: nothing is paid, `missed_payments += 1`, `last_missed_week = week`. Otherwise every loan is paid, even into the negative. A payment resets `missed_payments` to 0 unless it has already reached `shark_seize_after_missed`; then it sticks until repaid. Repossessed equipment covers the missed `due`.
 - **Survival actions:** sell equipment (at current `value`), lay off staff, take contract work.
-- **Bankruptcy:** money below 0 at three consecutive month starts with no unused bank or shark credit → `game_over = true`, event `game_over`, game stops ticking.
+- **Bankruptcy:** money below 0 at three consecutive month starts with no unused bank or shark credit → `game_over = true`, event `game_over`. It is checked after all month-start charges. Game over stops `GameSession`: no ticks, `speed = 0`, every command rejected with `error.game_over`.
 
 ## 8. After launch (M2c)
 
@@ -345,7 +355,7 @@ Three small interactive moments, each a popup that pauses the game. All outcomes
 
 ## 12. Save compatibility
 
-`schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new runtime int id field. Content-id references are not checked by the validator (it stays content-free). `ContentDB.missing_refs(state)` checks them at load time: company office, research, awards and dev kits; equipment defs; project size, platform, genre, topic, engine, feature and outlet ids; contract `locked_genre`, `locked_platform` and the `ENGINE_LICENSE` deliverable; owner perk keys; engine features. `GameRunner.load_game` refuses a save with missing refs using `error.save_content_missing` and leaves the current game untouched.
+`schema_version` stays 1 until the first public build (M1 rule). M2 adds fields freely. The validator (`StateValidator`) is extended in the same task that adds each field, including reference checks for every new runtime int id field. Content-id references are not checked by the validator (it stays content-free). `ContentDB.missing_refs(state)` checks them at load time: company office, research, awards and dev kits; equipment defs; project size, platform, genre, topic, engine, feature and outlet ids; contract `locked_genre`, `locked_platform`, the `ENGINE_LICENSE` deliverable, and `contract: unknown feature` for each `Contract.features` entry; owner perk keys; engine features. `GameRunner.load_game` refuses a save with missing refs using `error.save_content_missing` and leaves the current game untouched.
 
 The M2d-panels plan adds two checks to `ContentDB.missing_refs` (P8, P9): `project %d: unknown event %s` for each `Project.event_ids` entry not in `production_events`, and `decision %d: unknown event %s` for a pending decision whose `kind` begins with `pevent_` and is not in `production_events`. Other decision kinds are not checked.
 
@@ -353,6 +363,7 @@ The M2d-panels plan adds two checks to `ContentDB.missing_refs` (P8, P9): `proje
 
 - Unit tests per system and command, as in M1.
 - **M2 acceptance scenario** (`tests/scenario/test_m2_playthrough.gd`): a scripted headless run from 1980 that hires one staff member, buys equipment, researches one feature, builds an engine, makes and releases two games, receives four reviews with reason keys, sells for at least 20 weeks, takes and repays a bank loan, completes one contract job, and ends with valid state; plus the M1 determinism properties (same seed same hash; save/load/continue at five points) over this richer script.
+- The combined M2b+M2c playthrough above is written by whichever of M2b and M2c merges last.
 - Rule tests: entity removal only in `removal.gd`; every new `.gd` under `src/core` and `src/systems` keeps the M1 bans.
 - **Manual Mac checklist (M2d):** scene renders at 4× without blur; Thai text renders; bubbles appear while developing; each tab opens; concept wizard creates a game; review popup shows four outlets; sales graph draws.
 

@@ -39,3 +39,15 @@ func test_m2d_tuning_values() -> void:
 	assert_eq(t.bug_hunt_max_bugs, 10)
 	assert_eq(t.bug_hunt_seconds, 15.0)
 	assert_eq(t.hire_offer_salary, 800)
+
+
+func test_m2b_tuning_values() -> void:
+	var t: TuningDef = TuningDef.load_default()
+	assert_eq(t.wage_per_skill_point, 6)
+	assert_eq(t.candidates_per_month, 3)
+	assert_eq(t.candidate_level_weights.size(), 4)
+	assert_eq(t.candidate_level_skill_bonus.size(), 4)
+	assert_eq(t.owner_xp_per_point, 3000)
+	assert_eq(t.bank_rate_bp_per_month, 100)
+	assert_eq(t.shark_rate_bp_per_month, 800)
+	assert_eq(t.bankrupt_months, 3)

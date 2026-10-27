@@ -65,7 +65,7 @@ static func validate(d: Variant) -> bool:
 	if not _entities(s["engines"], GameEngine.SCHEMA, used, engine_ids, _engine_ok):
 		return false
 	var loan_ids: Dictionary[int, bool] = {}
-	if not _entities(s["loans"], Loan.SCHEMA, used, loan_ids, _always):
+	if not _entities(s["loans"], Loan.SCHEMA, used, loan_ids, _loan_ok):
 		return false
 	if not _list(s["candidates"], Candidate.SCHEMA, used, true, _candidate_ok):
 		return false
@@ -272,7 +272,8 @@ static func _company_ok(e: Dictionary) -> bool:
 		return false
 	if not (_strings_ok(e["unlocked"]) and _strings_ok(e["dev_kits"]) and _strings_ok(e["awards"])):
 		return false
-	return int(e["research_points"]) >= 0 and int(e["months_negative"]) >= 0
+	return (int(e["research_points"]) >= 0 and int(e["months_negative"]) >= 0
+		and int(e["last_missed_week"]) >= -1)
 
 
 static func _contract_ok(e: Dictionary) -> bool:
@@ -281,7 +282,7 @@ static func _contract_ok(e: Dictionary) -> bool:
 	if not _skill_map_ok(e["target_points"], MIN_TARGET_POINTS):
 		return false
 	var q: int = int(e["quality_roll"])
-	return q >= 0 and q <= 100
+	return q >= 0 and q <= 100 and _strings_ok(e["features"])
 
 
 static func _staff_ok(e: Dictionary) -> bool:
@@ -291,7 +292,7 @@ static func _staff_ok(e: Dictionary) -> bool:
 		return false
 	if not (_skill_map_ok(e["exp"], 0) and _skill_map_ok(e["week_points"], 0)):
 		return false
-	if int(e["seat_index"]) < -1:
+	if int(e["seat_index"]) < -1 or int(e["raise_refusals"]) < 0:
 		return false
 	var skills: Dictionary = e["skills"]
 	if not _whole_values(skills) or skills.size() != GameRules.SKILL_ORDER.size():
@@ -358,7 +359,15 @@ static func _project_ok(e: Dictionary) -> bool:
 
 
 static func _equipment_ok(e: Dictionary) -> bool:
-	return _enum_ok(Equipment.Ownership.keys(), e["ownership"]) and int(e["seat_index"]) >= -1
+	return (_enum_ok(Equipment.Ownership.keys(), e["ownership"]) and int(e["seat_index"]) >= -1
+		and int(e["value"]) >= 0)
+
+
+static func _loan_ok(e: Dictionary) -> bool:
+	for key: String in ["principal", "balance", "rate_bp_per_month", "payment_per_month", "missed_payments"]:
+		if int(e[key]) < 0:
+			return false
+	return true
 
 
 static func _engine_ok(e: Dictionary) -> bool:

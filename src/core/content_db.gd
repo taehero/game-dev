@@ -204,6 +204,9 @@ func missing_refs(state: GameState) -> Array[String]:
 			out.append("contract %d: unknown platform %s" % [kid, ct.locked_platform])
 		if ct.kind == Contract.Kind.ENGINE_LICENSE and not licensed_engines.has(ct.deliverable):
 			out.append("contract %d: unknown engine %s" % [kid, ct.deliverable])
+		for f: StringName in ct.features:
+			if not engine_features.has(f):
+				out.append("contract %d: unknown feature %s" % [kid, f])
 	for perk_id: StringName in GameState.sorted_names(state.owner.perks):
 		if not perks.has(perk_id):
 			out.append("owner: unknown perk %s" % perk_id)
@@ -227,6 +230,15 @@ func _check_seat(out: Array[String], state: GameState, what: String, id: int, co
 
 func validate() -> Array[String]:
 	var errs: Array[String] = []
+	for id: StringName in GameState.sorted_names(perks):
+		var pk: PerkDef = perks[id]
+		if pk.path != &"DEV" and pk.path != &"BUSINESS":
+			errs.append("%s: perk path %s is not DEV or BUSINESS" % [id, pk.path])
+		if pk.max_rank < 1:
+			errs.append("%s: perk max_rank %d < 1" % [id, pk.max_rank])
+		for e: StringName in GameState.sorted_names(pk.effects_bp_per_rank):
+			if not PeopleRules.EFFECTS.has(e):
+				errs.append("%s: unknown perk effect %s" % [id, e])
 	for id: StringName in GameState.sorted_names(research):
 		var r: ResearchDef = research[id]
 		for p: StringName in r.prerequisites:

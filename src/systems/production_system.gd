@@ -5,11 +5,6 @@ extends RefCounted
 ## exactly one roll per working staff per PRODUCTION week.
 
 
-## M2b hook for traits and leads.
-static func chemistry_bp(_state: GameState, _project_id: int, _staff_id: int) -> int:
-	return Fixed.ONE_BP
-
-
 @warning_ignore("integer_division")
 static func morale_bp(morale: int, t: TuningDef) -> int:
 	return t.morale_factor_min_bp + (t.morale_factor_max_bp - t.morale_factor_min_bp) * morale / 100
@@ -35,6 +30,10 @@ static func tick(ctx: TickContext) -> void:
 		state.staff[sid].week_points = {}
 	for pid: int in state.sorted_ids(state.projects):
 		var p: Project = state.projects[pid]
+		if p.kind == Project.Kind.CONTRACT_WORK:
+			if p.phase == Project.Phase.PRODUCTION:
+				_produce_contract(ctx, p)
+			continue
 		if p.kind != Project.Kind.GAME and p.kind != Project.Kind.ENGINE:
 			continue
 		if p.phase == Project.Phase.PRODUCTION:
@@ -62,12 +61,13 @@ static func _produce(ctx: TickContext, p: Project) -> void:
 	for sid: int in ws:
 		var st: Staff = state.staff[sid]
 		var eq: EquipmentDef = _equipment_def(ctx, st)
-		var speed_bp: int = eq.speed_bp if eq != null else Fixed.ONE_BP
-		var bug_eq_bp: int = eq.bug_bp if eq != null else Fixed.ONE_BP
+		var speed_bp: int = PeopleRules.equipment_speed_bp(eq, state.week, t)
+		var bug_eq_bp: int = PeopleRules.equipment_bug_bp(eq, state.week, t)
 		var lvl: LevelDef = ctx.content.level_def(int(st.level))
 		var output_bp: int = lvl.output_bp if lvl != null else Fixed.ONE_BP
 		var morale: int = morale_bp(st.morale, t)
-		var chem: int = chemistry_bp(state, p.id, sid)
+		var chem: int = PeopleRules.chemistry_bp(state, ctx.content, t, p.id, sid)
+		var owner_bp: int = PeopleRules.owner_point_bp(state, st)
 
 		var gained: Dictionary[StringName, int] = {}
 		var order: Array[StringName] = []
@@ -80,6 +80,7 @@ static func _produce(ctx: TickContext, p: Project) -> void:
 			amount = Fixed.mul_bp(amount, morale)
 			amount = Fixed.mul_bp(amount, output_bp)
 			amount = Fixed.mul_bp(amount, chem)
+			amount = Fixed.mul_bp(amount, owner_bp)
 			if amount <= 0:
 				continue
 			if not gained.has(type):
@@ -96,7 +97,7 @@ static func _produce(ctx: TickContext, p: Project) -> void:
 			b = Fixed.mul_bp(b, t.crunch_bug_bp)
 		b = Fixed.mul_bp(b, bug_eq_bp)
 		b = Fixed.mul_bp(b, age_bp)
-		b = Fixed.mul_bp(b, chem)
+		b = Fixed.mul_bp(b, maxi(0, 2 * Fixed.ONE_BP - chem))
 		@warning_ignore("integer_division")
 		var n: int = b / Fixed.ONE_BP
 		if Fixed.roll_bp(ctx.rng, b % Fixed.ONE_BP):
@@ -110,6 +111,7 @@ static func _produce(ctx: TickContext, p: Project) -> void:
 	var d: int = GameRules.stage_weeks(p, ctx.content, t) * GameRules.min_staff(p, ctx.content, t)
 	@warning_ignore("integer_division")
 	var inc: int = (Fixed.ONE_BP * working + d - 1) / d
+	inc = Fixed.mul_bp(inc, PeopleRules.progress_bp(state, ctx.content, p))
 	if p.crunch:
 		inc = Fixed.mul_bp(inc, t.crunch_speed_bp)
 	p.stage_progress += inc
@@ -124,6 +126,41 @@ static func _produce(ctx: TickContext, p: Project) -> void:
 		ctx.emit(&"project_phase_changed", {"project_id": p.id, "phase": "POLISH"})
 	else:
 		_finish_engine(ctx, p)
+
+
+## Ruling B10: no bugs, no RNG, no stage progress; stays in PRODUCTION until settled.
+static func _produce_contract(ctx: TickContext, p: Project) -> void:
+	var state: GameState = ctx.state
+	var t: TuningDef = ctx.tuning
+	if not state.contracts.has(p.contract_id):
+		return
+	var targets: Dictionary[StringName, int] = state.contracts[p.contract_id].target_points
+	var types: Array[StringName] = []
+	for type: StringName in GameRules.SKILL_ORDER:
+		if targets.get(type, 0) > 0:
+			types.append(type)
+	if types.is_empty():
+		return
+	for sid: int in GameRules.working_staff(state, p.id):
+		var st: Staff = state.staff[sid]
+		var eq: EquipmentDef = _equipment_def(ctx, st)
+		var lvl: LevelDef = ctx.content.level_def(int(st.level))
+		var output_bp: int = lvl.output_bp if lvl != null else Fixed.ONE_BP
+		var chem: int = PeopleRules.chemistry_bp(state, ctx.content, t, p.id, sid)
+		for type: StringName in types:
+			var amount: int = int(st.skills.get(type, 0)) * t.points_per_skill
+			@warning_ignore("integer_division")
+			amount = Fixed.mul_bp(amount, Fixed.ONE_BP / types.size())
+			amount = Fixed.mul_bp(amount, PeopleRules.equipment_speed_bp(eq, state.week, t))
+			amount = Fixed.mul_bp(amount, morale_bp(st.morale, t))
+			amount = Fixed.mul_bp(amount, output_bp)
+			amount = Fixed.mul_bp(amount, chem)
+			amount = Fixed.mul_bp(amount, PeopleRules.owner_point_bp(state, st))
+			if amount <= 0:
+				continue
+			_add_points(p, type, amount)
+			st.week_points[type] = int(st.week_points.get(type, 0)) + amount
+			ctx.emit(&"points_gained", {"staff_id": sid, "project_id": p.id, "type": type, "amount": amount})
 
 
 static func _finish_engine(ctx: TickContext, p: Project) -> void:

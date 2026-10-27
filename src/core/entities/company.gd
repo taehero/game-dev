@@ -16,6 +16,7 @@ const SCHEMA: Dictionary = {
 	"dev_kits": "array",
 	"months_negative": "int",
 	"awards": "array",
+	"last_missed_week": "int",
 }
 
 var id: int
@@ -30,6 +31,7 @@ var unlocked: Array[StringName] = []
 var dev_kits: Array[StringName] = []
 var months_negative: int = 0
 var awards: Array[StringName] = []
+var last_missed_week: int = -1  # last week a loan payment was missed; -1 = never
 
 
 
@@ -47,6 +49,7 @@ func to_dict() -> Dictionary:
 		"dev_kits": _names_out(dev_kits),
 		"months_negative": months_negative,
 		"awards": _names_out(awards),
+		"last_missed_week": last_missed_week,
 	}
 
 
@@ -67,6 +70,7 @@ static func from_dict(d: Dictionary) -> Company:
 	c.months_negative = int(d["months_negative"])
 	for a: Variant in d["awards"]:
 		c.awards.append(StringName(String(a)))
+	c.last_missed_week = int(d["last_missed_week"])
 	return c
 
 

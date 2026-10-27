@@ -24,6 +24,7 @@ const SCHEMA: Dictionary = {
 	"title": "string",
 	"hired_week": "int",
 	"week_points": "dict",
+	"raise_refusals": "int",
 }
 
 var id: int
@@ -45,6 +46,7 @@ var level: Level = Level.JUNIOR
 var title: StringName = &""
 var hired_week: int = 0
 var week_points: Dictionary[StringName, int] = {}  # points produced in the latest Production step
+var raise_refusals: int = 0  # raise asks refused so far
 
 
 ## Sets every skill (keys inserted sorted, Ruling 14) and seeds exp to 0 for each, like a loaded save.
@@ -83,6 +85,7 @@ func to_dict() -> Dictionary:
 		"title": String(title),
 		"hired_week": hired_week,
 		"week_points": _ints_out(week_points),
+		"raise_refusals": raise_refusals,
 	}
 
 
@@ -114,6 +117,7 @@ static func from_dict(d: Dictionary) -> Staff:
 	var wp: Dictionary = d["week_points"]
 	for k: StringName in GameState.sorted_names(wp):
 		s.week_points[k] = int(wp[String(k)])
+	s.raise_refusals = int(d["raise_refusals"])
 	return s
 
 

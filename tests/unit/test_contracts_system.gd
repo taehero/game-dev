@@ -1,0 +1,211 @@
+extends GutTest
+
+const TARGETS: Dictionary = {&"design": 100, &"tech": 100, &"art": 100, &"audio": 100}
+
+
+func _tick(s: GameState, week: int) -> TickContext:
+	s.week = week
+	var ctx := TickContext.new(s, Fixtures.tuning())
+	ContractsSystem.tick(ctx)
+	return ctx
+
+
+func _offered(s: GameState) -> Array[Contract]:
+	var out: Array[Contract] = []
+	for id: int in s.sorted_ids(s.contracts):
+		out.append(s.contracts[id])
+	return out
+
+
+func _sum(c: Contract) -> int:
+	var n: int = 0
+	for k: StringName in c.target_points:
+		n += c.target_points[k]
+	return n
+
+
+func _job(s: GameState, extra: Dictionary = {}) -> Array:
+	var o: Dictionary = {"deadline_week": 12, "delivery_week": 8, "price": 1000, "target_points": TARGETS}
+	o.merge(extra, true)
+	var cid: int = Fixtures.add_contract(s, o)
+	s.week = 4
+	var cmd := AcceptContractWorkCommand.new(cid)
+	assert_true(cmd.validate(s, Fixtures.tuning()).ok)
+	cmd.apply(TickContext.new(s, Fixtures.tuning()))
+	return [cid, s.contracts[cid].project_id]
+
+
+func test_month_start_offers() -> void:
+	var s := Fixtures.new_state(1)
+	var ctx := _tick(s, 4)
+	var offers := _offered(s)
+	assert_eq(offers.size(), 2)
+	for c: Contract in offers:
+		assert_eq(s.companies[c.party_b].kind, Company.Kind.AI_PUBLISHER)
+		for k: StringName in c.target_points:
+			assert_between(c.target_points[k], 150, 500)
+		assert_between(c.deadline_week, 4 + 6, 4 + 12)
+		assert_eq(c.delivery_week, 8)
+		assert_eq(c.price, _sum(c) * 3)
+		assert_eq(c.project_id, -1)
+	var n: int = 0
+	for e: Dictionary in ctx.events:
+		if e["name"] == &"contract_offered":
+			n += 1
+	assert_eq(n, 2)
+	_tick(s, 5)
+	assert_eq(s.contracts.size(), 2)
+
+
+func test_negotiator_raises_offer_price() -> void:
+	var s := Fixtures.new_state(1)
+	s.owner.perks[&"perk_negotiator"] = 1
+	s.owner.focus_dev_bp = 0
+	_tick(s, 4)
+	for c: Contract in _offered(s):
+		assert_eq(c.price, Fixed.mul_bp(_sum(c) * 3, 11000))
+
+
+func test_unaccepted_offer_expires() -> void:
+	var s := Fixtures.new_state(1)
+	_tick(s, 4)
+	_tick(s, 7)
+	assert_eq(s.contracts.size(), 2)
+	_tick(s, 8)  # week 8 is a month start, so two fresh offers replace them
+	for c: Contract in _offered(s):
+		assert_eq(c.delivery_week, 12)
+
+
+func test_met_target_pays_full() -> void:
+	var s := Fixtures.new_state(1)
+	var r := _job(s)
+	var p: Project = s.projects[r[1]]
+	for k: StringName in TARGETS:
+		p.points[k] = 100
+	var m: int = s.companies[s.player_company_id].money
+	var ctx := _tick(s, 6)
+	assert_eq(s.companies[s.player_company_id].money, m + 1000)
+	assert_eq(p.phase, Project.Phase.RETIRED)
+	assert_eq(p.revenue, 1000)
+	assert_eq(s.staff[s.owner_staff_id()].assigned_project_id, -1)
+	assert_true(s.contracts.has(r[0]))
+	var met: bool = false
+	for e: Dictionary in ctx.events:
+		if e["name"] == &"contract_completed":
+			met = e["payload"]["met"]
+	assert_true(met)
+	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func test_missed_deadline_pays_half() -> void:
+	var s := Fixtures.new_state(1)
+	var r := _job(s)
+	var company: Company = s.companies[s.player_company_id]
+	company.reputation = 10
+	var m: int = company.money
+	_tick(s, 11)
+	assert_eq(s.projects[r[1]].phase, Project.Phase.PRODUCTION)
+	_tick(s, 12)
+	assert_eq(company.money, m + 500)
+	assert_eq(company.reputation, 7)
+	assert_eq(s.projects[r[1]].revenue, 500)
+
+
+func test_partial_met_at_deadline_pays_half() -> void:
+	var s := Fixtures.new_state(1)
+	var r := _job(s)
+	var p: Project = s.projects[r[1]]
+	p.points = {&"design": 100, &"tech": 100, &"art": 100, &"audio": 99}
+	var m: int = s.companies[s.player_company_id].money
+	_tick(s, 12)
+	assert_eq(p.phase, Project.Phase.RETIRED)
+	assert_eq(s.companies[s.player_company_id].money, m + 500)
+
+
+func test_offer_targets_stored_in_sorted_order() -> void:
+	var s := Fixtures.new_state(1)
+	_tick(s, 4)
+	var c: Contract = _offered(s)[0]
+	assert_eq(c.target_points.keys(), GameState.sorted_names(c.target_points))
+
+
+func test_fired_worker_stalls_job_then_half_pay() -> void:
+	var s := Fixtures.new_state(1)
+	var w: int = Fixtures.add_worker(s)
+	var other := Fixtures.add_project(s)
+	s.staff[s.owner_staff_id()].assigned_project_id = other
+	var r := _job(s)
+	assert_eq(s.staff[w].assigned_project_id, r[1])
+	var cmd := FireStaffCommand.new(w)
+	cmd.apply(TickContext.new(s, Fixtures.tuning()))
+	var m: int = s.companies[s.player_company_id].money
+	s.companies[s.player_company_id].reputation = 10
+	var rep: int = 10
+	for wk: int in range(5, 12):
+		ProductionSystem.tick(TickContext.new(s, Fixtures.tuning()))
+		_tick(s, wk)
+	assert_eq(s.projects[r[1]].phase, Project.Phase.PRODUCTION)
+	_tick(s, 12)
+	assert_eq(s.projects[r[1]].phase, Project.Phase.RETIRED)
+	assert_eq(s.companies[s.player_company_id].money, m + 500)
+	assert_eq(s.companies[s.player_company_id].reputation, rep + Fixtures.tuning().contract_miss_reputation)
+	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func _outsource(s: GameState, o: Dictionary) -> int:
+	var d: Dictionary = {"kind": Contract.Kind.OUTSOURCE, "party_b": Fixtures.company_of_kind(s, Company.Kind.VENDOR)}
+	d.merge(o, true)
+	return Fixtures.add_contract(s, d)
+
+
+func test_engine_delivered_with_quality_penalty() -> void:
+	var s := Fixtures.new_state(1)
+	var cid: int = _outsource(s, {"deliverable": &"engine", "features": [&"feature_fx_save"], "quality_roll": 20, "delivery_week": 6})
+	var ctx := _tick(s, 6)
+	assert_false(s.contracts.has(cid))
+	assert_eq(s.engines.size(), 1)
+	var e: GameEngine = s.engines[s.sorted_ids(s.engines)[0]]
+	assert_eq(e.source, GameEngine.Source.OUTSOURCED)
+	assert_eq(e.tech_cap, 25)
+	assert_eq(e.name, "ui.engine.outsourced_name")
+	assert_eq(e.company_id, s.player_company_id)
+	var n: int = 0
+	for ev: Dictionary in ctx.events:
+		if ev["name"] == &"contract_completed":
+			n += 1
+	assert_eq(n, 1)
+
+
+func test_engine_not_delivered_early_and_good_quality() -> void:
+	var s := Fixtures.new_state(1)
+	_outsource(s, {"deliverable": &"engine", "features": [&"feature_fx_save"], "quality_roll": 80, "delivery_week": 6})
+	_tick(s, 5)
+	assert_eq(s.engines.size(), 0)
+	_tick(s, 6)
+	assert_eq(s.engines[s.sorted_ids(s.engines)[0]].tech_cap, 35)
+
+
+func test_outsource_part_delivers_over_weeks() -> void:
+	var s := Fixtures.new_state(1)
+	var pid: int = Fixtures.add_project(s)
+	var cid: int = _outsource(s, {"project_id": pid, "deliverable": &"art", "target_points": {&"art": 100}, "delivery_week": 4})
+	var done: int = 0
+	for w: int in [0, 1, 2, 3]:
+		var ctx := _tick(s, w)
+		assert_eq(s.projects[pid].points[&"art"], 25 * (w + 1))
+		for ev: Dictionary in ctx.events:
+			if ev["name"] == &"contract_completed":
+				done += 1
+	assert_eq(done, 1)
+	assert_false(s.contracts.has(cid))
+
+
+func test_part_lost_when_released() -> void:
+	var s := Fixtures.new_state(1)
+	var pid: int = Fixtures.add_project(s)
+	var cid: int = _outsource(s, {"project_id": pid, "deliverable": &"art", "target_points": {&"art": 100}, "delivery_week": 4})
+	_tick(s, 0)
+	s.projects[pid].phase = Project.Phase.RELEASED
+	_tick(s, 1)
+	assert_false(s.contracts.has(cid))
+	assert_eq(s.projects[pid].points[&"art"], 25)

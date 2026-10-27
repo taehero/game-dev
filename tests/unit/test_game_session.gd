@@ -137,3 +137,28 @@ func test_set_speed_clears_auto_paused_speed() -> void:
 	g.auto_paused_speed = 4
 	g.set_speed(1)
 	assert_eq(g.auto_paused_speed, 0)
+
+
+func test_set_speed_stays_zero_when_game_over() -> void:
+	var g := _session()
+	g.state.game_over = true
+	g.set_speed(2)
+	assert_eq(g.speed, 0)
+
+
+func test_game_ending_step_pins_speed_at_zero() -> void:
+	var g := _session()
+	var c: Company = g.state.companies[g.state.player_company_id]
+	c.money = -50000
+	c.months_negative = g.tuning.bankrupt_months - 1
+	Fixtures.add_loan(g.state, {"lender_id": Fixtures.company_of_kind(g.state, Company.Kind.LENDER), "balance": 50000, "principal": 50000})
+	c.last_missed_week = 0
+	g.state.week = 12
+	g.set_speed(2)
+	g.step_once()
+	assert_true(g.state.game_over)
+	assert_eq(g.speed, 0)
+	var r: CommandResult = g.submit(HireStaffCommand.new(999, "X", 800))
+	assert_eq(r.reason_key, &"error.game_over")
+	var names: Array = g.drain_events().map(func(e: Dictionary) -> StringName: return e["name"])
+	assert_has(names, &"command_rejected")

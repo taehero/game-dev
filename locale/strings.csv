@@ -323,3 +323,82 @@ event.late_night.title,On a roll,ลื่นไหลสุด ๆ
 event.late_night.body,Everything clicks tonight.,ทุกอย่างลงตัวในคืนนี้
 event.late_night.option.1,Keep going,ทำต่อเลย
 event.late_night.option.2,Go home and rest,กลับบ้านไปพักผ่อน
+content.perk.coder.name,Coder,โปรแกรมเมอร์
+content.perk.coder.desc,Raises your Tech skill by 5 per rank.,เพิ่มสกิล Tech ของคุณ 5 ต่อระดับ
+content.perk.designer.name,Designer,นักออกแบบ
+content.perk.designer.desc,Raises your Design skill by 5 per rank.,เพิ่มสกิล Design ของคุณ 5 ต่อระดับ
+content.perk.artist.name,Artist,ศิลปิน
+content.perk.artist.desc,Raises your Art skill by 5 per rank.,เพิ่มสกิล Art ของคุณ 5 ต่อระดับ
+content.perk.composer.name,Composer,คนแต่งเพลง
+content.perk.composer.desc,Raises your Audio skill by 5 per rank.,เพิ่มสกิล Audio ของคุณ 5 ต่อระดับ
+content.perk.engine_architect.name,Engine Architect,สถาปนิกเอนจิน
+content.perk.engine_architect.desc,Engines are built 15% faster per rank.,สร้างเอนจินเร็วขึ้น 15% ต่อระดับ
+content.perk.crunch_veteran.name,Crunch Veteran,เซียนปั่นงาน
+content.perk.crunch_veteran.desc,You burn out 25% slower per rank.,หมดไฟช้าลง 25% ต่อระดับ
+content.perk.negotiator.name,Negotiator,นักเจรจา
+content.perk.negotiator.desc,Contract jobs pay 10% more per rank.,งานรับจ้างจ่ายเพิ่ม 10% ต่อระดับ
+content.perk.recruiter.name,Recruiter,นักสรรหา
+content.perk.recruiter.desc,Better candidates and lower salary asks.,ได้ผู้สมัครเก่งขึ้นและขอเงินเดือนน้อยลง
+content.perk.promoter.name,Promoter,นักโปรโมต
+content.perk.promoter.desc,Marketing builds 15% more Hype per rank.,การตลาดสร้าง Hype เพิ่ม 15% ต่อระดับ
+content.perk.accountant.name,Accountant,นักบัญชี
+content.perk.accountant.desc,Loan interest is 15% lower per rank.,ดอกเบี้ยเงินกู้ลด 15% ต่อระดับ
+content.perk.leader.name,Leader,ผู้นำทีม
+content.perk.leader.desc,Better team chemistry and morale.,ทีมเข้ากันดีขึ้นและขวัญกำลังใจสูงขึ้น
+staff_name.01,Alex,อเล็กซ์
+staff_name.02,Ben,เบน
+staff_name.03,Chris,คริส
+staff_name.04,Dana,ดาน่า
+staff_name.05,Eli,อีไล
+staff_name.06,Fay,เฟย์
+staff_name.07,Gus,กัส
+staff_name.08,Hana,ฮานะ
+staff_name.09,Ivan,อีวาน
+staff_name.10,Jade,เจด
+staff_name.11,Kit,คิท
+staff_name.12,Lena,เลน่า
+staff_name.13,Max,แม็กซ์
+staff_name.14,Nina,นิน่า
+staff_name.15,Omar,โอมาร์
+staff_name.16,Pam,แพม
+staff_name.17,Quinn,ควินน์
+staff_name.18,Ray,เรย์
+staff_name.19,Sara,ซาร่า
+staff_name.20,Tom,ทอม
+staff_name.21,Uma,อูม่า
+staff_name.22,Vic,วิค
+staff_name.23,Wen,เวน
+staff_name.24,Zoe,โซอี้
+ui.decision.accept,Accept,ตกลง
+ui.decision.refuse,Refuse,ปฏิเสธ
+ui.contract_work.title,Contract job,งานรับจ้าง
+ui.engine.outsourced_name,Outsourced engine,เอนจินจ้างทำ
+error.game_over,The game is over.,จบเกมแล้ว
+error.candidate_not_found,Candidate not found.,ไม่พบผู้สมัครคนนี้
+error.staff_not_found,Staff member not found.,ไม่พบพนักงานคนนี้
+error.cannot_fire_owner,You cannot fire yourself.,ไล่ตัวเองออกไม่ได้
+error.no_raise_pending,No raise request to answer.,ไม่มีคำขอขึ้นเงินเดือน
+error.invalid_seat,That desk does not exist.,ไม่มีโต๊ะนี้
+error.seat_taken,That desk is taken.,โต๊ะนี้มีคนนั่งแล้ว
+error.equipment_not_found,Equipment not found.,ไม่พบอุปกรณ์นี้
+error.equipment_not_available,That equipment is not on sale yet.,อุปกรณ์นี้ยังไม่วางขาย
+error.seat_has_equipment,That desk already has equipment.,โต๊ะนี้มีอุปกรณ์แล้ว
+error.office_not_found,Office not found.,ไม่พบออฟฟิศนี้
+error.office_current,You are already in this office.,คุณอยู่ออฟฟิศนี้อยู่แล้ว
+error.office_too_small,The new office has too few desks.,ออฟฟิศใหม่มีโต๊ะไม่พอ
+error.license_not_needed,This engine needs no license.,เอนจินนี้ไม่ต้องใช้ลิขสิทธิ์
+error.license_owned,You already hold this license.,คุณมีลิขสิทธิ์นี้แล้ว
+error.vendor_not_found,Vendor not found.,ไม่พบผู้ขาย
+error.invalid_deliverable,That part cannot be outsourced.,จ้างทำส่วนนี้ไม่ได้
+error.already_outsourced,That part is already outsourced.,ส่วนนี้จ้างทำไปแล้ว
+error.contract_not_found,Contract not found.,ไม่พบสัญญา
+error.contract_taken,You already took this contract.,รับสัญญานี้ไปแล้ว
+error.contract_expired,This offer has expired.,ข้อเสนอนี้หมดอายุแล้ว
+error.lender_not_found,Lender not found.,ไม่พบผู้ให้กู้
+error.over_credit_limit,That is over your credit limit.,เกินวงเงินสินเชื่อ
+error.bank_refused,The bank turned you down.,ธนาคารปฏิเสธคำขอ
+error.loan_not_found,Loan not found.,ไม่พบเงินกู้ก้อนนี้
+error.perk_not_found,Perk not found.,ไม่พบสกิลนี้
+error.no_skill_points,No skill points left.,แต้มสกิลหมดแล้ว
+error.perk_maxed,This perk is at max rank.,สกิลนี้เต็มระดับแล้ว
+error.invalid_focus,That focus value is not valid.,ค่าโฟกัสไม่ถูกต้อง

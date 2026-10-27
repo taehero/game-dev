@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PerkDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/perk_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"perk_promoter"
+name_key = &"content.perk.promoter.name"
+path = &"BUSINESS"
+max_rank = 3
+effects_bp_per_rank = Dictionary[StringName, int]({&"hype_gain_bp": 1500})

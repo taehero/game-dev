@@ -10,3 +10,4 @@ extends Resource
 @export var speed_bp: int = 0
 @export var bug_bp: int = 0
 @export var recommended_until_year: int = 0
+@export var year_from: int = 0  # first year it can be bought

@@ -121,3 +121,60 @@ func test_engine_age_bp_licensed_engine_uses_year_from() -> void:
 	var lic: LicensedEngineDef = Fixtures.content().licensed_engines[&"lic_engine_homebrew"]
 	var years: int = Calendar.year(s.week, t) - lic.year_from
 	assert_eq(ProductionSystem.engine_age_bp(s, Fixtures.content(), s.projects[pid], t), Fixed.ONE_BP + years * t.engine_age_bug_bp_per_year)
+
+
+func _owner_tech(focus: int) -> int:
+	var g: GameState = Fixtures.new_state(3)
+	g.owner.focus_dev_bp = focus
+	var gp: int = Fixtures.add_project(g)
+	g.staff[g.owner_staff_id()].assigned_project_id = gp
+	ProductionSystem.tick(TickContext.new(g, t))
+	return g.staff[g.owner_staff_id()].week_points[&"tech"]
+
+
+func test_owner_focus_scales_owner_points() -> void:
+	assert_eq(_owner_tech(5000), Fixed.mul_bp(_owner_tech(10000), 5000))
+
+
+func test_outdated_equipment_lowers_points() -> void:
+	_tick()
+	var early: int = s.staff[s.owner_staff_id()].week_points[&"tech"]
+	s.week = 312
+	_tick()
+	assert_lt(s.staff[s.owner_staff_id()].week_points[&"tech"], early)
+
+
+func test_engine_architect_speeds_engine_stage() -> void:
+	var eid: int = Fixtures.add_project(s, {"kind": Project.Kind.ENGINE, "size_id": &"",
+		"focus": GameRules.ENGINE_FOCUS, "features": [&"feature_fx_save"] as Array[StringName]})
+	s.projects[pid].phase = Project.Phase.LIVE
+	s.staff[s.owner_staff_id()].assigned_project_id = eid
+	s.owner.perks[&"perk_engine_architect"] = 1
+	_tick()
+	assert_eq(s.projects[eid].stage_progress, 5750)
+
+
+func test_contract_work_produces_points_without_rng() -> void:
+	var cid: int = Fixtures.add_contract(s, {"target_points": {&"design": 100, &"tech": 100}})
+	s.projects[pid].phase = Project.Phase.LIVE
+	var wp: int = Fixtures.add_project(s, {"kind": Project.Kind.CONTRACT_WORK, "contract_id": cid})
+	var o: Staff = s.staff[s.owner_staff_id()]
+	o.assigned_project_id = wp
+	o.morale = 70
+	for k: StringName in GameRules.SKILL_ORDER:
+		o.skills[k] = 30
+	var before: int = s.rng.state
+	_tick()
+	assert_eq(s.projects[wp].points, {&"design": 153, &"tech": 153})
+	assert_eq(s.projects[wp].bugs, 0)
+	assert_eq(s.rng.state, before)
+	assert_eq(s.projects[wp].stage_progress, 0)
+
+
+func test_contract_work_without_contract_is_idle() -> void:
+	s.projects[pid].phase = Project.Phase.LIVE
+	var wp: int = Fixtures.add_project(s, {"kind": Project.Kind.CONTRACT_WORK, "contract_id": -1})
+	s.staff[s.owner_staff_id()].assigned_project_id = wp
+	var ctx := _tick()
+	assert_eq(s.projects[wp].points, {})
+	assert_eq(ctx.events.size(), 0)
