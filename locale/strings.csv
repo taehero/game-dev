@@ -318,8 +318,8 @@ event.power_cut.option.2,Accept the loss,ยอมรับความเสี
 event.sound_trick.title,Sound trick,ลูกเล่นเสียง
 event.sound_trick.body,A friend shows you a clever sound-chip trick.,เพื่อนโชว์เทคนิคเจ๋ง ๆ ของชิปเสียง
 event.sound_trick.option.1,Use it,ใช้เทคนิคนี้
-event.sound_trick.option.2,Keep it simple,เก็บให้เรียบง่ายไว้ก่อน
-event.late_night.title,On a roll,ลื่นไหลสุด ๆ
+event.sound_trick.option.2,Keep it simple,ทำแบบเรียบง่ายไปก่อน
+event.late_night.title,On a roll,กำลังเข้าขา
 event.late_night.body,Everything clicks tonight.,ทุกอย่างลงตัวในคืนนี้
 event.late_night.option.1,Keep going,ทำต่อเลย
 event.late_night.option.2,Go home and rest,กลับบ้านไปพักผ่อน
@@ -404,7 +404,7 @@ error.perk_maxed,This perk is at max rank.,สกิลนี้เต็มร�
 error.invalid_focus,That focus value is not valid.,ค่าโฟกัสไม่ถูกต้อง
 # M2c,,
 content.channel.magazine_ad.name,Magazine ad,โฆษณานิตยสาร
-content.channel.mail_order.name,Mail-order catalogue,สั่งซื้อทางไปรษณีย์
+content.channel.mail_order.name,Mail-order catalogue,แค็ตตาล็อกสั่งซื้อทางไปรษณีย์
 content.channel.trade_show.name,Trade show,งานแสดงสินค้า
 content.channel.tv_spot.name,TV spot,โฆษณาทีวี
 content.research.tv_advertising.name,TV advertising,การโฆษณาทางทีวี
