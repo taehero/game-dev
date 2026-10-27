@@ -29,9 +29,9 @@ func test_market_salary_matches_people_rules() -> void:
 	var st: Staff = s.staff[sid]
 	var expected: int = PeopleRules.market_salary(st.skills, int(st.level), Fixtures.content(), _t)
 	assert_eq(StateQueries.market_salary(s, sid, _t), expected)
-	assert_eq(StateQueries.market_salary(s, sid, _t), 680, "junior: era_wage_base 200 + 80 * 6")
+	assert_eq(StateQueries.market_salary(s, sid, _t), 1860, "junior: era_wage_base 500 + 80 * 17")
 	st.level = Staff.Level.MID
-	assert_eq(StateQueries.market_salary(s, sid, _t), 884, "mid salary_bp 13000")
+	assert_eq(StateQueries.market_salary(s, sid, _t), 2418, "mid salary_bp 13000")
 
 
 func test_monthly_costs_match_money_rules() -> void:

@@ -61,9 +61,9 @@ func test_combined_playthrough() -> void:
 
 
 func test_forum_reply_and_award_outcome() -> void:
-	var s := _new_state(2026)
+	var s := _new_state(2022)  # economy retune shifted the RNG stream; 2026 now wins the award, 2022 still loses it
 	ScenarioM2b.advance(s, plan, 50, real, tuning)
-	# week-49 entry: the ceremony has passed, the entry is consumed and seed 2026 loses deterministically
+	# week-49 entry: the ceremony has passed, the entry is consumed and seed 2022 loses deterministically
 	for id: int in s.sorted_ids(s.projects):
 		assert_eq(s.projects[id].award_entry, &"")
 	assert_true(s.companies[s.player_company_id].awards.is_empty())

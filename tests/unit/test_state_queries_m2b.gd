@@ -11,7 +11,7 @@ func before_each() -> void:
 func test_market_salary_view() -> void:
 	var s: GameState = Fixtures.new_state(1)
 	var id: int = Fixtures.add_staff(s, {"skills": {&"audio": 20, &"art": 20, &"design": 20, &"tech": 20}})
-	assert_eq(StateQueries.market_salary(s, id, _t), 680)
+	assert_eq(StateQueries.market_salary(s, id, _t), 1860)
 	assert_eq(StateQueries.market_salary(s, 999, _t), 0)
 
 

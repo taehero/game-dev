@@ -76,7 +76,7 @@ func test_hire_adds_staff_without_computer() -> void:
 	var texts: Array[String] = []
 	for l: Label in UiFit.labels_under(hired):
 		texts.append(l.text)
-	assert_true(texts.has(tr("ui.team.salary").format({"money": UiFormat.money(800)})))
+	assert_true(texts.has(tr("ui.team.salary").format({"money": UiFormat.money(Fixtures.tuning().hire_offer_salary)})))
 	assert_eq((_node("%HireName") as LineEdit).text, "")
 
 

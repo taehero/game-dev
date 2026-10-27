@@ -50,11 +50,11 @@ extends Resource
 @export var production_event_answer_weeks: int = 4
 @export var bug_hunt_max_bugs: int = 10
 @export var bug_hunt_seconds: float = 15.0
-@export var hire_offer_salary: int = 800
+@export var hire_offer_salary: int = 1700
 
 ## --- M2b people and money ---
-@export var era_wage_base: int = 200
-@export var wage_per_skill_point: int = 6
+@export var era_wage_base: int = 500
+@export var wage_per_skill_point: int = 17
 @export var raise_threshold_bp: int = 9000
 @export var raise_answer_weeks: int = 4
 @export var raise_refuse_morale: int = -15

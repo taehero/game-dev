@@ -9,6 +9,6 @@ name_key = &"content.size.small.name"
 base_weeks = 18
 min_staff = 1
 cost_multiplier_bp = 10000
-audience_bp = 100
+audience_bp = 22
 price = 12
 par_points = 9000

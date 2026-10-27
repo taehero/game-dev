@@ -66,7 +66,7 @@ func test_raise_ask_on_anniversary() -> void:
 	assert_eq(_asks(s).size(), 0)
 	ctx = _ctx(s, 52)
 	StaffSystem.tick(ctx)
-	assert_eq(s.staff[id].asking_raise, 680)
+	assert_eq(s.staff[id].asking_raise, 1860)
 	assert_eq(_asks(s).size(), 1)
 	assert_eq(_asks(s)[0].kind, &"raise_request")
 	assert_eq(_asks(s)[0].deadline_week, 56)
@@ -74,7 +74,7 @@ func test_raise_ask_on_anniversary() -> void:
 	assert_false(ctx.events[0]["payload"]["promotion"])
 	StaffSystem.tick(_ctx(s, 52))
 	assert_eq(_asks(s).size(), 1, "one ask at a time")
-	var rich: int = Fixtures.add_staff(s, {"salary": 650})
+	var rich: int = Fixtures.add_staff(s, {"salary": 1700})
 	StaffSystem.tick(_ctx(s, 104))
 	assert_eq(s.staff[rich].asking_raise, 0)
 
@@ -86,7 +86,7 @@ func test_promotion_ask_after_cooldown() -> void:
 	StaffSystem.tick(_ctx(s, 25))
 	assert_eq(_asks(s).size(), 0)
 	StaffSystem.tick(_ctx(s, 26))
-	assert_eq(s.staff[id].asking_raise, 1040)
+	assert_eq(s.staff[id].asking_raise, 2860)
 	assert_eq(_asks(s)[0].kind, &"promotion_request")
 
 

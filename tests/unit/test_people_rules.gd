@@ -16,8 +16,8 @@ func _skills(v: int) -> Dictionary[StringName, int]:
 
 
 func test_market_salary() -> void:
-	assert_eq(PeopleRules.market_salary(_skills(20), 0, Fixtures.content(), _t), 680)
-	assert_eq(PeopleRules.market_salary(_skills(20), 1, Fixtures.content(), _t), 884)
+	assert_eq(PeopleRules.market_salary(_skills(20), 0, Fixtures.content(), _t), 1860)
+	assert_eq(PeopleRules.market_salary(_skills(20), 1, Fixtures.content(), _t), 2418)
 
 
 func test_promotion_eligible() -> void:
