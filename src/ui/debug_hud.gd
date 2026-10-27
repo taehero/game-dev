@@ -2,7 +2,6 @@ extends Control
 ## Debug HUD: reads state via StateQueries, acts only through GameRunner.
 
 const SAVE_SLOT: String = "slot_1"
-const DEBUG_HIRE_SALARY: int = 800
 ## Plain names (data, not display text).
 const DEBUG_NAMES: Array[String] = ["Ada", "Bo", "Cy", "Di", "Eli", "Fay", "Gus", "Hal"]
 
@@ -71,7 +70,7 @@ func _on_hire() -> void:
 	var st: GameState = GameRunner.session.state
 	var hire_name: String = DEBUG_NAMES[_hire_index % DEBUG_NAMES.size()]
 	_hire_index += 1
-	GameRunner.submit(HireStaffCommand.new(StateQueries.player_company_id(st), hire_name, DEBUG_HIRE_SALARY))
+	GameRunner.submit(HireStaffCommand.new(StateQueries.player_company_id(st), hire_name, GameRunner.session.tuning.hire_offer_salary))
 	_refresh()
 
 

@@ -3,7 +3,7 @@ extends RefCounted
 ## Test helper: the M2c marketing, live-ops, promotion, forum and award specs. Reached from Scenario._make_command.
 
 const SCRIPT_M2C: Dictionary = {
-	0: [["hire", "Ada", 800], ["place_equipment", "equipment_micro_1980", 1],
+	0: [["hire", "Ada"], ["place_equipment", "equipment_micro_1980", 1],
 		["start_game", "Star Run", "size_small", "platform_nova8", "topic_space", "genre_action", "lic_engine_homebrew", []],
 		["sliders_ideal"]],
 	15: [["run_marketing", "channel_magazine_ad"]],

@@ -61,12 +61,36 @@ func test_combined_playthrough() -> void:
 
 
 func test_forum_reply_and_award_outcome() -> void:
-	var s := _new_state(2022)  # economy retune shifted the RNG stream; 2026 now wins the award, 2022 still loses it
-	ScenarioM2b.advance(s, plan, 50, real, tuning)
-	# week-49 entry: the ceremony has passed, the entry is consumed and seed 2022 loses deterministically
+	var s := _new_state(2026)
+	ScenarioM2b.advance(s, plan, 49, real, tuning)
+	assert_eq(s.week, 49)
+	# play the week-49 step by hand (same commands as the plan) so the entry and the ceremony event are observable
+	var session := GameSession.new(s, tuning)
+	var money_before: int = s.companies[s.player_company_id].money
+	var enter: CommandResult = session.submit(ScenarioM2C.make(s, ["enter_award", "award_golden_cartridge"]))
+	assert_true(enter.ok, "the week-49 award entry is accepted")
+	var entered: Array[int] = []
 	for id: int in s.sorted_ids(s.projects):
-		assert_eq(s.projects[id].award_entry, &"")
-	assert_true(s.companies[s.player_company_id].awards.is_empty())
+		if s.projects[id].award_entry == &"award_golden_cartridge":
+			entered.append(id)
+	assert_eq(entered.size(), 1, "the entry is pending before the ceremony")
+	assert_lt(s.companies[s.player_company_id].money, money_before, "the entry fee was paid")
+	for spec: Array in plan[49]:
+		if spec[0] != "enter_award":
+			session.submit(ScenarioM2b._make_command(s, spec))
+	session.step_once()  # the ceremony runs in this tick
+	var results: Array[Dictionary] = []
+	for e: Dictionary in session.drain_events():
+		if e["name"] == &"award_result":
+			results.append(e["payload"])
+	assert_eq(results.size(), 1, "the ceremony fired for the entry")
+	if results.size() == 1:
+		assert_eq(results[0]["project_id"], entered[0], "the entered game was the one scored")
+		# the outcome itself is an RNG result; only require that state agrees with the event
+		var awards: Array[StringName] = s.companies[s.player_company_id].awards
+		assert_eq(not awards.is_empty(), results[0]["won"], "awards list matches the ceremony result")
+	for id: int in s.sorted_ids(s.projects):
+		assert_eq(s.projects[id].award_entry, &"", "entry consumed by the ceremony")
 	ScenarioM2b.advance(s, plan, 6, real, tuning)
 	var target := -1  # the post the week-56 reply_forum step answers: the first unreplied one
 	for f: ForumPost in s.forum_posts:

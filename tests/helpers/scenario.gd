@@ -4,12 +4,12 @@ extends RefCounted
 
 ## week -> list of command specs.
 const SCRIPT_BASIC: Dictionary = {
-	0: [["hire", "Ada", 800]],
+	0: [["hire", "Ada"]],
 }
 
 
 const SCRIPT_M2A: Dictionary = {
-	0: [["hire", "Ada", 800], ["place_equipment", "equipment_micro_1980", 1],
+	0: [["hire", "Ada"], ["place_equipment", "equipment_micro_1980", 1],
 		["start_game", "Star Run", "size_small", "platform_nova8", "topic_space", "genre_action", "lic_engine_homebrew", []],
 		["sliders_ideal"]],
 	20: [["release"]],
@@ -44,7 +44,9 @@ static func run(state: GameState, script: Dictionary, weeks: int) -> String:
 static func _make_command(state: GameState, spec: Array) -> Command:
 	match spec[0]:
 		"hire":
-			return HireStaffCommand.new(state.player_company_id, spec[1], spec[2])
+			# optional third element overrides the salary; default is the market offer from tuning
+			var salary: int = spec[2] if spec.size() > 2 else Fixtures.tuning().hire_offer_salary
+			return HireStaffCommand.new(state.player_company_id, spec[1], salary)
 		"place_equipment":
 			return PlaceEquipmentCommand.new(state.player_company_id, StringName(spec[1]), spec[2])
 		"start_game":

@@ -1,10 +1,17 @@
 extends GutTest
-## Economy feel guard: a good and a poor scripted player run 52 weeks through real commands on shipped data.
-## The bands are the measured week-52 values (seed 7, matching the balance sim) with a +/-15% margin, so a later
+## Economy feel guard: a good and a poor scripted player run through real commands on shipped data.
+## Week 52: the bands are the measured values (seed 7, matching the balance sim) with a +/-15% margin, so a later
 ## tuning change that makes the early game trivial (poor player never in debt) or crushing (good player broke)
 ## fails here. Measured at retune: good money 14480; poor money 15650 with 21874 of loans outstanding.
+## Week 156 (the long-horizon retune goals): the good player ends inside GOOD_MONEY_156 and is never game over; the poor
+## player goes bankrupt between weeks 78 and 156 (measured: week 91). Measured good money at week 156: 235464;
+## band = 235464 * (0.85..1.15) = 200100..270800, which also sits inside the 150-300k design target. A 156-week run
+## takes well under a second headless, so no coarser setup is needed.
 const SEED: int = 7
 const WEEKS: int = 52
+const LONG_WEEKS: int = 156
+const GOOD_MONEY_156: Vector2i = Vector2i(200100, 270800)
+const POOR_OVER_WEEKS: Vector2i = Vector2i(78, 156)
 const GOOD_MONEY: Vector2i = Vector2i(12300, 16650)
 const POOR_MONEY: Vector2i = Vector2i(13300, 18000)
 const POOR_DEBT: Vector2i = Vector2i(18600, 25150)
@@ -22,13 +29,13 @@ func after_all() -> void:
 	ContentDB.use(Fixtures.content())
 
 
-func _play(good: bool) -> GameSession:
+func _play(good: bool, weeks: int = WEEKS) -> GameSession:
 	var session := GameSession.new(GameState.new_game(SEED, "Guard", _t), _t)
 	var combo: Array = _combo(session.state, good)
 	var ideal: Array[int] = []
 	ideal.assign(_real.genres[combo[0]].ideal_sliders)
 	var sloppy: Array[int] = [10000, 0, 0, 10000, 0, 0, 10000, 0, 0]
-	for i: int in WEEKS:
+	for i: int in weeks:
 		_week(session, combo, ideal if good else sloppy, good)
 		session.step_once()
 	return session
@@ -112,3 +119,16 @@ func test_poor_player_is_underwater_at_week_52() -> void:
 	var money: int = st.companies[st.player_company_id].money
 	assert_between(money, POOR_MONEY.x, POOR_MONEY.y, "poor player money at week 52 (borrowed)")
 	assert_between(_debt(st), POOR_DEBT.x, POOR_DEBT.y, "poor player debt at week 52")
+
+
+func test_good_player_thrives_through_week_156() -> void:
+	var st: GameState = _play(true, LONG_WEEKS).state
+	var money: int = st.companies[st.player_company_id].money
+	assert_false(st.game_over, "good player is never game over")
+	assert_between(money, GOOD_MONEY_156.x, GOOD_MONEY_156.y, "good player money at week 156")
+
+
+func test_poor_player_goes_bankrupt_between_weeks_78_and_156() -> void:
+	var st: GameState = _play(false, LONG_WEEKS).state
+	assert_true(st.game_over, "poor player ends the 156 weeks bankrupt")
+	assert_between(st.week, POOR_OVER_WEEKS.x, POOR_OVER_WEEKS.y, "week of game over")

@@ -46,7 +46,7 @@ func test_month_start_offers() -> void:
 			assert_between(c.target_points[k], 150, 500)
 		assert_between(c.deadline_week, 4 + 6, 4 + 12)
 		assert_eq(c.delivery_week, 8)
-		assert_eq(c.price, _sum(c) * 3)
+		assert_eq(c.price, _sum(c) * Fixtures.tuning().contract_pay_per_point)
 		assert_eq(c.project_id, -1)
 	var n: int = 0
 	for e: Dictionary in ctx.events:
@@ -63,7 +63,7 @@ func test_negotiator_raises_offer_price() -> void:
 	s.owner.focus_dev_bp = 0
 	_tick(s, 4)
 	for c: Contract in _offered(s):
-		assert_eq(c.price, Fixed.mul_bp(_sum(c) * 3, 11000))
+		assert_eq(c.price, Fixed.mul_bp(_sum(c) * Fixtures.tuning().contract_pay_per_point, 11000))
 
 
 func test_unaccepted_offer_expires() -> void:
