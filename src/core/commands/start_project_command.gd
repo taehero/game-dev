@@ -51,6 +51,8 @@ func validate(state: GameState, tuning: TuningDef) -> CommandResult:
 func _validate_game(state: GameState, tuning: TuningDef, content: ContentDB) -> CommandResult:
 	if not content.sizes.has(size_id):
 		return CommandResult.fail(&"error.size_not_found")
+	if content.sizes[size_id].dlc:
+		return CommandResult.fail(&"error.size_dlc_only")
 	if not GameRules.is_unlocked(state, content, company_id, size_id):
 		return CommandResult.fail(&"error.item_locked")
 	if not content.platforms.has(platform_id):

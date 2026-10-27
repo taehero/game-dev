@@ -4,6 +4,7 @@ extends RefCounted
 
 static func tick(ctx: TickContext) -> void:
 	_tick_tasks(ctx)  # Spec 4.2 step 8: live-ops updates and support.
+	_tick_dlc_launches(ctx)
 
 
 static func change_sentiment(p: Project, delta: int) -> void:
@@ -68,3 +69,20 @@ static func _tick_tasks(ctx: TickContext) -> void:
 		p.live_task_left = 0
 		release_task_staff(state, pid)
 		ctx.emit(&"project_changed", {"project_id": pid, "live_task_done": done})
+
+
+static func _tick_dlc_launches(ctx: TickContext) -> void:
+	var state: GameState = ctx.state
+	var t: TuningDef = ctx.tuning
+	for pid: int in state.sorted_ids(state.projects):
+		var d: Project = state.projects[pid]
+		if d.parent_id == -1 or d.phase != Project.Phase.LIVE or d.weekly_units.size() != 1:
+			continue
+		if not state.projects.has(d.parent_id):
+			continue
+		var parent: Project = state.projects[d.parent_id]
+		if parent.phase != Project.Phase.LIVE:
+			continue
+		var uplift: int = maxi(0, t.dlc_tail_uplift_bp - (t.mod_dlc_penalty_bp if parent.mod_tools else 0))
+		parent.sales_base_units = Fixed.mul_bp(parent.sales_base_units, Fixed.ONE_BP + uplift)
+		ctx.emit(&"project_changed", {"project_id": parent.id})
