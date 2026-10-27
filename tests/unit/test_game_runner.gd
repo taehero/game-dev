@@ -177,3 +177,23 @@ func test_manual_pause_then_popup_stays_paused() -> void:
 	GameRunner.pause_for_popup()
 	GameRunner.resume_after_popup()
 	assert_eq(GameRunner.session.speed, 0)
+
+
+func test_has_save_false_then_true() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	assert_false(GameRunner.has_save("autosave"))
+	assert_eq(GameRunner.save_game("autosave"), OK)
+	assert_true(GameRunner.has_save("autosave"))
+
+
+func test_has_save_invalid_slot_false() -> void:
+	assert_false(GameRunner.has_save("../evil"))
+
+
+func test_no_autosave_after_game_over() -> void:
+	GameRunner.start_new_game(5, "Acme")
+	GameRunner.session.state.game_over = true
+	GameRunner.session.autosave_due = true
+	GameRunner._process(0.0)
+	assert_false(GameRunner.session.autosave_due)
+	assert_false(FileAccess.file_exists(_dir.path_join("autosave.json")))

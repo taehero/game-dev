@@ -51,6 +51,11 @@ func save_game(slot: String) -> Error:
 	return SaveService.save_to_slot(session.state, slot, save_dir)
 
 
+## True when `slot` is a valid slot and its file exists under save_dir.
+func has_save(slot: String) -> bool:
+	return SaveService.is_valid_slot(slot) and FileAccess.file_exists(save_dir.path_join(slot + ".json"))
+
+
 func load_game(slot: String) -> LoadResult:
 	var r: LoadResult = SaveService.load_from_slot(slot, save_dir)
 	if not r.ok:
@@ -71,7 +76,7 @@ func _process(delta: float) -> void:
 	session.advance(delta)
 	if session.autosave_due and session.can_save():
 		session.autosave_due = false
-		if save_game("autosave") != OK:
+		if not session.state.game_over and save_game("autosave") != OK:
 			push_warning("GameRunner: autosave failed")
 	for e: Dictionary in session.drain_events():
 		EventBus.dispatch(e["name"], e["payload"])
