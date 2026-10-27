@@ -129,3 +129,62 @@ func test_fired_worker_stalls_job_then_half_pay() -> void:
 	assert_eq(s.projects[r[1]].phase, Project.Phase.RETIRED)
 	assert_eq(s.companies[s.player_company_id].money, m + 500)
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func _outsource(s: GameState, o: Dictionary) -> int:
+	var d: Dictionary = {"kind": Contract.Kind.OUTSOURCE, "party_b": Fixtures.company_of_kind(s, Company.Kind.VENDOR)}
+	d.merge(o, true)
+	return Fixtures.add_contract(s, d)
+
+
+func test_engine_delivered_with_quality_penalty() -> void:
+	var s := Fixtures.new_state(1)
+	var cid: int = _outsource(s, {"deliverable": &"engine", "features": [&"feature_fx_save"], "quality_roll": 20, "delivery_week": 6})
+	var ctx := _tick(s, 6)
+	assert_false(s.contracts.has(cid))
+	assert_eq(s.engines.size(), 1)
+	var e: GameEngine = s.engines[s.sorted_ids(s.engines)[0]]
+	assert_eq(e.source, GameEngine.Source.OUTSOURCED)
+	assert_eq(e.tech_cap, 25)
+	assert_eq(e.name, "ui.engine.outsourced_name")
+	assert_eq(e.company_id, s.player_company_id)
+	var n: int = 0
+	for ev: Dictionary in ctx.events:
+		if ev["name"] == &"contract_completed":
+			n += 1
+	assert_eq(n, 1)
+
+
+func test_engine_not_delivered_early_and_good_quality() -> void:
+	var s := Fixtures.new_state(1)
+	_outsource(s, {"deliverable": &"engine", "features": [&"feature_fx_save"], "quality_roll": 80, "delivery_week": 6})
+	_tick(s, 5)
+	assert_eq(s.engines.size(), 0)
+	_tick(s, 6)
+	assert_eq(s.engines[s.sorted_ids(s.engines)[0]].tech_cap, 35)
+
+
+func test_outsource_part_delivers_over_weeks() -> void:
+	var s := Fixtures.new_state(1)
+	var pid: int = Fixtures.add_project(s)
+	var cid: int = _outsource(s, {"project_id": pid, "deliverable": &"art", "target_points": {&"art": 100}, "delivery_week": 4})
+	var done: int = 0
+	for w: int in [0, 1, 2, 3]:
+		var ctx := _tick(s, w)
+		assert_eq(s.projects[pid].points[&"art"], 25 * (w + 1))
+		for ev: Dictionary in ctx.events:
+			if ev["name"] == &"contract_completed":
+				done += 1
+	assert_eq(done, 1)
+	assert_false(s.contracts.has(cid))
+
+
+func test_part_lost_when_released() -> void:
+	var s := Fixtures.new_state(1)
+	var pid: int = Fixtures.add_project(s)
+	var cid: int = _outsource(s, {"project_id": pid, "deliverable": &"art", "target_points": {&"art": 100}, "delivery_week": 4})
+	_tick(s, 0)
+	s.projects[pid].phase = Project.Phase.RELEASED
+	_tick(s, 1)
+	assert_false(s.contracts.has(cid))
+	assert_eq(s.projects[pid].points[&"art"], 25)

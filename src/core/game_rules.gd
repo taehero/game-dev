@@ -171,3 +171,11 @@ static func licensed_engine_available(state: GameState, content: ContentDB, comp
 	if def.fee == 0:
 		return true
 	return engine_license_contract(state, company_id, licensed_id) != null
+
+
+## Ruling B12: the lowest-id VENDOR company, or -1.
+static func first_vendor(state: GameState) -> int:
+	for id: int in state.sorted_ids(state.companies):
+		if state.companies[id].kind == Company.Kind.VENDOR:
+			return id
+	return -1

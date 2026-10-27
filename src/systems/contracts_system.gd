@@ -4,11 +4,64 @@ extends RefCounted
 
 
 static func tick(ctx: TickContext) -> void:
+	_deliver(ctx)
 	_settle(ctx)
 	_expire(ctx)
 	if Calendar.is_month_start(ctx.state.week, ctx.tuning):
 		for i: int in ctx.tuning.contract_offers_per_month:
 			_offer(ctx)
+
+
+static func _deliver(ctx: TickContext) -> void:
+	var state: GameState = ctx.state
+	for cid: int in state.sorted_ids(state.contracts):
+		var c: Contract = state.contracts[cid]
+		if c.kind != Contract.Kind.OUTSOURCE:
+			continue
+		if c.deliverable == &"engine":
+			if state.week >= c.delivery_week:
+				_deliver_engine(ctx, c)
+		else:
+			_deliver_part(ctx, c)
+
+
+static func _deliver_engine(ctx: TickContext, c: Contract) -> void:
+	var state: GameState = ctx.state
+	var t: TuningDef = ctx.tuning
+	var cap: int = t.engine_base_tech_cap
+	for f: StringName in c.features:
+		cap += ctx.content.engine_features[f].tech_cap_add
+	cap = mini(100, cap)
+	if c.quality_roll < t.outsource_low_quality_roll:
+		cap -= t.outsource_low_quality_cap_penalty
+	var e := GameEngine.new()
+	e.id = state.alloc_id()
+	e.company_id = c.party_a
+	e.name = "ui.engine.outsourced_name"
+	e.features.assign(c.features)
+	e.tech_cap = clampi(cap, 0, 100)
+	e.source = GameEngine.Source.OUTSOURCED
+	e.built_week = state.week
+	state.engines[e.id] = e
+	ctx.emit(&"contract_completed", {"contract_id": c.id, "engine_id": e.id})
+	Removal.remove_contract(state, c.id)
+
+
+## Ruling B11: remaining points sit in target_points; each week adds ceil(remaining / weeks left).
+static func _deliver_part(ctx: TickContext, c: Contract) -> void:
+	var state: GameState = ctx.state
+	var p: Project = state.projects.get(c.project_id, null)
+	if p == null or (p.phase != Project.Phase.PRODUCTION and p.phase != Project.Phase.POLISH):
+		Removal.remove_contract(state, c.id)
+		return
+	var remaining: int = c.target_points.get(c.deliverable, 0)
+	var left: int = maxi(1, c.delivery_week - state.week)
+	var amount: int = mini(remaining, (remaining + left - 1) / left)
+	ProductionSystem._add_points(p, c.deliverable, amount)
+	c.target_points[c.deliverable] = remaining - amount
+	if remaining - amount <= 0:
+		ctx.emit(&"contract_completed", {"contract_id": c.id, "project_id": p.id})
+		Removal.remove_contract(state, c.id)
 
 
 static func _settle(ctx: TickContext) -> void:
