@@ -76,6 +76,9 @@ static func _make_command(state: GameState, spec: Array) -> Command:
 			return BuyResearchCommand.new(state.player_company_id, StringName(spec[1]))
 		"buy_dev_kit":
 			return BuyDevKitCommand.new(state.player_company_id, StringName(spec[1]))
+	var ext: Command = ScenarioM2C.make(state, spec)
+	if ext != null:
+		return ext
 	push_error("Scenario: unknown command spec %s" % str(spec))
 	assert(false, "Scenario unknown command")
 	return null
