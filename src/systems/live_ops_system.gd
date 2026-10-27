@@ -5,6 +5,9 @@ extends RefCounted
 static func tick(ctx: TickContext) -> void:
 	_tick_tasks(ctx)  # Spec 4.2 step 8: live-ops updates and support.
 	_tick_dlc_launches(ctx)
+	_tick_forum(ctx)
+	if Calendar.is_month_start(ctx.state.week, ctx.tuning):
+		_tick_viral(ctx)
 
 
 static func change_sentiment(p: Project, delta: int) -> void:
@@ -86,3 +89,60 @@ static func _tick_dlc_launches(ctx: TickContext) -> void:
 		var uplift: int = maxi(0, t.dlc_tail_uplift_bp - (t.mod_dlc_penalty_bp if parent.mod_tools else 0))
 		parent.sales_base_units = Fixed.mul_bp(parent.sales_base_units, Fixed.ONE_BP + uplift)
 		ctx.emit(&"project_changed", {"project_id": parent.id})
+
+
+static func forum_chance_bp(p: Project, t: TuningDef) -> int:
+	return mini(t.forum_post_max_chance_bp, t.forum_post_base_chance_bp + p.bugs * t.forum_post_chance_per_bug_bp)
+
+
+static func add_forum_post(ctx: TickContext, project_id: int, topic_key: StringName, sentiment: int, replied: bool) -> int:
+	var state: GameState = ctx.state
+	var f := ForumPost.new()
+	f.id = state.alloc_id()
+	f.project_id = project_id
+	f.week = state.week
+	f.topic_key = topic_key
+	f.sentiment = sentiment
+	f.replied = replied
+	state.forum_posts.append(f)
+	change_sentiment(state.projects[project_id], sentiment)
+	while state.forum_posts.size() > ctx.tuning.forum_posts_cap:
+		Removal.remove_forum_post(state, state.forum_posts[0].id)
+	ctx.emit(&"forum_post_created", {"post_id": f.id, "project_id": project_id, "topic_key": topic_key})
+	return f.id
+
+
+static func _tick_forum(ctx: TickContext) -> void:
+	var state: GameState = ctx.state
+	for pid: int in state.sorted_ids(state.projects):
+		var p: Project = state.projects[pid]
+		if p.kind != Project.Kind.GAME or p.phase != Project.Phase.LIVE:
+			continue
+		if not Fixed.roll_bp(ctx.rng, forum_chance_bp(p, ctx.tuning)):
+			continue
+		var has_bugs: bool = p.bugs > 0
+		var has_reviews: bool = not p.review_results.is_empty()
+		if not has_bugs and not has_reviews:
+			continue
+		var bugs_topic: bool = has_bugs
+		if has_bugs and has_reviews:
+			bugs_topic = ctx.rng.randi_range(0, 1) == 0
+		add_forum_post(ctx, pid, &"forum.post.bugs" if bugs_topic else &"forum.post.weakness", ctx.tuning.forum_post_sentiment, false)
+
+
+static func _tick_viral(ctx: TickContext) -> void:
+	var state: GameState = ctx.state
+	var t: TuningDef = ctx.tuning
+	for pid: int in state.sorted_ids(state.projects):
+		var p: Project = state.projects[pid]
+		if p.kind != Project.Kind.GAME or p.phase != Project.Phase.LIVE or not p.mod_tools:
+			continue
+		if not Fixed.roll_bp(ctx.rng, t.mod_viral_chance_bp):
+			continue
+		if state.companies.has(p.company_id):
+			state.companies[p.company_id].fan_count += t.mod_viral_fans
+		var extra: int = Fixed.mul_bp(p.sales_base_units, t.mod_viral_units_bp)
+		if extra > 0 and not p.weekly_units.is_empty():
+			p.weekly_units[-1] += extra
+			SalesSystem.book_sale(ctx, p, extra, SalesSystem.unit_price(ctx.content, p, state.week))
+		add_forum_post(ctx, pid, &"forum.post.mod_viral", t.mod_viral_sentiment, true)
