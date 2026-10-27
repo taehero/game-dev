@@ -46,5 +46,5 @@ func test_neglect_monthly() -> void:
 	s.owner.focus_dev_bp = 8000
 	s.staff[ids[3]].is_owner = false
 	Removal.remove_staff(s, ids[3])
-	OwnerSystem.tick(_ctx(s, 12))
+	OwnerSystem.tick(_ctx(s, 13))
 	assert_eq(s.staff[ids[0]].morale, 65)

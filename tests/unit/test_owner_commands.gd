@@ -18,6 +18,14 @@ func test_spend_point_coder() -> void:
 	assert_eq(s.staff[s.owner.staff_id].skills[&"tech"], 35)
 
 
+func test_spend_point_skill_caps_at_100() -> void:
+	var s := Fixtures.new_state(1)
+	s.owner.skill_points = 1
+	s.staff[s.owner.staff_id].skills[&"tech"] = 98
+	assert_true(_run(s, SpendSkillPointCommand.new(&"perk_coder")).ok)
+	assert_eq(s.staff[s.owner.staff_id].skills[&"tech"], 100)
+
+
 func test_spend_rejections() -> void:
 	var s := Fixtures.new_state(1)
 	s.owner.skill_points = 1

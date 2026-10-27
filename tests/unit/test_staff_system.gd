@@ -126,11 +126,47 @@ func test_resignation_rolls() -> void:
 	assert_false(s.staff.has(id))
 	assert_true(s.staff.has(s.owner_staff_id()))
 	assert_eq(ctx.events[ctx.events.size() - 1]["name"], &"staff_resigned")
-	var s2 := Fixtures.new_state(1)
 	t.resign_base_chance_bp = 5000
+	var seed_no: int = -1
+	for sd: int in range(1, 50):
+		var sp := Fixtures.new_state(sd)
+		var pid: int = Fixtures.add_staff(sp, {"morale": 10})
+		StaffSystem.tick(_ctx(sp, 1, t))
+		if sp.staff.has(pid):
+			seed_no = sd
+			break
+	assert_gt(seed_no, 0, "a seed exists where 50% roll does not resign")
+	var s2 := Fixtures.new_state(seed_no)
 	var id2: int = Fixtures.add_staff(s2, {"morale": 10, "raise_refusals": 2})
 	StaffSystem.tick(_ctx(s2, 1, t))
-	assert_false(s2.staff.has(id2))
+	assert_false(s2.staff.has(id2), "double chance (100%) resigns where single did not")
+
+
+func test_resign_chance_burnout_term() -> void:
+	var t := Fixtures.tuning()
+	t.resign_base_chance_bp = 0
+	t.resign_chance_per_burnout_bp = 10000
+	var s := Fixtures.new_state(1)
+	var id: int = Fixtures.add_staff(s, {"burnout": 85, "morale": 70})
+	StaffSystem.tick(_ctx(s, 1, t))
+	assert_false(s.staff.has(id))
+	var s2 := Fixtures.new_state(1)
+	t.resign_chance_per_burnout_bp = 0
+	var id2: int = Fixtures.add_staff(s2, {"burnout": 85, "morale": 70})
+	StaffSystem.tick(_ctx(s2, 1, t))
+	assert_true(s2.staff.has(id2))
+
+
+func test_unanswered_promotion_applies_promotion_refuse_morale() -> void:
+	var s := Fixtures.new_state(1)
+	var id: int = Fixtures.add_staff(s, {"salary": 5000, "morale": 70, "skills": {&"design": 40, &"tech": 20, &"art": 20, &"audio": 20},
+		"exp": {&"design": 2000}})
+	StaffSystem.tick(_ctx(s, 26))
+	assert_eq(_asks(s)[0].kind, &"promotion_request")
+	StaffSystem.tick(_ctx(s, 30))
+	assert_eq(s.staff[id].raise_refusals, 1)
+	assert_eq(s.staff[id].morale, 61, "70 - 10 + 1 recovery")
+	assert_eq(_asks(s).size(), 0)
 
 
 func test_no_rng_without_eligible_staff() -> void:
