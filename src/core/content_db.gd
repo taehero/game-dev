@@ -231,6 +231,15 @@ func _check_seat(out: Array[String], state: GameState, what: String, id: int, co
 
 func validate() -> Array[String]:
 	var errs: Array[String] = []
+	for id: StringName in GameState.sorted_names(perks):
+		var pk: PerkDef = perks[id]
+		if pk.path != &"DEV" and pk.path != &"BUSINESS":
+			errs.append("%s: perk path %s is not DEV or BUSINESS" % [id, pk.path])
+		if pk.max_rank < 1:
+			errs.append("%s: perk max_rank %d < 1" % [id, pk.max_rank])
+		for e: StringName in GameState.sorted_names(pk.effects_bp_per_rank):
+			if not PeopleRules.EFFECTS.has(e):
+				errs.append("%s: unknown perk effect %s" % [id, e])
 	for id: StringName in GameState.sorted_names(research):
 		var r: ResearchDef = research[id]
 		for p: StringName in r.prerequisites:
