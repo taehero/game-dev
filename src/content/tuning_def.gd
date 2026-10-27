@@ -116,6 +116,43 @@ extends Resource
 @export var candidate_level_weights: Array[int] = [60, 30, 10, 0]
 @export var candidate_level_skill_bonus: Array[int] = [0, 15, 30, 45]
 
+## --- M2c after launch ---
+@export var hype_decay_bp: int = 9500
+@export var promo_discount_step_bp: int = 1000
+@export var promo_max_weeks: int = 4
+@export var promo_uplift_table_bp: Array[int] = [13000, 16000, 19000, 22000, 25000]
+@export var promo_fatigue_window_weeks: int = 26
+@export var promo_fatigue_hype: int = 5
+@export var promo_fatigue_recovery_per_month: int = 1
+@export var patch_staff_weeks: int = 4
+@export var patch_bugs_per_staff_week: int = 5
+@export var patch_user_score_x10: int = 3
+@export var patch_sentiment: int = 5
+@export var mod_tools_staff_weeks: int = 8
+@export var mod_tail_bp: int = 300
+@export var mod_dlc_penalty_bp: int = 2000
+@export var mod_viral_chance_bp: int = 500
+@export var mod_viral_fans: int = 2000
+@export var mod_viral_units_bp: int = 10000
+@export var mod_viral_sentiment: int = 10
+@export var dlc_size_id: StringName = &"size_dlc"
+@export var dlc_tail_uplift_bp: int = 5000
+@export var forum_post_base_chance_bp: int = 500
+@export var forum_post_chance_per_bug_bp: int = 50
+@export var forum_post_max_chance_bp: int = 3000
+@export var forum_post_sentiment: int = -5
+@export var forum_apologise_sentiment: int = 3
+@export var forum_promise_sentiment: int = 8
+@export var forum_posts_cap: int = 40
+@export var sentiment_decay_bp_per_point: int = 5
+@export var sales_decay_max_bp: int = 9800
+@export var award_window_weeks: int = 52
+@export var award_bonus_max_x10: int = 8
+@export var award_ai_entries: int = 3
+@export var award_ai_score_min_x10: int = 50
+@export var award_ai_score_max_x10: int = 85
+@export var award_reputation: int = 5
+
 
 static func load_default() -> TuningDef:
 	return load("res://data/tuning.tres") as TuningDef

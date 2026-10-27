@@ -73,7 +73,8 @@ func test_below_floor_retires() -> void:
 func test_retires_on_later_decay_tick() -> void:
 	var pid: int = _released()
 	_tick()
-	s.projects[pid].weekly_units[0] = 11  # 11 * 0.86 falls below the floor of 10
+	s.projects[pid].weekly_units[0] = 11
+	s.projects[pid].sales_base_units = 11  # 11 * 0.86 falls below the floor of 10
 	_tick()
 	assert_eq(s.projects[pid].phase, Project.Phase.RETIRED)
 	assert_eq(s.projects[pid].weekly_units.size(), 1)

@@ -9,3 +9,4 @@ extends Resource
 @export var audience_bp: int = 0
 @export var price: int = 0
 @export var par_points: int = 0
+@export var dlc: bool = false

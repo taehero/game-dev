@@ -99,6 +99,9 @@ static func validate(d: Variant) -> bool:
 		var cid: int = int(pe["contract_id"])
 		if cid != -1 and not contract_ids.has(cid):
 			return false
+		var parent: int = int(pe["parent_id"])
+		if parent != -1 and (parent == int(pe["id"]) or not project_ids.has(parent)):
+			return false
 	var contracts_d: Dictionary = s["contracts"]
 	for k: Variant in contracts_d:
 		var e: Dictionary = contracts_d[k]
@@ -273,7 +276,8 @@ static func _company_ok(e: Dictionary) -> bool:
 	if not (_strings_ok(e["unlocked"]) and _strings_ok(e["dev_kits"]) and _strings_ok(e["awards"])):
 		return false
 	return (int(e["research_points"]) >= 0 and int(e["months_negative"]) >= 0
-		and int(e["last_missed_week"]) >= -1)
+		and int(e["last_missed_week"]) >= -1
+		and int(e["promo_fatigue"]) >= 0 and int(e["promo_fatigue"]) <= 100)
 
 
 static func _contract_ok(e: Dictionary) -> bool:
@@ -314,6 +318,12 @@ static func _project_ok(e: Dictionary) -> bool:
 		if typeof(cfg[k]) != TYPE_STRING:
 			return false
 	if not _enum_ok(Project.Kind.keys(), e["kind"]):
+		return false
+	if not _enum_ok(Project.LiveTask.keys(), e["live_task"]):
+		return false
+	if int(e["live_task_left"]) < 0 or int(e["sales_base_units"]) < 0:
+		return false
+	if absi(int(e["sentiment"])) > 100:
 		return false
 	var focus: Array = e["focus"]
 	if focus.size() != 9:

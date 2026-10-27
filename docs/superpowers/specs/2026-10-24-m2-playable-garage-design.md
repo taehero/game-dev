@@ -75,7 +75,7 @@ Every tuning number named in this spec (UPPER_SNAKE names such as `WAGE_PER_SKIL
 
 ### 4.2 Company additions
 
-`office_id: StringName` (content `OfficeDef`), `research_points: int`, `unlocked: Array[StringName]` (research ids done), `dev_kits: Array[StringName]` (platform ids), `months_negative: int`, `awards: Array[StringName]`, `last_missed_week: int = -1` (the bank's 12-month memory of a missed payment; it outlives a repaid loan).
+`office_id: StringName` (content `OfficeDef`), `research_points: int`, `unlocked: Array[StringName]` (research ids done), `dev_kits: Array[StringName]` (platform ids), `months_negative: int`, `awards: Array[StringName]`, `last_missed_week: int = -1` (the bank's 12-month memory of a missed payment; it outlives a repaid loan), `promo_fatigue: int = 0` (hype points 0–100; added by M2c, see §8).
 
 New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing studio). The game creates one bank, one lender, two vendors and three AI publishers at new game.
 
@@ -111,7 +111,8 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 - `features: Array[StringName]` chosen features for the game.
 - `review_results: Array[ReviewResult]` (deferred from M1): each `outlet_id: StringName`, `score_x10: int`, `strength_key: StringName`, `weakness_key: StringName`.
 - `weekly_units: Array[int]` (sales history for the graph, capped at 104 entries).
-- `promo_until_week: int`, `promo_discount_bp: int`, `mod_tools: bool`, `dlc_count: int`.
+- `promo_until_week: int` (the last sales week of the promotion, inclusive), `promo_discount_bp: int`, `mod_tools: bool`, `dlc_count: int`.
+- M2c fields: `parent_id: int = -1` (a DLC's original game), `live_task: LiveTask {NONE, PATCH, MOD_TOOLS}` with `live_task_left: int` (staff-weeks left), `award_entry: StringName` (award id entered for the next ceremony), `sales_base_units: int` (the un-boosted weekly units the decay chain runs on).
 - `event_ids: Array[StringName]`: production events rolled for this project, in roll order. A repeat is never rolled, and the count is capped by `production_event_max_per_project`. `bug_hunt_done: bool`: the once-per-project bug hunt (§11.5). Added by the M2d-panels plan (P9).
 
 ### 4.6 Contract changes
@@ -127,10 +128,10 @@ New `Company.Kind` values: `BANK`, `LENDER` (loan shark), `VENDOR` (outsourcing 
 | `EngineFeatureDef` | id, research id required, tech_cap_add, dev_weeks |
 | `LicensedEngineDef` | id, year_from, year_to, fee, royalty_bp, tech_cap, features |
 | `ResearchDef` | id, cost_rp, prerequisites, unlocks (topic, genre, feature, size, channel ids) |
-| `ProjectSizeDef` | id, base_weeks, min_staff, cost_multiplier_bp, audience_bp, `price` (per unit), `par_points` (points that score a par review) |
+| `ProjectSizeDef` | id, base_weeks, min_staff, cost_multiplier_bp, audience_bp, `price` (per unit), `par_points` (points that score a par review), `dlc: bool` (M2c; a DLC size never appears as a normal game size: `StateQueries.concept_options` filters it and `StartProject.game` refuses it with `error.size_dlc_only`) |
 | `LevelDef` | level, min best skill, min total exp, salary_bp, output_bp |
 | `PerkDef` | id, path (DEV/BUSINESS), max_rank, effects per rank (Dictionary of effect id → bp) |
-| `MarketingChannelDef` | id, era years, cost, hype_gain, audience segment |
+| `MarketingChannelDef` | id, era years, cost, hype_gain, audience segment, `weeks_in_year: Array[int]` (M2c; empty = any week, else the fixed trade-show weeks) |
 | `AwardDef` | id, fictional name key, week_in_year, entry_fee, prize, fans |
 | `ProductionEventDef` | id (prefix `pevent_`), `title_key`, `body_key`, `option_keys: Array[StringName]` (2–3 keys), `option_a`, `option_b`, `option_c` (each `Dictionary[StringName, int]`; an unused slot is `{}`). No default option. The effect keys are the closed set in §11.5 (P7). Added by the M2d-panels plan (P8). |
 
@@ -238,7 +239,7 @@ Fictional 1980s platforms (5): two home micros, one console, one arcade-cabinet 
 - **Raise ask:** on a hire anniversary (`week > hired_week` and `(week − hired_week) % weeks_per_year == 0`) when salary < `mul_bp(market, raise_threshold_bp)`. **Promotion ask:** when `promotion_eligible` and `week − last_raise_week >= promotion_ask_cooldown_weeks`; it takes precedence. Both ask for the market salary at the target level. The owner never asks and self-promotes when eligible.
 - An ask is a `Decision` (kind `&"raise_request"` or `&"promotion_request"`, `related_ids [staff_id]`, `deadline_week = week + raise_answer_weeks`, `option_keys [&"ui.decision.accept", &"ui.decision.refuse"]`), so it auto-pauses. One ask per staff at a time. When the deadline passes, the ask counts as refused. `AnswerRaise` answers both kinds. Accept: salary rises. Refuse: morale −15 (−10 for a promotion); refused twice → resignation chance doubles.
 - The M1 `max_staff_default` limit is removed from `TuningDef`. Hiring is limited by free seats: `HireStaffCommand` (and `HireCandidate`) require a free seat in the current office and fail with `error.no_free_seat`.
-  - **Open follow-up (M2d):** the team panel still hires through the older `HireStaffCommand` (hire-by-name). M2b's `HireCandidateCommand` and the monthly candidate pool have no panel UI yet.
+  - **Open follow-ups (M2d):** the team panel still hires through the older `HireStaffCommand` (hire-by-name). M2b's `HireCandidateCommand` and the monthly candidate pool have no panel UI yet. Also open: `StateQueries.staff_pose` shows staff on a patch or mod-tools task as IDLE; no popup or panel exists for raise/promotion asks (they auto-pause, then expire as refusals); there is no game-over screen; the finance panel shows salaries only and should use `StateQueries.monthly_costs`.
 - Hiring pool: on each month start, `CANDIDATES_PER_MONTH` candidates appear with skills drawn by era, asking salary = market ± `randi_range(-10, 15)`%; each expires after 8 weeks. Hiring needs a free seat.
 - Firing pays `SEVERANCE_MONTHS` of salary and lowers everyone's morale by 5.
 
@@ -294,6 +295,23 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 - **Forum:** posts appear from bugs and review weaknesses; replies (apologise / promise patch / ignore) change sentiment.
 - **Mod tools:** a post-launch task (fixed staff weeks). After release: sales `decay_bp` improves by `MOD_TAIL_BP`; DLC uplift falls by `MOD_DLC_PENALTY_BP`; each month a small chance of a "community mod goes viral" event (fans + sales spike).
 - **Game awards:** one fictional yearly award. Entry costs `entry_fee`; eligible games are those released in the last 52 weeks. The winner is the entry with the highest average `score_x10` plus `randi_range(0, 8)`, compared with three AI entries rolled from era quality. Prize: money, fans, reputation, and the award id stored on the company.
+- **Hype (M2b Promoter perk):** `RunMarketing` scales `hype_gain` by `ONE_BP + PeopleRules.effect_bp(..., &"hype_gain_bp")`, and by business focus.
+
+### Rulings (M2c plan, `docs/superpowers/plans/2026-10-25-m2c-after-launch.md`)
+
+- **C3:** `weekly_units` stays "units sold that week"; decay and the retirement floor run on `sales_base_units`. A promotion multiplies only that week's units and price; a DLC launch raises the parent's base; a viral mod sells bonus units that week only.
+- **C5:** hype decays by `hype_decay_bp` each week only for GAME projects in PRODUCTION or POLISH; a RELEASED project keeps its hype for the first sales tick.
+- **C6:** the channel `segment` is stored and shown but has no effect in M2 (M3's market owns it).
+- **C7:** discount is a multiple of 1000 (1000–5000); uplift = `promo_uplift_table_bp[discount / step − 1]`. Fatigue is added when the previous `promo_until_week` is within 26 weeks of the new start, lowers launch hype via `max(0, hype − promo_fatigue)`, and recovers each month start.
+- **C8:** patch and mod tools reuse `Staff.assigned_project_id` on the LIVE game; LiveOps lowers `live_task_left` by 1 per working staff per week and clears the task when done or no longer LIVE. `StartPatch` needs `bugs > 0`. They cost staff time only, no money.
+- **C9:** a DLC is a GAME project with `parent_id` set and `size_id = tuning.dlc_size_id`; the parent must be LIVE and not a DLC, one DLC in development per parent. On its first LIVE sales week the parent's `sales_base_units` gets `dlc_tail_uplift_bp`, minus `mod_dlc_penalty_bp` if the parent has mod tools.
+- **C10:** `sentiment` is clamped −100..100; sales decay = review table + `mod_tail_bp` + `sentiment × sentiment_decay_bp_per_point`, clamped to `[0, sales_decay_max_bp]`, then the retired-platform doubling.
+- **C11:** forum posts are `ForumPost`s, not Decisions (no auto-pause). Weekly per LIVE game: one `roll_bp` at `min(max, base + bugs × per_bug)`; topic `bugs` or `weakness`; list capped at `forum_posts_cap` (oldest removed via `Removal`). Replies: apologise, promise_patch (needs a running PATCH task), ignore; one reply per post.
+- **C12:** each month start, each LIVE GAME with `mod_tools` rolls `mod_viral_chance_bp`; a hit adds fans, a bonus sale via `book_sale`, and a `forum.post.mod_viral` post.
+- **C13:** award eligibility is GAME, not a DLC, reviewed, released within `award_window_weeks` of the ceremony. Score = average review `score_x10` (not `user_score`) + `randi_range(0, award_bonus_max_x10)`; the player wins only with a strictly higher score than the AI (ties go to the AI; between players the lower project id wins). Prize adds money, fans and reputation (cap 100); all entries clear after the ceremony and an ineligible entry's fee is lost.
+- **C16 (post-plan):** a live task (patch or mod tools) whose project has no staff left with `assigned_project_id` set is cancelled by LiveOps (task NONE, left 0, `bugs` unchanged); assigned-but-unseated staff only stall it.
+- **C17 (post-plan):** `StartPatch`, `BuildModTools` and `StartDLC` take `staff_ids: Array[int]`. Empty means every free worker (old behaviour); otherwise each id must exist, be unique and be a free worker (`error.staff_not_found` / `error.not_enough_staff`), and exactly those are assigned. `StartDLC` checks `min_staff` against the chosen count.
+- **C18 (post-plan):** `BuildModTools` refuses a DLC (`parent_id != -1`, `error.dlc_of_dlc`), so a DLC never rolls for viral mods.
 
 ## 9. Commands added in M2
 
@@ -363,7 +381,7 @@ The M2d-panels plan adds two checks to `ContentDB.missing_refs` (P8, P9): `proje
 
 - Unit tests per system and command, as in M1.
 - **M2 acceptance scenario** (`tests/scenario/test_m2_playthrough.gd`): a scripted headless run from 1980 that hires one staff member, buys equipment, researches one feature, builds an engine, makes and releases two games, receives four reviews with reason keys, sells for at least 20 weeks, takes and repays a bank loan, completes one contract job, and ends with valid state; plus the M1 determinism properties (same seed same hash; save/load/continue at five points) over this richer script.
-- The combined M2b+M2c playthrough above is written by whichever of M2b and M2c merges last.
+- The combined M2b+M2c playthrough is written: `tests/scenario/test_m2_playthrough.gd` (M2c, the plan that finished last) covers the M2b and M2c steps, same-seed hash, and save/load/continue.
 - Rule tests: entity removal only in `removal.gd`; every new `.gd` under `src/core` and `src/systems` keeps the M1 bans.
 - **Manual Mac checklist (M2d):** scene renders at 4× without blur; Thai text renders; bubbles appear while developing; each tab opens; concept wizard creates a game; review popup shows four outlets; sales graph draws.
 

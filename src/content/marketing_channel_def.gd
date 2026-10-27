@@ -8,3 +8,4 @@ extends Resource
 @export var cost: int = 0
 @export var hype_gain: int = 0
 @export var segment: StringName = &""
+@export var weeks_in_year: Array[int] = []  # empty = any week

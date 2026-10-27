@@ -402,3 +402,37 @@ error.perk_not_found,Perk not found.,ไม่พบสกิลนี้
 error.no_skill_points,No skill points left.,แต้มสกิลหมดแล้ว
 error.perk_maxed,This perk is at max rank.,สกิลนี้เต็มระดับแล้ว
 error.invalid_focus,That focus value is not valid.,ค่าโฟกัสไม่ถูกต้อง
+# M2c,,
+content.channel.magazine_ad.name,Magazine ad,โฆษณานิตยสาร
+content.channel.mail_order.name,Mail-order catalogue,สั่งซื้อทางไปรษณีย์
+content.channel.trade_show.name,Trade show,งานแสดงสินค้า
+content.channel.tv_spot.name,TV spot,โฆษณาทีวี
+content.research.tv_advertising.name,TV advertising,การโฆษณาทางทีวี
+content.award.golden_cartridge.name,Golden Cartridge Awards,รางวัล Golden Cartridge
+content.size.dlc.name,DLC,DLC
+forum.post.bugs,Players report bugs in {title}.,ผู้เล่นรายงาน Bug ใน {title}
+forum.post.weakness,"Players agree with the critics about {title}: {reason}",ผู้เล่นเห็นด้วยกับนักวิจารณ์เรื่อง {title}: {reason}
+forum.post.mod_viral,A fan mod for {title} is going viral!,ม็อดจากแฟนเกม {title} กำลังดังระเบิด!
+forum.reply.apologise,Apologise,ขอโทษผู้เล่น
+forum.reply.promise_patch,Promise a patch,สัญญาว่าจะออก Patch
+forum.reply.ignore,Ignore,เมินไป
+error.channel_not_found,Marketing channel not found.,ไม่พบช่องทางโฆษณานี้
+error.channel_unavailable,That channel is not available now.,ตอนนี้ใช้ช่องทางนี้ไม่ได้
+error.project_not_marketable,This project cannot be marketed.,โปรเจกต์นี้โปรโมตไม่ได้
+error.project_not_live,The game must be on sale first.,เกมต้องวางขายก่อน
+error.promo_active,A promotion is already running.,มีโปรโมชันอยู่แล้ว
+error.invalid_discount,That discount is not valid.,ส่วนลดไม่ถูกต้อง
+error.invalid_promo_weeks,That promotion length is not valid.,ระยะเวลาโปรโมชันไม่ถูกต้อง
+error.live_task_running,The team is already busy with this game.,ทีมกำลังทำงานกับเกมนี้อยู่แล้ว
+error.no_bugs,There are no bugs to fix.,ไม่มี Bug ให้แก้
+error.mod_tools_built,Mod tools are already built.,สร้างเครื่องมือม็อดไปแล้ว
+error.dlc_of_dlc,A DLC cannot have its own DLC.,DLC ทำ DLC ซ้อนไม่ได้
+error.dlc_in_progress,A DLC is already in development.,มี DLC กำลังพัฒนาอยู่แล้ว
+error.size_dlc_only,This size is for DLC only.,ขนาดนี้ใช้กับ DLC เท่านั้น
+error.post_not_found,Forum post not found.,ไม่พบโพสต์นี้
+error.post_replied,You already replied to this post.,ตอบโพสต์นี้ไปแล้ว
+error.invalid_reply,That reply is not valid.,คำตอบนี้ใช้ไม่ได้
+error.no_patch_running,No patch is being made for this game.,ไม่มี Patch ที่กำลังทำสำหรับเกมนี้
+error.award_not_found,Award not found.,ไม่พบรางวัลนี้
+error.award_entered,This game is already entered.,ส่งเกมนี้เข้าประกวดแล้ว
+error.award_not_eligible,This game is not eligible for the award.,เกมนี้ไม่มีสิทธิ์ลงประกวด

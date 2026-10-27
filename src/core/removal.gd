@@ -68,3 +68,12 @@ static func _drop_decisions_about(state: GameState, id: int) -> void:
 				pending.append(state.pending_decisions[i].id)
 				state.pending_decisions.remove_at(i)
 			i -= 1
+
+
+static func remove_forum_post(state: GameState, post_id: int) -> bool:
+	for i: int in state.forum_posts.size():
+		if state.forum_posts[i].id == post_id:
+			state.forum_posts.remove_at(i)
+			_drop_decisions_about(state, post_id)
+			return true
+	return false

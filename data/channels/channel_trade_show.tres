@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MarketingChannelDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/marketing_channel_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"channel_trade_show"
+name_key = &"content.channel.trade_show.name"
+year_from = 1975
+year_to = 1999
+cost = 2500
+hype_gain = 35
+segment = &"core"
+weeks_in_year = Array[int]([22, 23, 24, 25])
