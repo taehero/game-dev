@@ -69,6 +69,5 @@ static func has_credit(state: GameState, company_id: int, t: TuningDef) -> bool:
 
 
 static func loan_rate_bp(state: GameState, content: ContentDB, lender_id: int, t: TuningDef) -> int:
-	if state.companies[lender_id].kind == Company.Kind.LENDER:
-		return t.shark_rate_bp_per_month
-	return maxi(0, Fixed.mul_bp(t.bank_rate_bp_per_month, Fixed.ONE_BP + PeopleRules.effect_bp(state, content, &"loan_rate_bp")))
+	var base: int = t.shark_rate_bp_per_month if state.companies[lender_id].kind == Company.Kind.LENDER else t.bank_rate_bp_per_month
+	return maxi(0, Fixed.mul_bp(base, Fixed.ONE_BP + PeopleRules.effect_bp(state, content, &"loan_rate_bp")))

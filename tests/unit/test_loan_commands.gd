@@ -53,3 +53,16 @@ func test_repay() -> void:
 	assert_eq(RepayLoanCommand.new(999, 1).validate(s, t).reason_key, &"error.loan_not_found")
 	_run(RepayLoanCommand.new(id, 4000))
 	assert_false(s.loans.has(id))
+
+
+func test_accountant_lowers_bank_loan_rate() -> void:
+	s.owner.perks[&"perk_accountant"] = 1
+	s.owner.focus_dev_bp = 0
+	_run(TakeLoanCommand.new(1, _bank(), 5000))
+	assert_eq(s.loans[s.sorted_ids(s.loans)[0]].rate_bp_per_month, 85)
+
+
+func test_repay_not_enough_money() -> void:
+	var id: int = Fixtures.add_loan(s)
+	s.companies[1].money = 500
+	assert_eq(RepayLoanCommand.new(id, 1000).validate(s, t).reason_key, &"error.not_enough_money")

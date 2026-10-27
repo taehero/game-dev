@@ -75,3 +75,5 @@ func test_accountant_lowers_rate() -> void:
 	s.owner.perks[&"perk_accountant"] = 1
 	s.owner.focus_dev_bp = 0
 	assert_eq(MoneyRules.loan_rate_bp(s, ContentDB.active(), _bank(s), Fixtures.tuning()), 85)
+	var shark: int = Fixtures.company_of_kind(s, Company.Kind.LENDER)
+	assert_eq(MoneyRules.loan_rate_bp(s, ContentDB.active(), shark, Fixtures.tuning()), 680)

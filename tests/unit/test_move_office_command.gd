@@ -31,3 +31,9 @@ func test_move_rejections() -> void:
 	assert_eq(MoveOfficeCommand.new(1, &"office_garage").validate(s, t).reason_key, &"error.office_current")
 	s.companies[1].money = 0
 	assert_eq(MoveOfficeCommand.new(1, &"office_small").validate(s, t).reason_key, &"error.not_enough_money")
+
+
+func test_move_refused_by_equipment_seat() -> void:
+	s.companies[1].office_id = &"office_small"
+	Fixtures.add_equipment(s, {"seat_index": 3})
+	assert_eq(MoveOfficeCommand.new(1, &"office_garage").validate(s, t).reason_key, &"error.office_too_small")
