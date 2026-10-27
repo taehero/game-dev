@@ -52,6 +52,70 @@ extends Resource
 @export var bug_hunt_seconds: float = 15.0
 @export var hire_offer_salary: int = 800
 
+## --- M2b people and money ---
+@export var era_wage_base: int = 200
+@export var wage_per_skill_point: int = 6
+@export var raise_threshold_bp: int = 9000
+@export var raise_answer_weeks: int = 4
+@export var raise_refuse_morale: int = -15
+@export var promotion_refuse_morale: int = -10
+@export var promotion_ask_cooldown_weeks: int = 26
+@export var severance_months: int = 1
+@export var fire_morale_penalty: int = -5
+@export var staff_exp_per_point_bp: int = 1000
+@export var burnout_recovery_per_week: int = 2
+@export var morale_baseline: int = 70
+@export var morale_recovery_per_week: int = 1
+@export var resign_morale_threshold: int = 15
+@export var resign_chance_per_burnout_bp: int = 100
+@export var resign_refusals_double: int = 2
+@export var lead_chemistry_bp: int = 500
+@export var candidates_per_month: int = 3
+@export var candidate_expiry_weeks: int = 8
+@export var candidate_name_count: int = 24
+@export var candidate_salary_noise_min_pct: int = -10
+@export var candidate_salary_noise_max_pct: int = 15
+@export var owner_xp_per_point: int = 3000
+@export var owner_xp_per_release: int = 1500
+@export var owner_solo_limit: int = 3
+@export var owner_neglect_focus_bp: int = 7000
+@export var owner_neglect_morale: int = -5
+@export var depreciation_bp_per_month: int = 200
+@export var outdated_speed_bp: int = 8000
+@export var outdated_bug_bp: int = 13000
+@export var contract_offers_per_month: int = 2
+@export var contract_offer_weeks: int = 4
+@export var contract_points_min: int = 150
+@export var contract_points_max: int = 500
+@export var contract_weeks_min: int = 6
+@export var contract_weeks_max: int = 12
+@export var contract_pay_per_point: int = 3
+@export var contract_miss_pay_bp: int = 5000
+@export var contract_miss_reputation: int = -3
+@export var outsource_engine_base_price: int = 2000
+@export var outsource_price_per_feature_week: int = 500
+@export var outsource_late_roll_below: int = 30
+@export var outsource_max_late_weeks: int = 4
+@export var outsource_low_quality_roll: int = 40
+@export var outsource_low_quality_cap_penalty: int = 10
+@export var outsource_part_price: int = 1500
+@export var outsource_part_par_bp: int = 2500
+@export var bank_limit_base: int = 10000
+@export var bank_limit_per_rep: int = 500
+@export var bank_rate_bp_per_month: int = 100
+@export var bank_refuse_weeks: int = 52
+@export var shark_limit: int = 15000
+@export var shark_rate_bp_per_month: int = 800
+@export var loan_term_months: int = 24
+@export var shark_repossess_bp: int = 15000
+@export var shark_seize_bp: int = 2000
+@export var shark_seize_after_missed: int = 3
+@export var repossess_reputation: int = -5
+@export var repossess_morale: int = -10
+@export var bankrupt_months: int = 3
+@export var candidate_level_weights: Array[int] = [60, 30, 10, 0]
+@export var candidate_level_skill_bonus: Array[int] = [0, 15, 30, 45]
+
 
 static func load_default() -> TuningDef:
 	return load("res://data/tuning.tres") as TuningDef
