@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MarketingChannelDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/marketing_channel_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"channel_tv_spot"
+name_key = &"content.channel.tv_spot.name"
+year_from = 1980
+year_to = 1999
+cost = 4000
+hype_gain = 45
+segment = &"casual"
+weeks_in_year = Array[int]([])

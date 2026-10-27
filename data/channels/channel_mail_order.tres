@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MarketingChannelDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/content/marketing_channel_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"channel_mail_order"
+name_key = &"content.channel.mail_order.name"
+year_from = 1975
+year_to = 1999
+cost = 400
+hype_gain = 10
+segment = &"casual"
+weeks_in_year = Array[int]([])
