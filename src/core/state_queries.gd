@@ -495,8 +495,10 @@ static func game_over_view(state: GameState, t: TuningDef) -> Dictionary:
 
 ## One row per BANK or LENDER company, in state.sorted_ids(state.companies) order.
 static func lender_rows(state: GameState, content: ContentDB, t: TuningDef) -> Array[Dictionary]:
-	var player: int = state.player_company_id
 	var out: Array[Dictionary] = []
+	if not state.companies.has(state.player_company_id):
+		return out
+	var player: int = state.player_company_id
 	for cid: int in state.sorted_ids(state.companies):
 		var company: Company = state.companies[cid]
 		if company.kind != Company.Kind.BANK and company.kind != Company.Kind.LENDER:
@@ -592,6 +594,9 @@ static func contract_jobs(state: GameState) -> Array[Dictionary]:
 
 ## One row per office in GameState.sorted_names(content.offices) (Ruling Q18 for monthly_total).
 static func office_rows(state: GameState, content: ContentDB) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not state.companies.has(state.player_company_id):
+		return out
 	var player: int = state.player_company_id
 	var player_office: StringName = player_office_id(state)
 	var cur: int = int(MoneyRules.monthly_costs(state, content, player)["total"])
@@ -600,7 +605,6 @@ static func office_rows(state: GameState, content: ContentDB) -> Array[Dictionar
 	if content.offices.has(player_office):
 		current_rent = content.offices[player_office].rent_per_month
 		current_electricity = content.offices[player_office].electricity_base
-	var out: Array[Dictionary] = []
 	for oid: StringName in GameState.sorted_names(content.offices):
 		var def: OfficeDef = content.offices[oid]
 		var is_current: bool = oid == player_office
