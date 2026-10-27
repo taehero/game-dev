@@ -17,7 +17,8 @@ static func tick(ctx: TickContext) -> void:
 			var e: Equipment = state.equipment[eid]
 			if e.company_id == company_id and e.ownership == Equipment.Ownership.BOUGHT:
 				e.value = Fixed.mul_bp(e.value, Fixed.ONE_BP - ctx.tuning.depreciation_bp_per_month)
-		# T10 loans, T11 bankruptcy slot in here.
+		_loans(ctx, company)
+		# T11 bankruptcy slots in here.
 		if company.money != start_money:
 			ctx.emit(&"money_changed", {"company_id": company_id, "money": company.money})
 
@@ -39,3 +40,27 @@ static func _upgrade_leases(ctx: TickContext, company_id: int) -> void:
 		if ctx.content.equipment.has(e.def_id) and best_tier > ctx.content.equipment[e.def_id].tier:
 			e.def_id = best_id
 			ctx.emit(&"equipment_changed", {"company_id": company_id, "office_id": ctx.state.companies[company_id].office_id})
+
+
+## B13: interest accrues, then every loan is paid (even into the negative) unless money is below 0.
+static func _loans(ctx: TickContext, company: Company) -> void:
+	var state: GameState = ctx.state
+	var missed: bool = company.money < 0
+	for lid: int in state.sorted_ids(state.loans):
+		var l: Loan = state.loans[lid]
+		if l.company_id != company.id:
+			continue
+		var interest: int = Fixed.mul_bp(l.balance, l.rate_bp_per_month)
+		l.balance += interest
+		var due: int = mini(l.balance, l.payment_per_month + interest)
+		if missed:
+			l.missed_payments += 1
+			company.last_missed_week = state.week
+			ctx.emit(&"payment_missed", {"loan_id": lid, "amount": due})
+			continue
+		company.money -= due
+		l.balance -= due
+		if l.missed_payments < ctx.tuning.shark_seize_after_missed:
+			l.missed_payments = 0
+		if l.balance <= 0:
+			Removal.remove_loan(state, lid)
