@@ -30,7 +30,8 @@ static func _deliver_engine(ctx: TickContext, c: Contract) -> void:
 	var t: TuningDef = ctx.tuning
 	var cap: int = t.engine_base_tech_cap
 	for f: StringName in c.features:
-		cap += ctx.content.engine_features[f].tech_cap_add
+		if ctx.content.engine_features.has(f):
+			cap += ctx.content.engine_features[f].tech_cap_add
 	cap = mini(100, cap)
 	if c.quality_roll < t.outsource_low_quality_roll:
 		cap -= t.outsource_low_quality_cap_penalty
@@ -56,6 +57,7 @@ static func _deliver_part(ctx: TickContext, c: Contract) -> void:
 		return
 	var remaining: int = c.target_points.get(c.deliverable, 0)
 	var left: int = maxi(1, c.delivery_week - state.week)
+	@warning_ignore("integer_division")
 	var amount: int = mini(remaining, (remaining + left - 1) / left)
 	ProductionSystem._add_points(p, c.deliverable, amount)
 	c.target_points[c.deliverable] = remaining - amount
@@ -121,10 +123,13 @@ static func _offer(ctx: TickContext) -> void:
 	c.party_a = state.player_company_id
 	c.party_b = pubs[ctx.rng.randi_range(0, pubs.size() - 1)]
 	var total: int = 0
+	var drawn: Dictionary = {}
 	for type: StringName in GameRules.SKILL_ORDER:
 		var pts: int = ctx.rng.randi_range(t.contract_points_min, t.contract_points_max)
-		c.target_points[type] = pts
+		drawn[type] = pts
 		total += pts
+	for type: StringName in GameState.sorted_names(drawn):
+		c.target_points[type] = drawn[type]
 	c.deadline_week = state.week + ctx.rng.randi_range(t.contract_weeks_min, t.contract_weeks_max)
 	c.delivery_week = state.week + t.contract_offer_weeks
 	c.price = Fixed.mul_bp(total * t.contract_pay_per_point,

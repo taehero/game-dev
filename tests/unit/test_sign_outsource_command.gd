@@ -65,4 +65,4 @@ func test_outsource_rejections() -> void:
 	s.projects[pid].phase = Project.Phase.POLISH
 	assert_eq(_run(s, SignOutsourceCommand.part(co.id, _vendor(s), pid, &"art")).reason_key, &"error.project_not_in_production")
 	co.money = 10
-	assert_false(_run(s, SignOutsourceCommand.engine(co.id, _vendor(s), f1)).ok)
+	assert_eq(_run(s, SignOutsourceCommand.engine(co.id, _vendor(s), f1)).reason_key, &"error.not_enough_money")

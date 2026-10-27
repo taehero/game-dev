@@ -26,6 +26,8 @@ func validate(state: GameState, tuning: TuningDef) -> CommandResult:
 		return CommandResult.fail(&"error.license_owned")
 	if state.companies[company_id].money < def.fee:
 		return CommandResult.fail(&"error.not_enough_money")
+	if _first_vendor(state) == -1:
+		return CommandResult.fail(&"error.company_not_found")
 	return CommandResult.success()
 
 
@@ -35,7 +37,7 @@ func apply(ctx: TickContext) -> void:
 	c.id = ctx.state.alloc_id()
 	c.kind = Contract.Kind.ENGINE_LICENSE
 	c.party_a = company_id
-	c.party_b = GameRules.first_vendor(ctx.state)
+	c.party_b = _first_vendor(ctx.state)
 	c.price = def.fee
 	c.royalty_bp = def.royalty_bp
 	c.deliverable = licensed_id
@@ -43,3 +45,11 @@ func apply(ctx: TickContext) -> void:
 	var company: Company = ctx.state.companies[company_id]
 	company.money -= def.fee
 	ctx.emit(&"money_changed", {"company_id": company_id, "money": company.money})
+
+
+## Ruling B12: the lowest-id VENDOR company, or -1.
+static func _first_vendor(state: GameState) -> int:
+	for id: int in state.sorted_ids(state.companies):
+		if state.companies[id].kind == Company.Kind.VENDOR:
+			return id
+	return -1

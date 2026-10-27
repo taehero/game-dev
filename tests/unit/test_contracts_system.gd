@@ -111,6 +111,24 @@ func test_missed_deadline_pays_half() -> void:
 	assert_eq(s.projects[r[1]].revenue, 500)
 
 
+func test_partial_met_at_deadline_pays_half() -> void:
+	var s := Fixtures.new_state(1)
+	var r := _job(s)
+	var p: Project = s.projects[r[1]]
+	p.points = {&"design": 100, &"tech": 100, &"art": 100, &"audio": 99}
+	var m: int = s.companies[s.player_company_id].money
+	_tick(s, 12)
+	assert_eq(p.phase, Project.Phase.RETIRED)
+	assert_eq(s.companies[s.player_company_id].money, m + 500)
+
+
+func test_offer_targets_stored_in_sorted_order() -> void:
+	var s := Fixtures.new_state(1)
+	_tick(s, 4)
+	var c: Contract = _offered(s)[0]
+	assert_eq(c.target_points.keys(), GameState.sorted_names(c.target_points))
+
+
 func test_fired_worker_stalls_job_then_half_pay() -> void:
 	var s := Fixtures.new_state(1)
 	var w: int = Fixtures.add_worker(s)
@@ -121,6 +139,8 @@ func test_fired_worker_stalls_job_then_half_pay() -> void:
 	var cmd := FireStaffCommand.new(w)
 	cmd.apply(TickContext.new(s, Fixtures.tuning()))
 	var m: int = s.companies[s.player_company_id].money
+	s.companies[s.player_company_id].reputation = 10
+	var rep: int = 10
 	for wk: int in range(5, 12):
 		ProductionSystem.tick(TickContext.new(s, Fixtures.tuning()))
 		_tick(s, wk)
@@ -128,6 +148,7 @@ func test_fired_worker_stalls_job_then_half_pay() -> void:
 	_tick(s, 12)
 	assert_eq(s.projects[r[1]].phase, Project.Phase.RETIRED)
 	assert_eq(s.companies[s.player_company_id].money, m + 500)
+	assert_eq(s.companies[s.player_company_id].reputation, rep + Fixtures.tuning().contract_miss_reputation)
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
 
 

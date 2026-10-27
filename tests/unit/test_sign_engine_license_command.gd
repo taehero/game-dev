@@ -33,4 +33,20 @@ func test_license_rejections() -> void:
 	assert_eq(_run(s, &"lic_engine_fx_pro").reason_key, &"error.license_owned")
 	var t := Fixtures.new_state(1)
 	t.companies[t.player_company_id].money = 100
-	assert_false(_run(t, &"lic_engine_fx_pro").ok)
+	assert_eq(_run(t, &"lic_engine_fx_pro").reason_key, &"error.not_enough_money")
+
+
+func test_license_outside_year_range_unavailable() -> void:
+	var s := Fixtures.new_state(1)
+	s.companies[s.player_company_id].money = 15000
+	s.week = 52 * 10
+	assert_eq(_run(s, &"lic_engine_fx_pro").reason_key, &"error.engine_unavailable")
+
+
+func test_license_without_vendor_fails() -> void:
+	var s := Fixtures.new_state(1)
+	s.companies[s.player_company_id].money = 15000
+	for id: int in s.sorted_ids(s.companies):
+		if s.companies[id].kind == Company.Kind.VENDOR:
+			s.companies.erase(id)
+	assert_eq(_run(s, &"lic_engine_fx_pro").reason_key, &"error.company_not_found")
