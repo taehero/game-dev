@@ -431,3 +431,31 @@ static func event_view(state: GameState, content: ContentDB, decision_id: int) -
 			"effects": effects,
 		}
 	return {}
+
+
+## Market salary for a staff member at their current level; 0 if missing.
+static func market_salary(state: GameState, staff_id: int, t: TuningDef) -> int:
+	if not state.staff.has(staff_id):
+		return 0
+	var s: Staff = state.staff[staff_id]
+	return PeopleRules.market_salary(s.skills, int(s.level), ContentDB.active(), t)
+
+
+static func monthly_costs(state: GameState) -> Dictionary:
+	return MoneyRules.monthly_costs(state, ContentDB.active(), state.player_company_id)
+
+
+static func available_credit(state: GameState, lender_id: int, t: TuningDef) -> int:
+	return MoneyRules.available_credit(state, state.player_company_id, lender_id, t)
+
+
+## {} or {"amount", "promotion", "deadline_week"} for a pending raise/promotion ask.
+static func pending_ask(state: GameState, staff_id: int) -> Dictionary:
+	var d: Decision = AnswerRaiseCommand.find_ask(state, staff_id)
+	if d == null or not state.staff.has(staff_id):
+		return {}
+	return {
+		"amount": state.staff[staff_id].asking_raise,
+		"promotion": d.kind == &"promotion_request",
+		"deadline_week": d.deadline_week,
+	}
