@@ -22,6 +22,7 @@ const SCHEMA: Dictionary = {
 	"delivery_week": "int",
 	"project_id": "int",
 	"deliverable": "string",
+	"features": "array",
 }
 
 var id: int
@@ -42,12 +43,16 @@ var quality_roll: int = 0  # 0-100
 var delivery_week: int = -1
 var project_id: int = -1
 var deliverable: StringName = &""  # ENGINE_LICENSE: LicensedEngineDef id
+var features: Array[StringName] = []  # OUTSOURCE: features of the outsourced engine
 
 
 func to_dict() -> Dictionary:
 	var tp_out: Dictionary = {}
 	for k: StringName in target_points:
 		tp_out[String(k)] = target_points[k]
+	var features_out: Array = []
+	for f: StringName in features:
+		features_out.append(String(f))
 	return {
 		"id": id,
 		"kind": Kind.keys()[kind],
@@ -67,6 +72,7 @@ func to_dict() -> Dictionary:
 		"delivery_week": delivery_week,
 		"project_id": project_id,
 		"deliverable": String(deliverable),
+		"features": features_out,
 	}
 
 
@@ -92,4 +98,6 @@ static func from_dict(d: Dictionary) -> Contract:
 	c.delivery_week = int(d["delivery_week"])
 	c.project_id = int(d["project_id"])
 	c.deliverable = StringName(String(d["deliverable"]))
+	for f: Variant in d["features"]:
+		c.features.append(StringName(String(f)))
 	return c
