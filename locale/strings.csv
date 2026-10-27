@@ -436,3 +436,134 @@ error.no_patch_running,No patch is being made for this game.,ไม่มี Pat
 error.award_not_found,Award not found.,ไม่พบรางวัลนี้
 error.award_entered,This game is already entered.,ส่งเกมนี้เข้าประกวดแล้ว
 error.award_not_eligible,This game is not eligible for the award.,เกมนี้ไม่มีสิทธิ์ลงประกวด
+ui.gameover.title,Studio closed,สตูดิโอปิดกิจการ
+ui.gameover.reason,"Your cash was below zero at {months} month starts in a row, and no lender will give you more credit.",เงินสดติดลบติดต่อกัน {months} ต้นเดือน และไม่มีผู้ให้กู้รายใดให้วงเงินเพิ่มอีกแล้ว
+ui.gameover.cash,Cash: {money},เงินสด: {money}
+ui.gameover.games,Games released: {n},เกมที่วางขาย: {n}
+ui.gameover.new_game,New game,เริ่มเกมใหม่
+ui.gameover.load,Load autosave,โหลดเซฟอัตโนมัติ
+ui.gameover.no_save,No autosave yet.,ยังไม่มีเซฟอัตโนมัติ
+ui.level.junior,Junior,จูเนียร์
+ui.level.mid,Mid-level,ระดับกลาง
+ui.level.senior,Senior,ซีเนียร์
+ui.level.lead,Lead,หัวหน้าทีม
+ui.loan.section,Loans,เงินกู้
+ui.loan.rate,{rate} per month,{rate} ต่อเดือน
+ui.loan.credit,Credit left: {money},วงเงินคงเหลือ: {money}
+ui.loan.refused,Refuses new loans after a missed payment.,ไม่ให้กู้เพิ่มเพราะเคยผิดนัดชำระ
+ui.loan.shark_warning,Miss a payment and they take your equipment.,ถ้าผิดนัดชำระ จะถูกยึดอุปกรณ์
+ui.loan.take,Borrow,กู้เงิน
+ui.loan.list,Your loans,เงินกู้ของคุณ
+ui.loan.none,No loans.,ไม่มีเงินกู้
+ui.loan.balance,Owed: {money},ยอดค้าง: {money}
+ui.loan.payment,Pays {money} / month,ผ่อน {money} / เดือน
+ui.loan.missed,Missed: {n},ผิดนัด: {n}
+ui.loan.repay,Repay,ชำระ
+ui.loan.repay_all,Repay all,ปิดหนี้
+ui.contract.section,Contract work,งานรับจ้าง
+ui.contract.pay,Pays {money},ค่าจ้าง {money}
+ui.contract.deadline,{n} weeks to finish,ต้องเสร็จใน {n} สัปดาห์
+ui.contract.expires,Offer ends in {n} weeks,ข้อเสนอหมดใน {n} สัปดาห์
+ui.contract.uses_staff,Uses every free worker.,ใช้พนักงานที่ว่างทุกคน
+ui.contract.accept,Take job,รับงาน
+ui.contract.running,In progress,กำลังทำ
+ui.contract.none,No offers now. New offers come each month.,ยังไม่มีข้อเสนอ จะมีข้อเสนอใหม่ทุกเดือน
+ui.costs.section,Monthly costs,ค่าใช้จ่ายรายเดือน
+ui.costs.rent,Rent,ค่าเช่า
+ui.costs.electricity,Electricity,ค่าไฟ
+ui.costs.leases,Equipment leases,ค่าเช่าอุปกรณ์
+ui.costs.total,Total per month (with salaries),รวมต่อเดือน (รวมเงินเดือน)
+ui.team.fire,Fire,ไล่ออก
+ui.team.fire_confirm,Fire and pay {money},ไล่ออกและจ่าย {money}
+ui.team.cancel,Cancel,ยกเลิก
+ui.team.asks,Asks {money},ขอ {money}
+ui.team.asks_promotion,Wants promotion: {money},ขอเลื่อนขั้น: {money}
+ui.candidates.section,Candidates,ผู้สมัครงาน
+ui.candidates.none,No candidates now. New ones arrive each month.,ยังไม่มีผู้สมัคร จะมีผู้สมัครใหม่ทุกเดือน
+ui.candidates.asking,Asks {money} / month,ขอ {money} / เดือน
+ui.candidates.expires,Leaves in {n} weeks,จะไปใน {n} สัปดาห์
+ui.owner.section,Owner,เจ้าของสตูดิโอ
+ui.owner.points,Skill points: {n},แต้มทักษะ: {n}
+ui.owner.xp,Next point: {xp} / {per} XP,แต้มถัดไป: {xp} / {per} XP
+ui.owner.focus,Focus: dev {dev}% · business {biz}%,โฟกัส: พัฒนา {dev}% · ธุรกิจ {biz}%
+ui.owner.focus_hint,Dev focus raises your own output. Business focus powers business perks.,โฟกัสพัฒนาเพิ่มผลงานของคุณเอง โฟกัสธุรกิจทำให้เพิร์กสายธุรกิจได้ผล
+ui.owner.path.dev,Developer path,สายนักพัฒนา
+ui.owner.path.business,Business path,สายธุรกิจ
+ui.owner.rank,Rank {rank} / {max},ระดับ {rank} / {max}
+ui.owner.learn,Learn,เรียนรู้
+ui.ask.title_raise,Raise request,ขอขึ้นเงินเดือน
+ui.ask.title_promotion,Promotion request,ขอเลื่อนตำแหน่ง
+ui.ask.body_raise,{name} asks for a raise from {salary} to {amount} per month.,{name} ขอขึ้นเงินเดือนจาก {salary} เป็น {amount} ต่อเดือน
+ui.ask.body_promotion,{name} asks to become {level} at {amount} per month (now {salary}).,{name} ขอเลื่อนเป็น {level} เงินเดือน {amount} ต่อเดือน (ตอนนี้ {salary})
+ui.ask.refuse_hint,Refusing lowers morale.,ถ้าปฏิเสธ ขวัญกำลังใจจะลดลง
+ui.ask.deadline,Answer within {n} weeks.,ตอบภายใน {n} สัปดาห์
+ui.ask.gone,This request was already answered.,คำขอนี้ได้รับคำตอบแล้ว
+ui.seats.section,Desks and computers,โต๊ะและคอมพิวเตอร์
+ui.seats.leased,Leased,เช่า
+ui.seats.outdated,Outdated,ล้าสมัย
+ui.seats.buy,Buy {money},ซื้อ {money}
+ui.seats.lease,Lease {money}/mo,เช่า {money}/เดือน
+ui.seats.sell,Sell for {money},ขายได้ {money}
+ui.seats.return,Return,คืนเครื่อง
+ui.seats.seating,Seating,ที่นั่ง
+ui.seats.no_desk,No desk,ไม่มีโต๊ะ
+ui.seats.assign,Move,ย้าย
+ui.office.section,Office,สำนักงาน
+ui.office.current,Current,ปัจจุบัน
+ui.office.now,Monthly costs now: {money},ค่าใช้จ่ายต่อเดือนตอนนี้: {money}
+ui.office.seats,{n} desks,{n} โต๊ะ
+ui.office.rent,Rent {money}/mo,ค่าเช่า {money}/เดือน
+ui.office.power,Power from {money}/mo,ค่าไฟเริ่มต้น {money}/เดือน
+ui.office.after,After moving: {money}/mo,หลังย้าย: {money}/เดือน
+ui.office.move,Move ({money}),ย้าย ({money})
+ui.license.section,Engine licences,ไลเซนส์เอนจิน
+ui.license.fee,Fee {money},ค่าไลเซนส์ {money}
+ui.license.royalty,Royalty {rate} of sales,ส่วนแบ่ง {rate} จากยอดขาย
+ui.license.sign,Sign,เซ็นสัญญา
+ui.license.signed,Licensed,มีไลเซนส์แล้ว
+ui.license.none,No engines to license this year.,ปีนี้ไม่มีเอนจินให้ซื้อไลเซนส์
+ui.marketing.section,Marketing,การตลาด
+ui.marketing.for,For: {title},สำหรับ: {title}
+ui.marketing.no_project,Start a game to run marketing.,เริ่มสร้างเกมก่อนจึงจะทำการตลาดได้
+ui.marketing.cost,Cost {money},ราคา {money}
+ui.marketing.hype,+{n} hype,กระแส +{n}
+ui.marketing.run,Run,ลงโฆษณา
+ui.segment.core,Core gamers,เกมเมอร์ตัวจริง
+ui.segment.casual,Casual players,ผู้เล่นทั่วไป
+ui.promo.section,Sales promotions,โปรโมชันลดราคา
+ui.promo.none,No game on sale yet.,ยังไม่มีเกมวางขาย
+ui.promo.discount,{pct} off,ลด {pct}
+ui.promo.weeks,{n} weeks,{n} สัปดาห์
+ui.promo.start,Start sale,เริ่มลดราคา
+ui.promo.active,"On sale: {pct} off, {n} weeks left",กำลังลด {pct} เหลือ {n} สัปดาห์
+ui.promo.fatigue,Players wait for sales: launch hype −{n},ผู้เล่นรอซื้อตอนลดราคา: กระแสเปิดตัว −{n}
+ui.award.section,Awards,รางวัล
+ui.award.ceremony,Ceremony in {n} weeks,ประกาศผลในอีก {n} สัปดาห์
+ui.award.fee,Entry fee {money},ค่าสมัคร {money}
+ui.award.prize,Prize {money} + {fans} fans,รางวัล {money} + แฟน {fans} คน
+ui.award.enter,Enter,ส่งประกวด
+ui.award.entered,Entered,ส่งแล้ว
+ui.award.won,Won {n} times,ชนะแล้ว {n} ครั้ง
+ui.award.none,No eligible games. A game needs reviews and a release in the last year.,ยังไม่มีเกมที่มีสิทธิ์ เกมต้องมีรีวิวและวางขายภายในหนึ่งปี
+ui.live.title,Live: {title},ดูแลเกม: {title}
+ui.live.stats,Bugs {bugs} · User score {score} · Mood {mood},บั๊ก {bugs} · คะแนนผู้เล่น {score} · อารมณ์ {mood}
+ui.live.free_workers,Free workers: {n},พนักงานว่าง: {n}
+ui.live.task_patch,Patch in progress: {n} staff-weeks left,กำลังทำแพตช์: เหลือ {n} คน-สัปดาห์
+ui.live.task_mod,Mod tools in progress: {n} staff-weeks left,กำลังทำเครื่องมือม็อด: เหลือ {n} คน-สัปดาห์
+ui.live.patch,Start patch,เริ่มทำแพตช์
+ui.live.patch_hint,Free workers fix bugs and lift the user score.,พนักงานที่ว่างจะแก้บั๊กและเพิ่มคะแนนผู้เล่น
+ui.live.mod_tools,Build mod tools,สร้างเครื่องมือม็อด
+ui.live.mod_done,Mod tools out,ปล่อยเครื่องมือม็อดแล้ว
+ui.live.mod_hint,"Sells longer, but DLC sells less.",ขายได้นานขึ้น แต่ DLC จะขายได้น้อยลง
+ui.live.dlc_title,DLC title,ชื่อ DLC
+ui.live.dlc_default,{title}: Expansion,{title}: ภาคเสริม
+ui.live.dlc,Start DLC,เริ่มทำ DLC
+ui.live.dlc_count,DLCs released: {n},DLC ที่ออกแล้ว: {n}
+ui.live.not_live,This game is no longer on sale.,เกมนี้ไม่ได้วางขายแล้ว
+ui.forum.title,Forum: {title},เว็บบอร์ด: {title}
+ui.forum.none,No posts yet.,ยังไม่มีโพสต์
+ui.forum.ago,{n} weeks ago,{n} สัปดาห์ก่อน
+ui.forum.mood,Mood {n},อารมณ์ {n}
+ui.forum.replied,Replied,ตอบแล้ว
+ui.project.manage,Manage,จัดการ
+ui.project.forum,Forum ({n}),บอร์ด ({n})
