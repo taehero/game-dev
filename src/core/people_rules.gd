@@ -91,7 +91,7 @@ static func equipment_bug_bp(def: EquipmentDef, week: int, t: TuningDef) -> int:
 
 
 static func equipment_available(def: EquipmentDef, week: int, t: TuningDef) -> bool:
-	return Calendar.year(week, t) >= def.year_from
+	return def != null and Calendar.year(week, t) >= def.year_from
 
 
 static func morale_baseline(state: GameState, content: ContentDB, t: TuningDef) -> int:

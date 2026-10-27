@@ -55,7 +55,7 @@ func test_recruiter_raises_skills() -> void:
 	b.owner.focus_dev_bp = 0
 	_tick(a, 4)
 	_tick(b, 4)
-	assert_gte(_sum(b), _sum(a))
+	assert_gt(_sum(b), _sum(a))
 
 
 func test_state_valid_after_hiring_ticks() -> void:
@@ -63,3 +63,22 @@ func test_state_valid_after_hiring_ticks() -> void:
 	for w: int in range(1, 31):
 		_tick(s, w)
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
+
+
+func _ask_ratio_bp(s: GameState) -> int:
+	var ask: int = 0
+	var market: int = 0
+	for c: Candidate in s.candidates:
+		ask += c.asking_salary
+		market += PeopleRules.market_salary(c.skills, c.level, Fixtures.content(), Fixtures.tuning())
+	return ask * Fixed.ONE_BP / market
+
+
+func test_asking_salary_perk_lowers_salary() -> void:
+	var a := Fixtures.new_state(3)
+	var b := Fixtures.new_state(3)
+	b.owner.perks[&"perk_recruiter"] = 1
+	b.owner.focus_dev_bp = 0
+	_tick(a, 4)
+	_tick(b, 4)
+	assert_lt(_ask_ratio_bp(b), _ask_ratio_bp(a))

@@ -30,6 +30,10 @@ func test_rejects_bad_m2b_values() -> void:
 		func(d: Dictionary) -> void: d["companies"][str(s.player_company_id)]["last_missed_week"] = -2,
 		func(d: Dictionary) -> void: d["contracts"][str(cid)]["features"] = [3],
 		func(d: Dictionary) -> void: d["loans"][str(lid)]["balance"] = -1,
+		func(d: Dictionary) -> void: d["loans"][str(lid)]["principal"] = -1,
+		func(d: Dictionary) -> void: d["loans"][str(lid)]["rate_bp_per_month"] = -1,
+		func(d: Dictionary) -> void: d["loans"][str(lid)]["payment_per_month"] = -1,
+		func(d: Dictionary) -> void: d["loans"][str(lid)]["missed_payments"] = -1,
 		func(d: Dictionary) -> void: d["equipment"][str(eid)]["value"] = -1,
 	]
 	for edit: Callable in edits:
@@ -47,6 +51,12 @@ func test_missing_refs_reports_contract_feature() -> void:
 	assert_string_contains(refs[0], "feature_gone")
 
 
+func test_known_contract_feature_has_no_missing_ref() -> void:
+	var s := _state()
+	Fixtures.add_contract(s, {"features": [&"feature_fx_save"]})
+	assert_eq(Fixtures.content().missing_refs(s).size(), 0)
+
+
 func test_fixture_perks_and_future_equipment() -> void:
 	assert_eq(Fixtures.content().perks.size(), 7)
 	assert_eq(Fixtures.content().equipment[&"equipment_fx_future"].year_from, 1990)
@@ -57,3 +67,13 @@ func test_fixture_helpers() -> void:
 	assert_eq(Fixtures.company_of_kind(s, Company.Kind.BANK), s.companies.keys().filter(func(i: int) -> bool: return s.companies[i].kind == Company.Kind.BANK).min())
 	var lid := Fixtures.add_loan(s)
 	assert_eq(s.loans[lid].payment_per_month, 209)
+
+
+func test_contract_party_b_and_absent_kind() -> void:
+	var s := _state()
+	var cid := Fixtures.add_contract(s)
+	assert_eq(s.companies[s.contracts[cid].party_b].kind, Company.Kind.AI_PUBLISHER)
+	for id: int in s.companies.keys():
+		if s.companies[id].kind == Company.Kind.BANK:
+			s.companies.erase(id)
+	assert_eq(Fixtures.company_of_kind(s, Company.Kind.BANK), -1)

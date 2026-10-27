@@ -32,6 +32,26 @@ func test_promotion_eligible() -> void:
 	assert_false(PeopleRules.promotion_eligible(s, Fixtures.content()))
 
 
+func test_promotion_needs_best_skill() -> void:
+	var s := Staff.new()
+	s.skills = {&"design": 39}
+	s.exp = {&"design": 2000}
+	assert_false(PeopleRules.promotion_eligible(s, Fixtures.content()))
+	s.skills[&"design"] = 40
+	assert_true(PeopleRules.promotion_eligible(s, Fixtures.content()))
+
+
+func test_outdated_boundary_year() -> void:
+	var micro: EquipmentDef = Fixtures.content().equipment[&"equipment_micro_1980"]
+	assert_eq(Calendar.year(260, _t), micro.recommended_until_year)
+	assert_eq(PeopleRules.equipment_speed_bp(micro, 260, _t), 10000)
+	assert_eq(PeopleRules.equipment_bug_bp(micro, 260, _t), 10000)
+
+
+func test_equipment_available_null() -> void:
+	assert_false(PeopleRules.equipment_available(null, 0, _t))
+
+
 func test_effect_bp_scaling() -> void:
 	var state: GameState = Fixtures.new_state(1)
 	var c: ContentDB = Fixtures.content()
@@ -108,3 +128,16 @@ func test_validate_reports_bad_perk() -> void:
 	p.effects_bp_per_rank = {&"nope": 100}
 	db.add(p)
 	assert_eq(db.validate().size(), 1)
+
+
+func test_validate_reports_bad_path_and_rank() -> void:
+	var db := ContentDB.new()
+	var p := PerkDef.new()
+	p.id = &"perk_bad2"
+	p.path = &"OTHER"
+	p.max_rank = 0
+	db.add(p)
+	var errs := db.validate()
+	assert_eq(errs.size(), 2)
+	assert_string_contains(errs[0], "path")
+	assert_string_contains(errs[1], "max_rank")

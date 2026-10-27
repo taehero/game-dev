@@ -204,10 +204,9 @@ func missing_refs(state: GameState) -> Array[String]:
 			out.append("contract %d: unknown platform %s" % [kid, ct.locked_platform])
 		if ct.kind == Contract.Kind.ENGINE_LICENSE and not licensed_engines.has(ct.deliverable):
 			out.append("contract %d: unknown engine %s" % [kid, ct.deliverable])
-	for kid2: int in state.sorted_ids(state.contracts):
-		for f: StringName in state.contracts[kid2].features:
+		for f: StringName in ct.features:
 			if not engine_features.has(f):
-				out.append("contract %d: unknown feature %s" % [kid2, f])
+				out.append("contract %d: unknown feature %s" % [kid, f])
 	for perk_id: StringName in GameState.sorted_names(state.owner.perks):
 		if not perks.has(perk_id):
 			out.append("owner: unknown perk %s" % perk_id)
