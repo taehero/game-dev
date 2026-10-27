@@ -371,8 +371,12 @@ static func concept_options(state: GameState, content: ContentDB, t: TuningDef) 
 			"name_key": content.licensed_engines[lid].name_key,
 			"tech_cap": content.licensed_engines[lid].tech_cap,
 		})
+	var sizes: Array[StringName] = []
+	for sid: StringName in _unlocked_ids(state, content, content.sizes):
+		if not content.sizes[sid].dlc:  # DLC sizes are not offered as normal games
+			sizes.append(sid)
 	return {
-		"sizes": _unlocked_ids(state, content, content.sizes),
+		"sizes": sizes,
 		"topics": _unlocked_ids(state, content, content.topics),
 		"genres": _unlocked_ids(state, content, content.genres),
 		"platforms": platforms,

@@ -3,6 +3,7 @@ extends RefCounted
 
 enum Phase { CONCEPT, PRODUCTION, POLISH, RELEASED, LIVE, RETIRED }
 enum Kind { GAME, ENGINE, CONTRACT_WORK }
+enum LiveTask { NONE, PATCH, MOD_TOOLS }
 
 const WEEKLY_UNITS_CAP: int = 104
 ## Nine slider shares in bp: stage 1 Code/Design/Story, stage 2 Levels/Characters/AI,
@@ -42,6 +43,11 @@ const SCHEMA: Dictionary = {
 	"dlc_count": "int",
 	"event_ids": "array",
 	"bug_hunt_done": "bool",
+	"parent_id": "int",
+	"live_task": "string",
+	"live_task_left": "int",
+	"award_entry": "string",
+	"sales_base_units": "int",
 }
 
 var id: int
@@ -76,6 +82,11 @@ var mod_tools: bool = false
 var dlc_count: int = 0
 var event_ids: Array[StringName] = []
 var bug_hunt_done: bool = false
+var parent_id: int = -1  # the DLC's original game
+var live_task: LiveTask = LiveTask.NONE
+var live_task_left: int = 0  # staff-weeks left
+var award_entry: StringName = &""
+var sales_base_units: int = 0  # un-boosted weekly units the decay chain runs on
 
 
 func to_dict() -> Dictionary:
@@ -133,6 +144,11 @@ func to_dict() -> Dictionary:
 		"dlc_count": dlc_count,
 		"event_ids": events_out,
 		"bug_hunt_done": bug_hunt_done,
+		"parent_id": parent_id,
+		"live_task": LiveTask.keys()[live_task],
+		"live_task_left": live_task_left,
+		"award_entry": String(award_entry),
+		"sales_base_units": sales_base_units,
 	}
 
 
@@ -180,4 +196,9 @@ static func from_dict(d: Dictionary) -> Project:
 	for e: Variant in d["event_ids"]:
 		p.event_ids.append(StringName(String(e)))
 	p.bug_hunt_done = bool(d["bug_hunt_done"])
+	p.parent_id = int(d["parent_id"])
+	p.live_task = LiveTask[String(d["live_task"])]
+	p.live_task_left = int(d["live_task_left"])
+	p.award_entry = StringName(String(d["award_entry"]))
+	p.sales_base_units = int(d["sales_base_units"])
 	return p

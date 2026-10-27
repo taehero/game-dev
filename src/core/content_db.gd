@@ -187,6 +187,8 @@ func missing_refs(state: GameState) -> Array[String]:
 			var v: StringName = pr.config.get(key, &"")
 			if v != &"" and not table.has(v):
 				out.append("project %d: unknown %s %s" % [pid, key, v])
+		if pr.award_entry != &"" and not awards.has(pr.award_entry):
+			out.append("project %d: unknown award %s" % [pid, pr.award_entry])
 		for f: StringName in pr.features:
 			if not engine_features.has(f):
 				out.append("project %d: unknown feature %s" % [pid, f])

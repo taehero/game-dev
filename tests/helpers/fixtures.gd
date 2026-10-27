@@ -155,6 +155,8 @@ static func content() -> ContentDB:
 	var db := ContentDB.new()
 	for d: Resource in _fixture_defs():
 		db.add(d)
+	for d: Resource in _m2c_defs():
+		db.add(d)
 	_content = db
 	return db
 
@@ -389,4 +391,38 @@ static func _template(id: StringName, dim: StringName, strength: bool, threshold
 	d.is_strength = strength
 	d.threshold_x10 = threshold
 	d.text_key = key
+	return d
+
+
+static func _m2c_defs() -> Array[Resource]:
+	var defs: Array[Resource] = []
+	defs.append(_channel(&"channel_fx_ad", 1975, 1999, 500, 20, [] as Array[int]))
+	defs.append(_channel(&"channel_fx_show", 1975, 1999, 2000, 30, [10, 11] as Array[int]))
+	defs.append(_channel(&"channel_fx_tv", 1975, 1999, 4000, 40, [] as Array[int]))
+	defs.append(_channel(&"channel_fx_old", 1970, 1975, 100, 5, [] as Array[int]))
+	defs.append(_research(&"research_fx_tv", 30, [] as Array[StringName], [&"channel_fx_tv"] as Array[StringName]))
+	var a := AwardDef.new()
+	a.id = &"award_fx"
+	a.name_key = &"fx.award_fx"
+	a.week_in_year = 50
+	a.entry_fee = 1000
+	a.prize = 10000
+	a.fans = 500
+	defs.append(a)
+	var dlc := _size(&"size_dlc", 6, 1, 5000, 40, 6, 3000)
+	dlc.dlc = true
+	defs.append(dlc)
+	return defs
+
+
+static func _channel(id: StringName, from: int, to: int, cost: int, hype: int, weeks: Array[int]) -> MarketingChannelDef:
+	var d := MarketingChannelDef.new()
+	d.id = id
+	d.name_key = StringName("fx.%s" % id)
+	d.year_from = from
+	d.year_to = to
+	d.cost = cost
+	d.hype_gain = hype
+	d.segment = &"core"
+	d.weeks_in_year = weeks
 	return d
