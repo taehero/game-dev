@@ -11,8 +11,8 @@ func before_all() -> void:
 	real = ContentDB.load_dir()
 	tuning = TuningDef.load_default()
 	plan = ScenarioM2C.SCRIPT_M2C.duplicate(true)
-	plan[0].remove_at(0)  # the garage has 2 seats: the owner plus the candidate hired at week 4
-	plan[0].remove_at(0)  # the free equipment grant; seat 1 is bought at week 4 instead
+	# the garage has 2 seats: drop the free hire and the free equipment grant; seat 1 is bought at week 4 instead
+	plan[0] = plan[0].filter(func(spec: Array) -> bool: return spec[0] != "hire" and spec[0] != "place_equipment")
 	plan[0].append(["take_loan", "BANK", 5000])
 	plan[4] = [["hire_candidate"], ["buy_equipment", "equipment_micro_1980", 1], ["accept_contract_work"]]
 	plan[56] = [["reply_forum", "apologise"]]
@@ -56,13 +56,28 @@ func test_combined_playthrough() -> void:
 	assert_true(games[1].mod_tools)
 	assert_eq(games[1].dlc_count, 1)
 	assert_gt(s.companies[s.player_company_id].promo_fatigue, 0)
-	var replied := 0
-	for f: ForumPost in s.forum_posts:
-		if f.replied:
-			replied += 1
-	assert_gt(replied, 0)
 	assert_true(GameState.validate_dict(Fixtures.json_round_trip(s.to_dict())))
 	assert_eq(real.missing_refs(s), [] as Array[String])
+
+
+func test_forum_reply_and_award_outcome() -> void:
+	var s := _new_state(2026)
+	ScenarioM2b.advance(s, plan, 50, real, tuning)
+	# week-49 entry: the ceremony has passed, the entry is consumed and seed 2026 loses deterministically
+	for id: int in s.sorted_ids(s.projects):
+		assert_eq(s.projects[id].award_entry, &"")
+	assert_true(s.companies[s.player_company_id].awards.is_empty())
+	ScenarioM2b.advance(s, plan, 6, real, tuning)
+	var target := -1  # the post the week-56 reply_forum step answers: the first unreplied one
+	for f: ForumPost in s.forum_posts:
+		if not f.replied:
+			target = f.id
+			break
+	assert_ne(target, -1)
+	ScenarioM2b.advance(s, plan, 1, real, tuning)
+	for f: ForumPost in s.forum_posts:
+		if f.id == target:
+			assert_true(f.replied)
 
 
 func test_same_seed_same_hash() -> void:

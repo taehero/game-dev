@@ -43,6 +43,14 @@ static func start_task(ctx: TickContext, project_id: int, task: Project.LiveTask
 	ctx.emit(&"project_changed", {"project_id": project_id})
 
 
+## True while any staff member is assigned to the project (seated or not).
+static func _anyone_assigned(state: GameState, project_id: int) -> bool:
+	for sid: int in state.sorted_ids(state.staff):
+		if state.staff[sid].assigned_project_id == project_id:
+			return true
+	return false
+
+
 static func _tick_tasks(ctx: TickContext) -> void:
 	var state: GameState = ctx.state
 	var t: TuningDef = ctx.tuning
@@ -50,7 +58,7 @@ static func _tick_tasks(ctx: TickContext) -> void:
 		var p: Project = state.projects[pid]
 		if p.live_task == Project.LiveTask.NONE:
 			continue
-		if p.phase != Project.Phase.LIVE:
+		if p.phase != Project.Phase.LIVE or not _anyone_assigned(state, pid):
 			p.live_task = Project.LiveTask.NONE
 			p.live_task_left = 0
 			release_task_staff(state, pid)

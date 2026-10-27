@@ -128,3 +128,34 @@ func test_sentiment_clamped() -> void:
 	assert_eq(p.sentiment, 100)
 	LiveOpsSystem.change_sentiment(p, -500)
 	assert_eq(p.sentiment, -100)
+
+
+func test_task_cancelled_when_all_workers_removed() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	_patch(s, r[1])
+	var ctx := _ctx(s)
+	FireStaffCommand.new(r[2]).apply(ctx)
+	FireStaffCommand.new(r[3]).apply(ctx)
+	LiveOpsSystem.tick(ctx)
+	var p: Project = s.projects[r[1]]
+	assert_eq(p.live_task, Project.LiveTask.NONE)
+	assert_eq(p.live_task_left, 0)
+	assert_eq(p.bugs, 20)
+	Fixtures.add_worker(s)
+	assert_true(StartPatchCommand.new(r[1]).validate(s, Fixtures.tuning()).ok)
+
+
+func test_promise_patch_refused_after_cancel() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	_patch(s, r[1])
+	var f := ForumPost.new()
+	f.id = s.alloc_id()
+	f.project_id = r[1]
+	s.forum_posts.append(f)
+	var ctx := _ctx(s)
+	FireStaffCommand.new(r[2]).apply(ctx)
+	FireStaffCommand.new(r[3]).apply(ctx)
+	LiveOpsSystem.tick(ctx)
+	assert_false(ReplyForumCommand.new(f.id, &"promise_patch").validate(s, Fixtures.tuning()).ok)

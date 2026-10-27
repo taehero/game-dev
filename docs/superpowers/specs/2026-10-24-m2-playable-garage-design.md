@@ -309,6 +309,7 @@ Monthly, AI publishers offer `CONTRACT_WORK` jobs: target points per type, deadl
 - **C11:** forum posts are `ForumPost`s, not Decisions (no auto-pause). Weekly per LIVE game: one `roll_bp` at `min(max, base + bugs × per_bug)`; topic `bugs` or `weakness`; list capped at `forum_posts_cap` (oldest removed via `Removal`). Replies: apologise, promise_patch (needs a running PATCH task), ignore; one reply per post.
 - **C12:** each month start, each LIVE GAME with `mod_tools` rolls `mod_viral_chance_bp`; a hit adds fans, a bonus sale via `book_sale`, and a `forum.post.mod_viral` post.
 - **C13:** award eligibility is GAME, not a DLC, reviewed, released within `award_window_weeks` of the ceremony. Score = average review `score_x10` (not `user_score`) + `randi_range(0, award_bonus_max_x10)`; the player wins only with a strictly higher score than the AI (ties go to the AI; between players the lower project id wins). Prize adds money, fans and reputation (cap 100); all entries clear after the ceremony and an ineligible entry's fee is lost.
+- **C14:** a live task (patch or mod tools) whose project has no staff left with `assigned_project_id` set is cancelled by LiveOps (task NONE, left 0, `bugs` unchanged); assigned-but-unseated staff only stall it.
 
 ## 9. Commands added in M2
 
