@@ -153,3 +153,18 @@ func test_game_over_stops_session() -> void:
 	assert_eq(r.reason_key, &"error.game_over")
 	var back: GameState = GameState.from_dict(Fixtures.json_round_trip(s.to_dict()))
 	assert_true(back.game_over)
+
+
+func test_repossession_that_clears_final_instalment_removes_loan() -> void:
+	var id: int = _shark({"payment_per_month": 1000})
+	var p: Company = s.companies[s.player_company_id]
+	p.money = -500
+	p.reputation = 50
+	var ctx := _tick()
+	assert_eq(_count(ctx, &"repossessed"), 1)
+	assert_false(s.loans.has(id))
+	var rep: int = p.reputation
+	p.money = -500
+	ctx = _tick()
+	assert_eq(_count(ctx, &"payment_missed"), 0)
+	assert_eq(p.reputation, rep)

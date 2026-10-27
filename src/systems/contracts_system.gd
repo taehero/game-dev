@@ -123,7 +123,7 @@ static func _offer(ctx: TickContext) -> void:
 	c.party_a = state.player_company_id
 	c.party_b = pubs[ctx.rng.randi_range(0, pubs.size() - 1)]
 	var total: int = 0
-	var drawn: Dictionary = {}
+	var drawn: Dictionary[StringName, int] = {}
 	for type: StringName in GameRules.SKILL_ORDER:
 		var pts: int = ctx.rng.randi_range(t.contract_points_min, t.contract_points_max)
 		drawn[type] = pts

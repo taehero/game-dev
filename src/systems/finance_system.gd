@@ -89,6 +89,8 @@ static func _repossess(ctx: TickContext, company: Company, l: Loan, due: int) ->
 		Removal.remove_equipment(state, key.y)
 	if not taken.is_empty():
 		l.balance -= mini(l.balance, due)
+		if l.balance <= 0:
+			Removal.remove_loan(state, l.id)
 		ctx.emit(&"equipment_changed", {"company_id": company.id, "office_id": company.office_id})
 		ctx.emit(&"repossessed", {"loan_id": l.id, "equipment_ids": taken, "value": value})
 	company.reputation = clampi(company.reputation + ctx.tuning.repossess_reputation, 0, 100)
