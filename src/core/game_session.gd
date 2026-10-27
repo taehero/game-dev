@@ -30,6 +30,10 @@ func set_speed(s: int) -> void:
 
 
 func submit(cmd: Command) -> CommandResult:
+	if state.game_over:
+		var over: CommandResult = CommandResult.fail(&"error.game_over")
+		_events.append({"name": &"command_rejected", "payload": {"reason_key": over.reason_key}})
+		return over
 	var result: CommandResult = cmd.validate(state, tuning)
 	if not result.ok:
 		_events.append({"name": &"command_rejected", "payload": {"reason_key": result.reason_key}})
@@ -65,6 +69,8 @@ func advance(delta: float) -> int:
 
 
 func step_once() -> void:
+	if state.game_over:
+		return
 	var ctx := TickContext.new(state, tuning)
 	var snapshot: int = state.next_id
 	var queued: Array[Command] = _queue
@@ -76,6 +82,10 @@ func step_once() -> void:
 		else:
 			ctx.emit(&"command_rejected", {"reason_key": result.reason_key})
 	Simulation.step(ctx)
+	if state.game_over and speed > 0:
+		speed = 0
+		auto_paused_speed = 0
+		ctx.emit(&"speed_changed", {"speed": 0})
 	if _emit_if_new_decision(ctx, snapshot) and speed > 0:
 		auto_paused_speed = speed
 		speed = 0
