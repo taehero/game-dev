@@ -106,3 +106,17 @@ func test_no_uplift_for_retired_parent() -> void:
 
 func test_uplift_only_on_launch_week() -> void:
 	assert_eq(_launch(false, Project.Phase.LIVE, [50, 40] as Array[int]).sales_base_units, 1000)
+
+
+func test_dlc_with_chosen_staff() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	var w2: int = Fixtures.add_worker(s)
+	var bad: Array[int] = [9999]
+	assert_eq(StartDLCCommand.new(r[1], "x", bad).validate(s, Fixtures.tuning()).reason_key, &"error.staff_not_found")
+	var ids: Array[int] = [r[2]]
+	var cmd := StartDLCCommand.new(r[1], "Add-on", ids)
+	assert_true(cmd.validate(s, Fixtures.tuning()).ok)
+	cmd.apply(_ctx(s))
+	assert_ne(s.staff[r[2]].assigned_project_id, -1)
+	assert_eq(s.staff[w2].assigned_project_id, -1)

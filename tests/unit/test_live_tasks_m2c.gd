@@ -159,3 +159,43 @@ func test_promise_patch_refused_after_cancel() -> void:
 	FireStaffCommand.new(r[3]).apply(ctx)
 	LiveOpsSystem.tick(ctx)
 	assert_false(ReplyForumCommand.new(f.id, &"promise_patch").validate(s, Fixtures.tuning()).ok)
+
+
+func test_patch_with_chosen_staff_leaves_others_free() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	var ids: Array[int] = [r[2]]
+	var cmd := StartPatchCommand.new(r[1], ids)
+	assert_true(cmd.validate(s, Fixtures.tuning()).ok)
+	cmd.apply(_ctx(s))
+	assert_eq(s.staff[r[2]].assigned_project_id, r[1])
+	assert_eq(s.staff[r[3]].assigned_project_id, -1)
+
+
+func test_bad_staff_choice_refused() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	var t := Fixtures.tuning()
+	var unknown: Array[int] = [9999]
+	assert_eq(StartPatchCommand.new(r[1], unknown).validate(s, t).reason_key, &"error.staff_not_found")
+	var dup: Array[int] = [r[2], r[2]]
+	assert_eq(StartPatchCommand.new(r[1], dup).validate(s, t).reason_key, &"error.not_enough_staff")
+	s.staff[r[3]].assigned_project_id = r[1]
+	var busy: Array[int] = [r[3]]
+	assert_eq(BuildModToolsCommand.new(r[1], busy).validate(s, t).reason_key, &"error.not_enough_staff")
+
+
+func test_empty_staff_ids_takes_everyone() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	var none: Array[int] = []
+	StartPatchCommand.new(r[1], none).apply(_ctx(s))
+	assert_eq(s.staff[r[2]].assigned_project_id, r[1])
+	assert_eq(s.staff[r[3]].assigned_project_id, r[1])
+
+
+func test_no_mod_tools_on_dlc() -> void:
+	var r := _setup()
+	var s: GameState = r[0]
+	var dlc: int = Fixtures.add_project(s, {"phase": Project.Phase.LIVE, "parent_id": r[1]})
+	assert_eq(BuildModToolsCommand.new(dlc).validate(s, Fixtures.tuning()).reason_key, &"error.dlc_of_dlc")

@@ -3,11 +3,13 @@ extends Command
 
 var parent_id: int
 var title: String
+var staff_ids: Array[int]
 
 
-func _init(p_parent_id: int, p_title: String) -> void:
+func _init(p_parent_id: int, p_title: String, p_staff_ids: Array[int] = []) -> void:
 	parent_id = p_parent_id
 	title = p_title
+	staff_ids = p_staff_ids
 
 
 func validate(state: GameState, tuning: TuningDef) -> CommandResult:
@@ -27,7 +29,10 @@ func validate(state: GameState, tuning: TuningDef) -> CommandResult:
 		var o: Project = state.projects[pid]
 		if o.parent_id == parent_id and (o.phase == Project.Phase.PRODUCTION or o.phase == Project.Phase.POLISH):
 			return CommandResult.fail(&"error.dlc_in_progress")
-	if GameRules.free_workers(state, parent.company_id).size() < content.sizes[tuning.dlc_size_id].min_staff:
+	var sk: StringName = LiveOpsSystem.staff_choice_key(state, parent.company_id, staff_ids)
+	if sk != &"":
+		return CommandResult.fail(sk)
+	if LiveOpsSystem.staff_to_assign(state, parent.company_id, staff_ids).size() < content.sizes[tuning.dlc_size_id].min_staff:
 		return CommandResult.fail(&"error.not_enough_staff")
 	return CommandResult.success()
 
@@ -48,7 +53,7 @@ func apply(ctx: TickContext) -> void:
 	p.features = parent.features.duplicate()
 	p.focus = Project.DEFAULT_FOCUS.duplicate()
 	p.deadline_week = ctx.state.week + GameRules.stage_count(p) * GameRules.stage_weeks(p, ctx.content, ctx.tuning)
-	for sid: int in GameRules.free_workers(ctx.state, p.company_id):
+	for sid: int in LiveOpsSystem.staff_to_assign(ctx.state, p.company_id, staff_ids):
 		ctx.state.staff[sid].assigned_project_id = p.id
 	ctx.state.projects[p.id] = p
 	parent.dlc_count += 1

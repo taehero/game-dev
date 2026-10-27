@@ -34,11 +34,29 @@ static func live_task_block_key(state: GameState, project_id: int) -> StringName
 	return &""
 
 
-static func start_task(ctx: TickContext, project_id: int, task: Project.LiveTask, staff_weeks: int) -> void:
+## Error key if `ids` is not a valid unique subset of the company's free workers (empty = ok, means everyone).
+static func staff_choice_key(state: GameState, company_id: int, ids: Array[int]) -> StringName:
+	var free: Array[int] = GameRules.free_workers(state, company_id)
+	var seen: Dictionary = {}
+	for sid: int in ids:
+		if not state.staff.has(sid):
+			return &"error.staff_not_found"
+		if seen.has(sid) or not free.has(sid):
+			return &"error.not_enough_staff"
+		seen[sid] = true
+	return &""
+
+
+## Chosen ids, or every free worker when `ids` is empty.
+static func staff_to_assign(state: GameState, company_id: int, ids: Array[int]) -> Array[int]:
+	return ids if not ids.is_empty() else GameRules.free_workers(state, company_id)
+
+
+static func start_task(ctx: TickContext, project_id: int, task: Project.LiveTask, staff_weeks: int, staff_ids: Array[int] = []) -> void:
 	var p: Project = ctx.state.projects[project_id]
 	p.live_task = task
 	p.live_task_left = staff_weeks
-	for sid: int in GameRules.free_workers(ctx.state, p.company_id):
+	for sid: int in staff_to_assign(ctx.state, p.company_id, staff_ids):
 		ctx.state.staff[sid].assigned_project_id = project_id
 	ctx.emit(&"project_changed", {"project_id": project_id})
 
