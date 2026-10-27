@@ -13,3 +13,4 @@ power_per_month = 10
 speed_bp = 10000
 bug_bp = 10000
 recommended_until_year = 1985
+year_from = 1978
